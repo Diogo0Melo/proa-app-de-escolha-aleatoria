@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.view
+package com.ogos.apprandomizador.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -21,11 +22,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,13 +38,19 @@ import com.ogos.apprandomizador.R
 
 
 @Composable
-fun PresetSelectionScreen(modifier: Modifier = Modifier) {
+fun PresetSelectionScreen(
+    onNavigateToActive: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         topBar = { RandomizeTopBar() },
         bottomBar = { RandomizeBottomBar() },
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         content = { padding ->
-            PresetCollectionContent(modifier = Modifier.padding(padding))
+            PresetCollectionContent(
+                onNavigateToActive = onNavigateToActive,
+                modifier = Modifier.padding(padding)
+            )
         }
     )
 }
@@ -140,8 +149,12 @@ fun RandomizeBottomBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun PresetCollectionContent(modifier: Modifier = Modifier) {
+fun PresetCollectionContent(
+    onNavigateToActive: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
+        onClick = onNavigateToActive,
         modifier = modifier.padding(16.dp),
     ) {
         Row(
@@ -149,14 +162,17 @@ fun PresetCollectionContent(modifier: Modifier = Modifier) {
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Row() {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Image(
                     painter = painterResource(R.drawable.ic_launcher_background),
                     contentDescription = "Itens da coleção",
+                    modifier = Modifier.clip(Shapes().medium)
                 )
                 Column(
                     modifier = Modifier.padding(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     Text(
                         text = "Tema A Ser Roletado",
@@ -165,7 +181,7 @@ fun PresetCollectionContent(modifier: Modifier = Modifier) {
                     )
                     Text(text = "Items: 5")
                     Text(text = "Usos: 5")
-                    Text(text = "Ultimo uso: há´22min")
+                    Text(text = "Ultimo uso: há 22min")
                     Text(text = "Criado Em: 22/02/2000")
                 }
             }
@@ -180,8 +196,8 @@ fun PresetCollectionContent(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showSystemUi = true)
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun PresetSelectionScreenPreview() {
-    PresetSelectionScreen()
+private fun PresetSelectionScreenPreview() {
+    PresetSelectionScreen(onNavigateToActive = {})
 }
