@@ -38,19 +38,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ogos.apprandomizador.model.ItemList
+import com.ogos.apprandomizador.repository.ItemListRepository
 
 @Composable
-fun ActiveRandomizerScreen(onBack: () -> Unit) {
-
+fun ActiveRandomizerScreen(onBack: () -> Unit, itemIndex: Int) {
+    val item = ItemListRepository.items[itemIndex]
     var currentNumber by remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = { ActiveRandomizerTopBar(onBack = onBack) },
-        bottomBar = { ActiveRandomizerBottomBar(onClick = { currentNumber = (1..6).random() }) }
+        bottomBar = { ActiveRandomizerBottomBar(onClick = { currentNumber = (1..item.items.size).random() }) }
     ) { paddingValues ->
         ActiveRandomizerContent(
             response = currentNumber,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
+            item = item
         )
     }
 }
@@ -86,15 +89,10 @@ fun ActiveRandomizerTopBar(onBack: () -> Unit) {
 }
 
 @Composable
-fun ActiveRandomizerContent(response: Int, modifier: Modifier = Modifier) {
+fun ActiveRandomizerContent(response: Int, modifier: Modifier = Modifier, item: ItemList) {
 
-    val response = when (response) {
-        1 -> mapOf("DEFINITIVAMENTE SIM" to Color(0xFF00FF00))
-        2 -> mapOf("SIM" to Color(0xFF009600))
-        3 -> mapOf("TALVEZ SIM" to Color(0xFF005500))
-        4 -> mapOf("TALVEZ NÃO" to Color(0xFF550000))
-        5 -> mapOf("NÃO" to Color(0xFF960000))
-        6 -> mapOf("ABSOLUTAMENTE NÃO" to Color(0xFFFF0000))
+    val response = when {
+        response in 1..item.items.size -> item.items[response - 1]
         else -> mapOf("USE RODAR PARA SORTEAR" to MaterialTheme.colorScheme.primary)
     }
 
@@ -177,5 +175,5 @@ fun ActiveRandomizerBottomBar(onClick: () -> Unit, modifier: Modifier = Modifier
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun ActiveRandomizerScreenPreview() {
-    ActiveRandomizerScreen(onBack = {})
+    ActiveRandomizerScreen(onBack = {}, itemIndex = -1)
 }

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
@@ -35,11 +37,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ogos.apprandomizador.R
+import com.ogos.apprandomizador.repository.ItemListRepository
 
 
 @Composable
 fun PresetSelectionScreen(
-    onNavigateToActive: () -> Unit,
+    onNavigateToActive: (index: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -150,51 +153,61 @@ fun RandomizeBottomBar(modifier: Modifier = Modifier) {
 
 @Composable
 fun PresetCollectionContent(
-    onNavigateToActive: () -> Unit,
+    onNavigateToActive: (index: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        onClick = onNavigateToActive,
-        modifier = modifier.padding(16.dp),
+    val itemList = ItemListRepository.items
+
+    LazyColumn(
+        modifier = modifier
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+        items(itemList.size) { index ->
+            val item = itemList[index]
+            Card(
+                onClick = { onNavigateToActive(index) },
+                modifier = Modifier.padding(16.dp, 8.dp),
             ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_launcher_background),
-                    contentDescription = "Itens da coleção",
-                    modifier = Modifier.clip(Shapes().medium)
-                )
-                Column(
-                    modifier = Modifier.padding(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(
-                        text = "Tema A Ser Roletado",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(text = "Items: 5")
-                    Text(text = "Usos: 5")
-                    Text(text = "Ultimo uso: há 22min")
-                    Text(text = "Criado Em: 22/02/2000")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_launcher_background),
+                            contentDescription = "Itens da coleção",
+                            modifier = Modifier.clip(Shapes().medium)
+                        )
+                        Column(
+                            modifier = Modifier.padding(4.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            Text(
+                                text = item.topic,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(text = "Items: ${item.items.size}")
+                            Text(text = "Usos: ${item.uses}")
+                            Text(text = "Ultimo uso: ${item.lastUse}")
+                            Text(text = "Criado Em: ${item.createdAt}")
+                        }
+                    }
+                    Box() {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = "Editar esse item",
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
                 }
-            }
-            Box() {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = "Editar esse item",
-                    modifier = Modifier.padding(8.dp)
-                )
             }
         }
     }
 }
+
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable

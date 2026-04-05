@@ -5,9 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.ui.screens.PresetSelectionScreen
 import com.ogos.apprandomizador.ui.screens.ActiveRandomizerScreen
@@ -30,12 +33,21 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = "preset_selection") {
         composable("preset_selection") {
             PresetSelectionScreen(
-                onNavigateToActive = { navController.navigate("active_randomizer") }
+                onNavigateToActive = { itemIndex ->
+                    navController.navigate("active_randomizer/$itemIndex")
+                }
             )
         }
-        composable("active_randomizer") {
+        composable(
+            route = "active_randomizer/{itemIndex}", arguments = listOf(
+                navArgument("itemIndex") { type = NavType.IntType }
+            )) { backStackEntry ->
+            val itemIndex = backStackEntry.arguments?.getInt("itemIndex") ?: -1
             ActiveRandomizerScreen(
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    navController.popBackStack()
+                },
+                itemIndex = itemIndex
             )
         }
     }
