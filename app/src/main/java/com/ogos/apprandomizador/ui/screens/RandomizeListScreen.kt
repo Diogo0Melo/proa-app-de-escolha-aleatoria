@@ -11,8 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
@@ -25,14 +29,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Shapes
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -163,9 +173,12 @@ fun PresetCollectionContent(
     ) {
         items(itemList.size) { index ->
             val item = itemList[index]
+            val scrollState = rememberScrollState()
             Card(
                 onClick = { onNavigateToActive(index) },
-                modifier = Modifier.padding(16.dp, 8.dp),
+                modifier = Modifier
+                    .padding(12.dp, 8.dp)
+                    .height(136.dp),
             ) {
                 Row(
                     modifier = Modifier
@@ -175,11 +188,67 @@ fun PresetCollectionContent(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        /*
                         Image(
                             painter = painterResource(R.drawable.ic_launcher_background),
                             contentDescription = "Itens da coleção",
                             modifier = Modifier.clip(Shapes().medium)
                         )
+                         */
+                        Column(
+                            modifier = Modifier.verticalScroll(scrollState),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            val times = if (item.items.size >= 7) item.items.size else 7
+                            repeat(
+                                times = times,
+                            ) { index ->
+                                var index = index
+                                if (item.items.size < 7 && index >= item.items.size) {
+                                    index -= item.items.size
+                                }
+
+                                val item = item.items[index]
+                                Box(
+                                    modifier = Modifier.width(108.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(16.dp),
+                                        color = item.values.first()
+                                    ) {
+                                        Text(
+                                            text = item.keys.first(),
+                                            modifier = Modifier.wrapContentHeight(Alignment.CenterVertically),
+                                            style = TextStyle(
+                                                fontSize = 8.sp,
+                                                fontWeight = FontWeight.Black,
+                                                textAlign = TextAlign.Center,
+                                                drawStyle = Stroke(
+                                                    miter = 10f,
+                                                    width = 8f,
+                                                    join = StrokeJoin.Round
+                                                ),
+                                                color = Color.Black
+                                            )
+                                        )
+                                        Text(
+                                            text = item.keys.first(),
+                                            modifier = Modifier.wrapContentHeight(Alignment.CenterVertically),
+                                            style = TextStyle(
+                                                textAlign = TextAlign.Center,
+                                                fontSize = 8.sp,
+                                                fontWeight = FontWeight.Black,
+                                                color = Color.White
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
                         Column(
                             modifier = Modifier.padding(4.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp),

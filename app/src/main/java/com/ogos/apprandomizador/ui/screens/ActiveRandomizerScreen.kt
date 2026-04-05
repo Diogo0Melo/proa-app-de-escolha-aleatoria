@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -111,22 +112,43 @@ fun ActiveRandomizerContent(response: Int, modifier: Modifier = Modifier, item: 
         ) {
             Text(
                 text = response.keys.first(),
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 37.sp,
-                textAlign = TextAlign.Center,
-                lineHeight = 36.sp,
                 style = TextStyle(
+                    fontSize = 42.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 42.sp,
+                    drawStyle = Stroke(
+                        miter = 10f,
+                        width = 16f,
+                        join = StrokeJoin.Round
+                    ),
                     color = Color.White,
-                    drawStyle = Stroke(width = 5f)
                 )
             )
             Text(
                 text = response.keys.first(),
-                color = response.values.first(),
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 36.sp,
-                textAlign = TextAlign.Center,
-                lineHeight = 36.sp,
+                style = TextStyle(
+                    fontSize = 42.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 42.sp,
+                    drawStyle = Stroke(
+                        miter = 10f,
+                        width = 8f,
+                        join = StrokeJoin.Round
+                    ),
+                    color = Color.Black,
+                )
+            )
+            Text(
+                text = response.keys.first(),
+                lineHeight = 42.sp,
+                style = TextStyle(
+                    textAlign = TextAlign.Center,
+                    fontSize = 42.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = response.values.first()
+                )
             )
         }
     }
