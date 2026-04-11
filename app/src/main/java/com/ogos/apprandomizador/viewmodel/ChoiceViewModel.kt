@@ -1,16 +1,17 @@
 package com.ogos.apprandomizador.viewmodel
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.lifecycle.ViewModel
 import java.security.SecureRandom
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-class ChoiceViewModel() : ViewModel() {
-    private val _randomNumber = mutableIntStateOf(-1)
-    val randomNumber: State<Int> = _randomNumber
+class ChoiceViewModel : ViewModel() {
+    private val _randomNumber = MutableStateFlow(-1)
+    val randomNumber: StateFlow<Int> = _randomNumber.asStateFlow()
 
     fun generateRandomNumber(number: Int) {
         val secureRandom = SecureRandom()
-        _randomNumber.intValue = secureRandom.nextInt(number)
+        _randomNumber.value = secureRandom.nextInt(number)
     }
 }

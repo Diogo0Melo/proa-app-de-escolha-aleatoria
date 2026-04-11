@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -44,17 +45,24 @@ import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun ActiveRandomizerScreen(onBack: () -> Unit, itemIndex: Int) {
+fun ActiveRandomizerScreen(
+    onBack: () -> Unit,
+    itemIndex: Int,
+    viewModel: ChoiceViewModel = viewModel()
+) {
     val item = ItemListRepository.items[itemIndex]
+    val currentNumber by viewModel.randomNumber.collectAsState()
+    val onClick = { viewModel.generateRandomNumber(item.items.size) }
     Scaffold(
         topBar = { ActiveRandomizerTopBar(onBack = onBack) },
         bottomBar = {
-            ActiveRandomizerBottomBar(item = item)
+            ActiveRandomizerBottomBar(onClick = onClick)
         }
     ) { paddingValues ->
         ActiveRandomizerContent(
             modifier = Modifier.padding(paddingValues),
-            item = item
+            item = item,
+            currentNumber = currentNumber
         )
     }
 }
@@ -103,10 +111,8 @@ fun ActiveRandomizerTopBar(onBack: () -> Unit) {
 fun ActiveRandomizerContent(
     modifier: Modifier = Modifier,
     item: ItemList,
-    viewModel: ChoiceViewModel = viewModel()
+    currentNumber: Int
 ) {
-
-    val currentNumber by viewModel.randomNumber
 
     val response = when {
         currentNumber in 0..item.items.size -> {
@@ -175,8 +181,7 @@ fun ActiveRandomizerContent(
 @Composable
 fun ActiveRandomizerBottomBar(
     modifier: Modifier = Modifier,
-    item: ItemList,
-    viewModel: ChoiceViewModel = viewModel(),
+    onClick: () -> Unit,
 ) {
     BottomAppBar(
         modifier = modifier.height(160.dp),
@@ -191,7 +196,7 @@ fun ActiveRandomizerBottomBar(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
-                onClick = { viewModel.generateRandomNumber(item.items.size) },
+                onClick = onClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "RODAR")
