@@ -39,11 +39,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ogos.apprandomizador.RandomApplication
+import com.ogos.apprandomizador.database.ItemDao
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.repository.ItemListRepository
 import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun ActiveRandomizerScreen(
@@ -223,12 +224,20 @@ fun ActiveRandomizerBottomBar(
     }
 }
 
+
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun ActiveRandomizerScreenPreview() {
+    val fakeDao = object : ItemDao {
+        override fun insertOrUpdateItem(item: ItemList) {}
+        override fun readAllItems() = flowOf(emptyList<ItemList>())
+    }
+    val mockRepository = ItemListRepository(fakeDao).apply {
+        createDefault()
+    }
     ActiveRandomizerScreen(
-        onBack = {}, itemIndex = 0, repository = ItemListRepository(
-            itemDao = TODO()
-        )
+        onBack = {},
+        itemIndex = 0,
+        repository = mockRepository
     )
 }

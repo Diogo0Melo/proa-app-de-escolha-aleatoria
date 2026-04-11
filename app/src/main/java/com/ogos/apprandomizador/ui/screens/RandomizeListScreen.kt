@@ -43,8 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ogos.apprandomizador.R
+import com.ogos.apprandomizador.database.ItemDao
+import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.repository.ItemListRepository
-
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun PresetSelectionScreen(
@@ -273,7 +275,14 @@ fun PresetCollectionContent(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun PresetSelectionScreenPreview() {
-    PresetSelectionScreen(onNavigateToActive = {}, repository = ItemListRepository(
-        itemDao = TODO()
-    ))
+    val fakeDao = object : ItemDao {
+        override fun insertOrUpdateItem(item: ItemList) {}
+        override fun readAllItems() = flowOf(emptyList<ItemList>())
+    }
+    val mockRepository = ItemListRepository(fakeDao).apply {
+        createDefault()
+    }
+    PresetSelectionScreen(
+        onNavigateToActive = {}, repository = mockRepository
+    )
 }
