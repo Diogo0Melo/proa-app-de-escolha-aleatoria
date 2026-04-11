@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ogos.apprandomizador.RandomApplication
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.repository.ItemListRepository
 import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
@@ -48,13 +49,14 @@ import kotlinx.coroutines.launch
 fun ActiveRandomizerScreen(
     onBack: () -> Unit,
     itemIndex: Int,
-    viewModel: ChoiceViewModel = viewModel()
+    viewModel: ChoiceViewModel = viewModel(),
+    repository: ItemListRepository,
 ) {
-    val item = ItemListRepository.items[itemIndex]
+    val item = repository.items[itemIndex]
     val currentNumber by viewModel.randomNumber.collectAsState()
     val onClick = { viewModel.generateRandomNumber(item.items.size) }
     Scaffold(
-        topBar = { ActiveRandomizerTopBar(onBack = onBack) },
+        topBar = { ActiveRandomizerTopBar(onBack = onBack, repository) },
         bottomBar = {
             ActiveRandomizerBottomBar(onClick = onClick)
         }
@@ -69,7 +71,7 @@ fun ActiveRandomizerScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActiveRandomizerTopBar(onBack: () -> Unit) {
+fun ActiveRandomizerTopBar(onBack: () -> Unit, repository: ItemListRepository) {
     val coroutineScope = rememberCoroutineScope()
 
     TopAppBar(
@@ -79,7 +81,7 @@ fun ActiveRandomizerTopBar(onBack: () -> Unit) {
                 onClick =
                     {
                         coroutineScope.launch {
-                            ItemListRepository.saveInDatabase()
+                            repository.saveInDatabase()
                         }
                         onBack()
                     }
@@ -224,5 +226,9 @@ fun ActiveRandomizerBottomBar(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun ActiveRandomizerScreenPreview() {
-    ActiveRandomizerScreen(onBack = {}, itemIndex = 0)
+    ActiveRandomizerScreen(
+        onBack = {}, itemIndex = 0, repository = ItemListRepository(
+            itemDao = TODO()
+        )
+    )
 }

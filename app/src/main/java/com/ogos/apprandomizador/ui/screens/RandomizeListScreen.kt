@@ -49,7 +49,8 @@ import com.ogos.apprandomizador.repository.ItemListRepository
 @Composable
 fun PresetSelectionScreen(
     onNavigateToActive: (index: Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    repository: ItemListRepository
 ) {
     Scaffold(
         topBar = { RandomizeTopBar() },
@@ -58,7 +59,8 @@ fun PresetSelectionScreen(
         content = { padding ->
             PresetCollectionContent(
                 onNavigateToActive = onNavigateToActive,
-                modifier = Modifier.padding(padding)
+                modifier = Modifier.padding(padding),
+                repository = repository,
             )
         }
     )
@@ -160,9 +162,10 @@ fun RandomizeBottomBar(modifier: Modifier = Modifier) {
 @Composable
 fun PresetCollectionContent(
     onNavigateToActive: (index: Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    repository: ItemListRepository
 ) {
-    val itemList = ItemListRepository.items
+    val itemList = repository.items
 
     LazyColumn(
         modifier = modifier
@@ -184,13 +187,6 @@ fun PresetCollectionContent(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        /*
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_background),
-                            contentDescription = "Itens da coleção",
-                            modifier = Modifier.clip(Shapes().medium)
-                        )
-                         */
                         Column(
                             modifier = Modifier.verticalScroll(scrollState),
                             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -277,5 +273,7 @@ fun PresetCollectionContent(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun PresetSelectionScreenPreview() {
-    PresetSelectionScreen(onNavigateToActive = {})
+    PresetSelectionScreen(onNavigateToActive = {}, repository = ItemListRepository(
+        itemDao = TODO()
+    ))
 }

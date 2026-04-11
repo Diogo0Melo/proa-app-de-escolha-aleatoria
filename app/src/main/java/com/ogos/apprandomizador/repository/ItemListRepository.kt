@@ -8,10 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
-object ItemListRepository {
+class ItemListRepository(private val itemDao: ItemDao) {
 
     val items = mutableStateListOf<ItemList>()
-    lateinit var itemDao: ItemDao
 
     suspend fun saveInDatabase() {
         val copiaDaLista = items.toList()
