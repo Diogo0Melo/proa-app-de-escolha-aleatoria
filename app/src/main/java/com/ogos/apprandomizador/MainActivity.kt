@@ -31,9 +31,9 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(isFirstTime.value) {
                     when (isFirstTime.value) {
                         true -> {
-                            dataStoreManager.saveFirstAcess(false)
                             repository.createDefault()
                             repository.saveInDatabase()
+                            dataStoreManager.saveFirstAcess(false)
                         }
 
                         false -> {

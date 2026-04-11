@@ -45,6 +45,7 @@ import com.ogos.apprandomizador.repository.ItemListRepository
 import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.flowOf
+import java.time.LocalDateTime
 
 @Composable
 fun ActiveRandomizerScreen(
@@ -119,8 +120,10 @@ fun ActiveRandomizerContent(
 
     val response = when {
         currentNumber in 0..item.items.size -> {
+            val response = item.items[currentNumber]
             item.uses++
-            item.items[currentNumber]
+            item.updateHistory(response.keys.first(), LocalDateTime.now())
+            response
         }
 
         else -> mapOf("USE RODAR PARA SORTEAR" to MaterialTheme.colorScheme.primary)

@@ -42,8 +42,6 @@ class ItemListRepository(private val itemDao: ItemDao) {
                     mapOf("ABSOLUTAMENTE NÃO" to Color(0xFFFF0000)),
                 ),
                 uses = 0,
-                lastUse = "há 22min",
-                createdAt = "12/02/2000",
             ),
         )
         items.add(
@@ -72,8 +70,6 @@ class ItemListRepository(private val itemDao: ItemDao) {
                     mapOf("PROIBIDO" to Color(0xFFD50000))
                 ),
                 uses = 0,
-                lastUse = "há 2 semanas",
-                createdAt = "12/02/2000",
             )
         )
     }
