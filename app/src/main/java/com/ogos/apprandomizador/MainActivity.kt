@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,13 +14,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ogos.apprandomizador.database.AppDatabase
 import com.ogos.apprandomizador.database.DataStoreManager
-import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.repository.ItemListRepository
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.ui.screens.PresetSelectionScreen
 import com.ogos.apprandomizador.ui.screens.ActiveRandomizerScreen
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +39,7 @@ class MainActivity : ComponentActivity() {
                             ItemListRepository.saveInDatabase()
                         }
                     }
+
                     false -> {
                         LaunchedEffect(isFirstTime) {
                             ItemListRepository.readFromDatabase()

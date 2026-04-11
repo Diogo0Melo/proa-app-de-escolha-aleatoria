@@ -25,10 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,29 +37,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ogos.apprandomizador.database.AppDatabase
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.repository.ItemListRepository
-import kotlinx.coroutines.coroutineScope
+import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.security.SecureRandom
 
 @Composable
 fun ActiveRandomizerScreen(onBack: () -> Unit, itemIndex: Int) {
     val item = ItemListRepository.items[itemIndex]
-    val secureRandom = remember { SecureRandom() }
-    var currentNumber by remember { mutableIntStateOf(-1) }
     Scaffold(
         topBar = { ActiveRandomizerTopBar(onBack = onBack) },
         bottomBar = {
-            ActiveRandomizerBottomBar(onClick = {
-                currentNumber = secureRandom.nextInt(item.items.size)
-            })
+            ActiveRandomizerBottomBar(item = item)
         }
     ) { paddingValues ->
         ActiveRandomizerContent(
-            response = currentNumber,
             modifier = Modifier.padding(paddingValues),
             item = item
         )
@@ -110,18 +100,22 @@ fun ActiveRandomizerTopBar(onBack: () -> Unit) {
 }
 
 @Composable
-fun ActiveRandomizerContent(response: Int, modifier: Modifier = Modifier, item: ItemList) {
+fun ActiveRandomizerContent(
+    modifier: Modifier = Modifier,
+    item: ItemList,
+    viewModel: ChoiceViewModel = viewModel()
+) {
+
+    val currentNumber by viewModel.randomNumber
 
     val response = when {
-        response in 0..item.items.size -> {
+        currentNumber in 0..item.items.size -> {
             item.uses++
-            item.items[response]
+            item.items[currentNumber]
         }
 
         else -> mapOf("USE RODAR PARA SORTEAR" to MaterialTheme.colorScheme.primary)
     }
-
-
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -179,7 +173,11 @@ fun ActiveRandomizerContent(response: Int, modifier: Modifier = Modifier, item: 
 }
 
 @Composable
-fun ActiveRandomizerBottomBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ActiveRandomizerBottomBar(
+    modifier: Modifier = Modifier,
+    item: ItemList,
+    viewModel: ChoiceViewModel = viewModel(),
+) {
     BottomAppBar(
         modifier = modifier.height(160.dp),
         containerColor = MaterialTheme.colorScheme.surface,
@@ -193,7 +191,7 @@ fun ActiveRandomizerBottomBar(onClick: () -> Unit, modifier: Modifier = Modifier
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
-                onClick = { onClick() },
+                onClick = { viewModel.generateRandomNumber(item.items.size) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "RODAR")

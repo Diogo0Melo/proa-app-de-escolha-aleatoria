@@ -3,7 +3,6 @@ package com.ogos.apprandomizador.database
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.room.TypeConverter
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class Converters {
@@ -24,7 +23,7 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromHistory(value: MutableList<String>?): String? = Json.encodeToString(value)
+    fun fromHistory(value: MutableList<String>?): String = Json.encodeToString(value)
 
     @TypeConverter
     fun toHistory(value: String?): MutableList<String>? = value?.let { Json.decodeFromString(it) }
