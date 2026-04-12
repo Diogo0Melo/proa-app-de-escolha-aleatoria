@@ -177,7 +177,7 @@ fun ActiveRandomizerContent(
                     textAlign = TextAlign.Center,
                     fontSize = 40.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = response.values.first()
+                    color = Color(response.values.first() as Int)
                 )
             )
         }

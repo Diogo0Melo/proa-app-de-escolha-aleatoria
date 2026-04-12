@@ -212,7 +212,7 @@ fun PresetCollectionContent(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(16.dp),
-                                        color = item.values.first()
+                                        color = Color(item.values.first())
                                     ) {
                                         Text(
                                             text = item.keys.first(),

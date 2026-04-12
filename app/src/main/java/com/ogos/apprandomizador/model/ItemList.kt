@@ -1,12 +1,7 @@
 package com.ogos.apprandomizador.model
 
-import androidx.compose.ui.graphics.Color
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -15,33 +10,24 @@ import java.time.temporal.ChronoUnit
 data class ItemList(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     var topic: String = "",
-    var items: MutableList<Map<String, Color>> = mutableListOf(),
+    var items: MutableList<Map<String, Long>> = mutableListOf(),
     var uses: Int = 0,
     var resultHistory: MutableList<String> = mutableListOf(),
-    var dateTimeHistory: MutableList<String> = mutableListOf()
+    var dateTimeHistory: MutableList<String> = mutableListOf(),
+    val createdAtNotFormated: String = LocalDateTime.now().toString(),
 ) {
     var lastUse = "Nunca"
     val createdAt: String
-        get() = setCreatedDateTime()
+        get() = setCreatedDateTime(createdAtNotFormated)
 
     init {
-        CoroutineScope(Dispatchers.IO).launch {
-            startUpdateLoop()
-        }
-    }
-
-    private suspend fun startUpdateLoop() {
         updateLastUse()
-        while (true) {
-            delay(60000)
-            updateLastUse()
-        }
     }
 
-    private fun setCreatedDateTime(): String {
-        val now = LocalDateTime.now()
+    private fun setCreatedDateTime(createdDateTime: String): String {
+        val createdDateTime = LocalDateTime.parse(createdDateTime)
         val format = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        val formatedDateTime = now.format(format)
+        val formatedDateTime = createdDateTime.format(format)
         return formatedDateTime
     }
 
