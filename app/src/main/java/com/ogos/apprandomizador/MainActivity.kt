@@ -1,12 +1,13 @@
 package com.ogos.apprandomizador
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,40 +18,32 @@ import com.ogos.apprandomizador.repository.ItemListRepository
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.ui.screens.PresetSelectionScreen
 import com.ogos.apprandomizador.ui.screens.ActiveRandomizerScreen
+import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
+import com.ogos.apprandomizador.viewmodel.MainViewModel
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val app = application as RandomApplication
             val repository = app.repository
-            val dataStoreManager = DataStoreManager(this)
-            val isFirstTime = dataStoreManager.isFirstTime.collectAsState(null)
+            val choiceViewModel = ChoiceViewModel(repository)
+            val mainViewModel = MainViewModel(repository, DataStoreManager(this))
+            val isReady by mainViewModel.isReady.collectAsState()
             AppRandomizadorTheme {
-                LaunchedEffect(isFirstTime.value) {
-                    when (isFirstTime.value) {
-                        true -> {
-                            repository.createDefault()
-                            repository.saveInDatabase()
-                            dataStoreManager.saveFirstAcess(false)
-                        }
-
-                        false -> {
-                            repository.readFromDatabase()
-                        }
-
-                        null -> {}
-                    }
+                if (isReady) {
+                    AppNavigation(repository = repository, viewModel = choiceViewModel)
                 }
-                AppNavigation(repository = repository)
+                println("Aguardando inicialização...")
             }
         }
     }
 }
 
 @Composable
-fun AppNavigation(repository: ItemListRepository) {
+fun AppNavigation(repository: ItemListRepository, viewModel: ChoiceViewModel) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "preset_selection") {
         composable("preset_selection") {
@@ -64,13 +57,15 @@ fun AppNavigation(repository: ItemListRepository) {
         composable(
             route = "active_randomizer/{itemIndex}", arguments = listOf(
                 navArgument("itemIndex") { type = NavType.IntType },
-            )) { backStackEntry ->
+            )
+        ) { backStackEntry ->
             val itemIndex = backStackEntry.arguments?.getInt("itemIndex") ?: -1
             ActiveRandomizerScreen(
                 repository = repository,
                 onBack = {
                     navController.popBackStack()
                 },
+                viewModel = viewModel,
                 itemIndex = itemIndex
             )
         }

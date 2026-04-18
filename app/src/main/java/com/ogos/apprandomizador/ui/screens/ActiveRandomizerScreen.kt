@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,8 +44,8 @@ import com.ogos.apprandomizador.database.ItemDao
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.repository.ItemListRepository
 import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 @Composable
@@ -54,13 +55,14 @@ fun ActiveRandomizerScreen(
     viewModel: ChoiceViewModel = viewModel(),
     repository: ItemListRepository,
 ) {
-    val item = repository.items[itemIndex]
+    viewModel.setCurrentItem(itemIndex)
+    val item by viewModel.currentItem.collectAsState()
     val currentNumber by viewModel.randomNumber.collectAsState()
     val onClick = { viewModel.generateRandomNumber(item.items.size) }
     Scaffold(
-        topBar = { ActiveRandomizerTopBar(onBack = onBack, repository) },
+        topBar = { ActiveRandomizerTopBar(onBack = onBack) },
         bottomBar = {
-            ActiveRandomizerBottomBar(onClick = onClick)
+            ActiveRandomizerBottomBar(onClick = onClick, repository = repository, item = item)
         }
     ) { paddingValues ->
         ActiveRandomizerContent(
@@ -73,8 +75,7 @@ fun ActiveRandomizerScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActiveRandomizerTopBar(onBack: () -> Unit, repository: ItemListRepository) {
-    val coroutineScope = rememberCoroutineScope()
+fun ActiveRandomizerTopBar(onBack: () -> Unit) {
 
     TopAppBar(
         title = { },
@@ -82,9 +83,6 @@ fun ActiveRandomizerTopBar(onBack: () -> Unit, repository: ItemListRepository) {
             IconButton(
                 onClick =
                     {
-                        coroutineScope.launch {
-                            repository.saveInDatabase()
-                        }
                         onBack()
                     }
             ) {
@@ -126,7 +124,7 @@ fun ActiveRandomizerContent(
             response
         }
 
-        else -> mapOf("USE RODAR PARA SORTEAR" to MaterialTheme.colorScheme.primary)
+        else -> mapOf("USE RODAR PARA SORTEAR" to MaterialTheme.colorScheme.primary.toArgb().toLong())
     }
 
     Column(
@@ -177,7 +175,7 @@ fun ActiveRandomizerContent(
                     textAlign = TextAlign.Center,
                     fontSize = 40.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(response.values.first() as Int)
+                    color = Color(response.values.first())
                 )
             )
         }
@@ -188,7 +186,10 @@ fun ActiveRandomizerContent(
 fun ActiveRandomizerBottomBar(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    repository: ItemListRepository,
+    item: ItemList
 ) {
+    val coroutineScope = rememberCoroutineScope()
     BottomAppBar(
         modifier = modifier.height(160.dp),
         containerColor = MaterialTheme.colorScheme.surface,
@@ -202,7 +203,12 @@ fun ActiveRandomizerBottomBar(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
-                onClick = onClick,
+                onClick = {
+                    coroutineScope.launch {
+                        repository.updateInDatabase(item = item)
+                    }
+                    onClick()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "RODAR")
@@ -232,11 +238,12 @@ fun ActiveRandomizerBottomBar(
 @Composable
 private fun ActiveRandomizerScreenPreview() {
     val fakeDao = object : ItemDao {
-        override fun insertOrUpdateItem(item: ItemList) {}
+        override fun insertItem(item: ItemList) {}
+        override fun updateItem(item: ItemList) {}
         override fun readAllItems() = flowOf(emptyList<ItemList>())
     }
     val mockRepository = ItemListRepository(fakeDao).apply {
-        createDefault()
+       createDefaultList()
     }
     ActiveRandomizerScreen(
         onBack = {},

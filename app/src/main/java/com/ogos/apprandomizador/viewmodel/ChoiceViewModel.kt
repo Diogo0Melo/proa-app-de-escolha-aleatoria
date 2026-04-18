@@ -10,20 +10,23 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class ChoiceViewModel(repository: ItemListRepository) : ViewModel() {
+class ChoiceViewModel(private val repository: ItemListRepository) : ViewModel() {
+
     private val _randomNumber = MutableStateFlow(-1)
     val randomNumber: StateFlow<Int> = _randomNumber.asStateFlow()
-    val items: StateFlow<List<ItemList>> =
-        repository.getAllItems().stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    private val _currentItem = MutableStateFlow(ItemList())
+    val currentItem: StateFlow<ItemList> = _currentItem.asStateFlow()
+    private val secureRandom = SecureRandom()
 
     fun generateRandomNumber(number: Int) {
-        val secureRandom = SecureRandom()
         _randomNumber.value = secureRandom.nextInt(number)
     }
 
+    fun setCurrentItem(index: Int) {
+        viewModelScope.launch {
+            _currentItem.value = repository.getItem(index)
+        }
+    }
 }

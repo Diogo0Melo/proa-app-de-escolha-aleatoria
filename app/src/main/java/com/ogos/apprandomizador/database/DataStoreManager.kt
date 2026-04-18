@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.map
 
 val Context.dataStore by preferencesDataStore(name = "settings")
 
-class DataStoreManager(private val context: Context) {
-    private val dataStore = context.dataStore
+class DataStoreManager(private val context: Context?) {
+    private val dataStore = context!!.dataStore
 
     companion object {
         val IS_FIRST_TIME = booleanPreferencesKey("is_first_time")
@@ -22,7 +22,7 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
-    val isFirstTime: Flow<Boolean> = context.dataStore.data.map {
+    val isFirstTime: Flow<Boolean> = context!!.dataStore.data.map {
         it[IS_FIRST_TIME] ?: true
     }
 

@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -167,7 +168,7 @@ fun PresetCollectionContent(
     modifier: Modifier = Modifier,
     repository: ItemListRepository
 ) {
-    val itemList = repository.items
+    val itemList = repository.allItems.collectAsState(initial = emptyList()).value
 
     LazyColumn(
         modifier = modifier
@@ -276,11 +277,12 @@ fun PresetCollectionContent(
 @Composable
 private fun PresetSelectionScreenPreview() {
     val fakeDao = object : ItemDao {
-        override fun insertOrUpdateItem(item: ItemList) {}
+        override fun insertItem(item: ItemList) {}
+        override fun updateItem(item: ItemList) {}
         override fun readAllItems() = flowOf(emptyList<ItemList>())
     }
     val mockRepository = ItemListRepository(fakeDao).apply {
-        createDefault()
+        createDefaultList()
     }
     PresetSelectionScreen(
         onNavigateToActive = {}, repository = mockRepository
