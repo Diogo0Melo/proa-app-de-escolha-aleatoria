@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit
 
 @Entity(tableName = "item_list")
 data class ItemList(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     var topic: String = "",
     var items: MutableList<Map<String, Long>> = mutableListOf(),
     var uses: Int = 0,

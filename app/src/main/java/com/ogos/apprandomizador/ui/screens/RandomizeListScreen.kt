@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun PresetSelectionScreen(
-    onNavigateToActive: (index: Int) -> Unit,
+    onNavigateToActive: (index: Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChoiceViewModel = viewModel(),
 ) {
@@ -166,7 +166,7 @@ fun RandomizeBottomBar(modifier: Modifier = Modifier) {
 
 @Composable
 fun PresetCollectionContent(
-    onNavigateToActive: (index: Int) -> Unit,
+    onNavigateToActive: (index: Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChoiceViewModel
 ) {
@@ -175,11 +175,11 @@ fun PresetCollectionContent(
     LazyColumn(
         modifier = modifier
     ) {
-        items(itemList.size) { index ->
+        items(count = itemList.size) { index ->
             val item = itemList[index]
             val scrollState = rememberScrollState()
             Card(
-                onClick = { onNavigateToActive(index) },
+                onClick = { onNavigateToActive(item.id) },
                 modifier = Modifier
                     .padding(12.dp, 8.dp)
                     .height(136.dp),
@@ -279,8 +279,8 @@ fun PresetCollectionContent(
 @Composable
 private fun PresetSelectionScreenPreview() {
     val fakeDao = object : ItemDao {
-        override fun insertItem(item: ItemList) {}
-        override fun updateItem(item: ItemList) {}
+        override suspend fun insertItem(item: ItemList) {}
+        override suspend fun updateItem(item: ItemList) {}
         override fun readAllItems() = flowOf(emptyList<ItemList>())
     }
     ItemListRepository(fakeDao).apply {

@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ItemDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertItem(item: ItemList)
+    suspend fun insertItem(item: ItemList)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun updateItem(item: ItemList)
+    suspend fun updateItem(item: ItemList)
 
     @Query("SELECT * FROM item_list")
     fun readAllItems(): Flow<List<ItemList>>

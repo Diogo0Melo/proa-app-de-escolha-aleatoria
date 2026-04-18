@@ -55,17 +55,17 @@ fun AppNavigation(viewModel: ChoiceViewModel) {
             )
         }
         composable(
-            route = "active_randomizer/{itemIndex}", arguments = listOf(
-                navArgument("itemIndex") { type = NavType.IntType },
+            route = "active_randomizer/{itemID}", arguments = listOf(
+                navArgument("itemID") { type = NavType.LongType },
             )
         ) { backStackEntry ->
-            val itemIndex = backStackEntry.arguments?.getInt("itemIndex") ?: -1
+            val itemID = backStackEntry.arguments?.getLong("itemID") ?: -1
             ActiveRandomizerScreen(
                 onBack = {
                     navController.popBackStack()
                 },
                 viewModel = viewModel,
-                itemIndex = itemIndex
+                itemID = itemID
             )
         }
     }

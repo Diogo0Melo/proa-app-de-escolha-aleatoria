@@ -12,9 +12,7 @@ class ItemListRepository(private val itemDao: ItemDao) {
 
     val allItems: Flow<List<ItemList>> = itemDao.readAllItems()
 
-
     suspend fun saveInDatabase(item: ItemList) {
-        //val listCopy = allItems.toList()
         withContext(Dispatchers.IO) {
                 itemDao.insertItem(item)
         }
@@ -25,7 +23,8 @@ class ItemListRepository(private val itemDao: ItemDao) {
             itemDao.updateItem(item)
         }
     }
-    suspend fun getItem(index: Int): ItemList = allItems.first()[index]
+    suspend fun getItem(id: Long): ItemList = allItems.first().first { it.id == id }
+
 
     suspend fun initializeDatabase(isFirstTime: Boolean, dataStoreManager: DataStoreManager) {
         if (isFirstTime) {
