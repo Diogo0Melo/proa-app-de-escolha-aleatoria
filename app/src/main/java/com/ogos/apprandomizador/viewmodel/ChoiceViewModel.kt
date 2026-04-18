@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.repository.ItemListRepository
+import kotlinx.coroutines.flow.Flow
 import java.security.SecureRandom
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,4 +30,18 @@ class ChoiceViewModel(private val repository: ItemListRepository) : ViewModel() 
             _currentItem.value = repository.getItem(index)
         }
     }
+
+    fun updateItem(item: ItemList) {
+        viewModelScope.launch {
+            repository.updateInDatabase(item)
+        }
+    }
+
+    fun insertItem(item: ItemList) {
+        viewModelScope.launch {
+            repository.saveInDatabase(item)
+        }
+    }
+
+    fun getAllItems(): Flow<List<ItemList>> = repository.allItems
 }

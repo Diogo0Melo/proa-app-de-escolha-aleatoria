@@ -43,17 +43,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.database.ItemDao
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.repository.ItemListRepository
+import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun PresetSelectionScreen(
     onNavigateToActive: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
-    repository: ItemListRepository
+    viewModel: ChoiceViewModel = viewModel(),
 ) {
     Scaffold(
         topBar = { RandomizeTopBar() },
@@ -63,7 +65,7 @@ fun PresetSelectionScreen(
             PresetCollectionContent(
                 onNavigateToActive = onNavigateToActive,
                 modifier = Modifier.padding(padding),
-                repository = repository,
+                viewModel = viewModel,
             )
         }
     )
@@ -166,9 +168,9 @@ fun RandomizeBottomBar(modifier: Modifier = Modifier) {
 fun PresetCollectionContent(
     onNavigateToActive: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
-    repository: ItemListRepository
+    viewModel: ChoiceViewModel
 ) {
-    val itemList = repository.allItems.collectAsState(initial = emptyList()).value
+    val itemList = viewModel.getAllItems().collectAsState(initial = emptyList()).value
 
     LazyColumn(
         modifier = modifier
@@ -281,10 +283,10 @@ private fun PresetSelectionScreenPreview() {
         override fun updateItem(item: ItemList) {}
         override fun readAllItems() = flowOf(emptyList<ItemList>())
     }
-    val mockRepository = ItemListRepository(fakeDao).apply {
+    ItemListRepository(fakeDao).apply {
         createDefaultList()
     }
     PresetSelectionScreen(
-        onNavigateToActive = {}, repository = mockRepository
+        onNavigateToActive = {}
     )
 }

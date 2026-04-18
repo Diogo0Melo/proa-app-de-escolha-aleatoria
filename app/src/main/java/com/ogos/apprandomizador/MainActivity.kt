@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
             val isReady by mainViewModel.isReady.collectAsState()
             AppRandomizadorTheme {
                 if (isReady) {
-                    AppNavigation(repository = repository, viewModel = choiceViewModel)
+                    AppNavigation(viewModel = choiceViewModel)
                 }
                 println("Aguardando inicialização...")
             }
@@ -43,12 +43,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppNavigation(repository: ItemListRepository, viewModel: ChoiceViewModel) {
+fun AppNavigation(viewModel: ChoiceViewModel) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "preset_selection") {
         composable("preset_selection") {
             PresetSelectionScreen(
-                repository = repository,
+                viewModel = viewModel,
                 onNavigateToActive = { itemIndex ->
                     navController.navigate("active_randomizer/$itemIndex")
                 }
@@ -61,7 +61,6 @@ fun AppNavigation(repository: ItemListRepository, viewModel: ChoiceViewModel) {
         ) { backStackEntry ->
             val itemIndex = backStackEntry.arguments?.getInt("itemIndex") ?: -1
             ActiveRandomizerScreen(
-                repository = repository,
                 onBack = {
                     navController.popBackStack()
                 },
