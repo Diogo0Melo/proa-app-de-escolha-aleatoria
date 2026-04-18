@@ -27,8 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,7 +52,6 @@ fun ActiveRandomizerScreen(
     itemID: Long,
     viewModel: ChoiceViewModel = viewModel(),
 ) {
-    val item by viewModel.currentItemList.collectAsState()
     val result by viewModel.currentRandomItem.collectAsState()
     val color = MaterialTheme.colorScheme.primary.toArgb().toLong()
     LaunchedEffect(itemID) {
@@ -67,7 +64,7 @@ fun ActiveRandomizerScreen(
         Scaffold(
             topBar = { ActiveRandomizerTopBar(onBack = onBack) },
             bottomBar = {
-                ActiveRandomizerBottomBar(item = item, viewModel = viewModel, color = color)
+                ActiveRandomizerBottomBar(viewModel = viewModel)
             }
         ) { paddingValues ->
             ActiveRandomizerContent(
@@ -178,8 +175,6 @@ fun ActiveRandomizerContent(
 fun ActiveRandomizerBottomBar(
     modifier: Modifier = Modifier,
     viewModel: ChoiceViewModel,
-    item: ItemList,
-    color: Long
 ) {
     BottomAppBar(
         modifier = modifier.height(160.dp),
@@ -195,7 +190,7 @@ fun ActiveRandomizerBottomBar(
         ) {
             Button(
                 onClick = {
-                    viewModel.performRoll(color = color)
+                    viewModel.performRoll()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

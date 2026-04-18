@@ -10,10 +10,10 @@ import java.time.temporal.ChronoUnit
 data class ItemList(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     var topic: String = "",
-    var items: MutableList<Map<String, Long>> = mutableListOf(),
+    var items: List<Map<String, Long>> = listOf(),
     var uses: Int = 0,
-    var resultHistory: MutableList<String> = mutableListOf(),
-    var dateTimeHistory: MutableList<String> = mutableListOf(),
+    var resultHistory: List<String> = listOf(),
+    var dateTimeHistory: List<String> = listOf(),
     val createdAtNotFormated: String = LocalDateTime.now().toString(),
 ) {
     var lastUse = "Nunca"
@@ -55,11 +55,5 @@ data class ItemList(
             else -> "Há $year anos"
         }
         lastUse = formatedDateTime
-    }
-
-    fun updateHistory(resultItem: String, resultDateTime: LocalDateTime) {
-        resultHistory.add(resultItem)
-        dateTimeHistory.add(resultDateTime.toString())
-        updateLastUse()
     }
 }

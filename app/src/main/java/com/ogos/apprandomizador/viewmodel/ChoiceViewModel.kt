@@ -14,28 +14,30 @@ import java.time.LocalDateTime
 
 class ChoiceViewModel(private val repository: ItemListRepository) : ViewModel() {
 
-    private var randomNumber = -1
     private val secureRandom = SecureRandom()
     private val _currentItemList = MutableStateFlow(ItemList())
     val currentItemList: StateFlow<ItemList> = _currentItemList.asStateFlow()
     private val _currentRandomItem = MutableStateFlow<Map<String, Long>>(mapOf())
     val currentRandomItem: StateFlow<Map<String, Long>> = _currentRandomItem
 
-    fun performRoll(color: Long) {
+    fun performRoll() {
         val item = currentItemList.value
-        val range = item.items.size
-        randomNumber = secureRandom.nextInt(range)
-        _currentRandomItem.value = when {
-            randomNumber in 0..range -> {
-                val result = item.items[randomNumber]
-                item.uses++
-                item.updateHistory(result.keys.first(), LocalDateTime.now())
-                result
-            }
 
-            else -> mapOf("USE RODAR PARA SORTEAR" to color)
-        }
-        updateItem(item)
+        if (item.items.isEmpty()) return
+
+        val newIndex = secureRandom.nextInt(item.items.size)
+        val resultKey = item.items[newIndex].keys.first()
+        val newHistory = item.resultHistory.toMutableList().apply { add(resultKey) }
+        val newTimeHistory = item.dateTimeHistory.toMutableList().apply { add(LocalDateTime.now().toString()) }
+        val updatedItem = item.copy(
+            uses = item.uses + 1,
+            resultHistory = newHistory,
+            dateTimeHistory = newTimeHistory
+        )
+
+        _currentRandomItem.value = item.items[newIndex]
+        _currentItemList.value = updatedItem
+        updateItem(updatedItem)
     }
 
     fun defaultText(color: Long) {
