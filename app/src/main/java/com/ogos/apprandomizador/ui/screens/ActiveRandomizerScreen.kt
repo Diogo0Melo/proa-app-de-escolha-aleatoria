@@ -57,11 +57,11 @@ fun ActiveRandomizerScreen(
     val item by viewModel.currentItemList.collectAsState()
     val result by viewModel.currentRandomItem.collectAsState()
     val color = MaterialTheme.colorScheme.primary.toArgb().toLong()
-    LaunchedEffect(item.id) {
+    LaunchedEffect(itemID) {
         viewModel.setCurrentItem(itemID)
         viewModel.defaultText(color = color)
     }
-    if (result == null) {
+    if (result.isEmpty()) {
         println("Aguardando sorteio...")
     } else {
         Scaffold(
@@ -72,7 +72,7 @@ fun ActiveRandomizerScreen(
         ) { paddingValues ->
             ActiveRandomizerContent(
                 modifier = Modifier.padding(paddingValues),
-                result = result!!
+                result = result
             )
         }
     }
@@ -195,7 +195,7 @@ fun ActiveRandomizerBottomBar(
         ) {
             Button(
                 onClick = {
-                    viewModel.rollList(range = item.items.size, item = item, color = color)
+                    viewModel.performRoll(color = color)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -229,6 +229,9 @@ private fun ActiveRandomizerScreenPreview() {
         override suspend fun insertItem(item: ItemList) {}
         override suspend fun updateItem(item: ItemList) {}
         override fun readAllItems() = flowOf(emptyList<ItemList>())
+        override suspend fun getItem(id: Long): ItemList {
+            return ItemList()
+        }
     }
     ItemListRepository(fakeDao).apply {
         createDefaultList()

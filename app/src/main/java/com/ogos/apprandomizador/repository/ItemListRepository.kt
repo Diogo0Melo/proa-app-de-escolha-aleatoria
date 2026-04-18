@@ -23,7 +23,7 @@ class ItemListRepository(private val itemDao: ItemDao) {
             itemDao.updateItem(item)
         }
     }
-    suspend fun getItem(id: Long): ItemList = allItems.first().first { it.id == id }
+    suspend fun getItem(id: Long): ItemList = itemDao.getItem(id)
 
 
     suspend fun initializeDatabase(isFirstTime: Boolean, dataStoreManager: DataStoreManager) {

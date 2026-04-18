@@ -282,6 +282,9 @@ private fun PresetSelectionScreenPreview() {
         override suspend fun insertItem(item: ItemList) {}
         override suspend fun updateItem(item: ItemList) {}
         override fun readAllItems() = flowOf(emptyList<ItemList>())
+        override suspend fun getItem(id: Long): ItemList {
+            return ItemList()
+        }
     }
     ItemListRepository(fakeDao).apply {
         createDefaultList()

@@ -19,4 +19,6 @@ interface ItemDao {
     @Query("SELECT * FROM item_list")
     fun readAllItems(): Flow<List<ItemList>>
 
+    @Query("SELECT * FROM item_list WHERE id = :id")
+    suspend fun getItem(id: Long): ItemList
 }
