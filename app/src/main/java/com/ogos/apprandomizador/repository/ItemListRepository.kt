@@ -3,24 +3,18 @@ package com.ogos.apprandomizador.repository
 import com.ogos.apprandomizador.database.DataStoreManager
 import com.ogos.apprandomizador.database.ItemDao
 import com.ogos.apprandomizador.model.ItemList
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 class ItemListRepository(private val itemDao: ItemDao) {
 
     val allItems: Flow<List<ItemList>> = itemDao.readAllItems()
 
     suspend fun saveInDatabase(item: ItemList) {
-        withContext(Dispatchers.IO) {
-            itemDao.insertItem(item)
-        }
+        itemDao.insertItem(item)
     }
 
     suspend fun updateInDatabase(item: ItemList) {
-        withContext(Dispatchers.IO) {
-            itemDao.updateItem(item)
-        }
+        itemDao.updateItem(item)
     }
 
     suspend fun getItem(id: Long): ItemList = itemDao.getItem(id)

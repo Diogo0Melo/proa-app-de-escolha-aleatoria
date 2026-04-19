@@ -16,13 +16,10 @@ data class ItemList(
     var dateTimeHistory: List<String> = listOf(),
     val createdAtNotFormated: String = LocalDateTime.now().toString(),
 ) {
-    var lastUse = "Nunca"
+    val lastUse: String
+        get() = updateLastUse()
     val createdAt: String
         get() = setCreatedDateTime(createdAtNotFormated)
-
-    init {
-        updateLastUse()
-    }
 
     private fun setCreatedDateTime(createdDateTime: String): String {
         val createdDateTime = LocalDateTime.parse(createdDateTime)
@@ -31,9 +28,9 @@ data class ItemList(
         return formatedDateTime
     }
 
-    fun updateLastUse() {
+    fun updateLastUse(): String {
         if (dateTimeHistory.isEmpty())
-            return
+            return "Nunca"
 
         val now = LocalDateTime.now()
         val lastSavedDateTimeHistory = dateTimeHistory.last()
@@ -46,14 +43,13 @@ data class ItemList(
         val month = ChronoUnit.MONTHS.between(dateTimeHistory, now)
         val year = ChronoUnit.YEARS.between(dateTimeHistory, now)
 
-        val formatedDateTime = when {
-            seconds < 60 -> "Agora mesmo"
-            minutes < 60 -> "Há $minutes min"
-            hours < 24 -> "Há $hours horas"
-            days < 30 -> "Há $days dias"
-            month < 12 -> "Há $month meses"
-            else -> "Há $year anos"
+        return when {
+            seconds < 60 -> "agora mesmo"
+            minutes < 60 -> "há $minutes min"
+            hours < 24 -> "há $hours horas"
+            days < 30 -> "há $days dias"
+            month < 12 -> "há $month meses"
+            else -> "há $year anos"
         }
-        lastUse = formatedDateTime
     }
 }
