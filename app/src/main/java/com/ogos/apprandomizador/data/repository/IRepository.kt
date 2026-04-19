@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.model.repository
+package com.ogos.apprandomizador.data.repository
 
 import com.ogos.apprandomizador.model.ItemList
 

@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
@@ -81,7 +82,7 @@ fun RandomizeViewRoute(
         onDispose { mediaPlayer.release() }
     }
     if (result.isEmpty()) {
-        println("Aguardando sorteio...")
+        println(stringResource(R.string.waiting_raffle))
     } else {
         RandomizeViewMain(
             result = result,
@@ -119,7 +120,7 @@ fun RandomizeViewTopBar(onBack: () -> Unit) {
             ) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBackIosNew,
-                    contentDescription = "Voltar"
+                    contentDescription = stringResource(R.string.back)
                 )
             }
         },
@@ -127,13 +128,13 @@ fun RandomizeViewTopBar(onBack: () -> Unit) {
             IconButton(onClick = {}) {
                 Icon(
                     imageVector = Icons.Default.Analytics,
-                    contentDescription = "Estatisticas"
+                    contentDescription = stringResource(R.string.statistics)
                 )
             }
             IconButton(onClick = {}) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Editar"
+                    contentDescription = stringResource(R.string.edit)
                 )
             }
         }
@@ -221,7 +222,7 @@ fun RandomizeViewBottomBar(onPerfomRoll: () -> Unit, isSpinning: Boolean) {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "RODAR")
+                Text(text = stringResource(R.string.roll))
             }
             Row {
                 OutlinedButton(
@@ -229,14 +230,14 @@ fun RandomizeViewBottomBar(onPerfomRoll: () -> Unit, isSpinning: Boolean) {
                     modifier = Modifier.weight(1f),
 
                     ) {
-                    Text(text = "DESATIVAR")
+                    Text(text = stringResource(R.string.disable))
                 }
                 Spacer(Modifier.padding(4.dp))
                 OutlinedButton(
                     onClick = { /*TODO*/ },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "RESETAR")
+                    Text(text = stringResource(R.string.reset))
                 }
             }
         }
@@ -249,7 +250,7 @@ fun RandomizeViewBottomBar(onPerfomRoll: () -> Unit, isSpinning: Boolean) {
 private fun RandomizeViewPreview() {
     RandomizeViewMain(
         onBack = {},
-        result = mapOf("USE RODAR PARA SORTEAR" to 0xFF000000),
+        result = mapOf(stringResource(R.string.use_roll_to_draw) to 0xFF000000),
         onPerfomRoll = { },
         isSpinning = false
     )

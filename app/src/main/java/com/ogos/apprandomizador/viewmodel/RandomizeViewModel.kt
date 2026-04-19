@@ -3,7 +3,7 @@ package com.ogos.apprandomizador.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.model.repository.ItemListRepository
+import com.ogos.apprandomizador.data.repository.ItemListRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import java.security.SecureRandom

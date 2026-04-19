@@ -1,8 +1,8 @@
 package com.ogos.apprandomizador
 
 import android.app.Application
-import com.ogos.apprandomizador.model.database.AppDatabase
-import com.ogos.apprandomizador.model.repository.ItemListRepository
+import com.ogos.apprandomizador.data.database.AppDatabase
+import com.ogos.apprandomizador.data.repository.ItemListRepository
 
 class RandomApplication : Application() {
     val database by lazy { AppDatabase.getDatabase(this) }

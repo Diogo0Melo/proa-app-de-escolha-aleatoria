@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.model.database
+package com.ogos.apprandomizador.data.database
 
 import android.content.Context
 import androidx.room.Database

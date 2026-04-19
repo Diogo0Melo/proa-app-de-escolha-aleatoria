@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.model.ItemList
@@ -81,12 +82,12 @@ private fun HomeRandomizeViewMain(
 private fun HomeRandomizeViewTopBar() {
     TopAppBar(
         title = {
-            Text(text = "Sortear 1 item de uma lista")
+            Text(text = stringResource(R.string.draw_item_from_list))
         },
         actions = {
             Icon(
                 imageVector = Icons.Filled.Add,
-                contentDescription = "Adicionar novo item",
+                contentDescription = stringResource(R.string.add_new_item),
                 modifier = Modifier.padding(end = 16.dp)
             )
         }
@@ -109,11 +110,11 @@ private fun HomeRandomizeViewBottomBar() {
             ) {
                 Icon(
                     painter = painterResource(R.drawable.dice_3_svgrepo_com),
-                    contentDescription = "Adicionar novo item",
+                    contentDescription = stringResource(R.string.add_new_item),
                     modifier = Modifier.size(32.dp)
                 )
                 Text(
-                    text = "Sortear",
+                    text = stringResource(R.string.draw),
                     fontSize = 22.sp,
                 )
             }
@@ -124,11 +125,11 @@ private fun HomeRandomizeViewBottomBar() {
             ) {
                 Icon(
                     imageVector = Icons.Filled.Shuffle,
-                    contentDescription = "Adicionar novo item",
+                    contentDescription = stringResource(R.string.add_new_item),
                     modifier = Modifier.size(32.dp)
                 )
                 Text(
-                    text = "Embaralhar",
+                    text = stringResource(R.string.shuffle),
                     fontSize = 22.sp,
                 )
             }
@@ -139,11 +140,11 @@ private fun HomeRandomizeViewBottomBar() {
             ) {
                 Icon(
                     imageVector = Icons.Filled.Fingerprint,
-                    contentDescription = "Adicionar novo item",
+                    contentDescription = stringResource(R.string.add_new_item),
                     modifier = Modifier.size(32.dp)
                 )
                 Text(
-                    text = "Dedos",
+                    text = stringResource(R.string.fingers),
                     fontSize = 22.sp,
                 )
             }
@@ -154,11 +155,11 @@ private fun HomeRandomizeViewBottomBar() {
             ) {
                 Icon(
                     imageVector = Icons.Filled.Stream,
-                    contentDescription = "Adicionar novo item",
+                    contentDescription = stringResource(R.string.add_new_item),
                     modifier = Modifier.size(32.dp)
                 )
                 Text(
-                    text = "Modos",
+                    text = stringResource(R.string.modes),
                     fontSize = 22.sp,
                 )
             }
@@ -251,16 +252,16 @@ private fun HomeRandomizeViewContent(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text(text = "Items: ${item.items.size}")
-                            Text(text = "Usos: ${item.uses}")
-                            Text(text = "Ultimo uso: ${item.lastUse}")
-                            Text(text = "Criado Em: ${item.createdAt}")
+                            Text(text = stringResource(R.string.items_count, item.items.size))
+                            Text(text = stringResource(R.string.uses_count, item.uses))
+                            Text(text = stringResource(R.string.last_use, item.lastUse))
+                            Text(text = stringResource(R.string.created_at, item.createdAt))
                         }
                     }
                     Box() {
                         Icon(
                             imageVector = Icons.Filled.Edit,
-                            contentDescription = "Editar esse item",
+                            contentDescription = stringResource(R.string.edit_item),
                             modifier = Modifier.padding(8.dp)
                         )
                     }

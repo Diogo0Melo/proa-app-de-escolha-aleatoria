@@ -1,7 +1,7 @@
-package com.ogos.apprandomizador.model.repository
+package com.ogos.apprandomizador.data.repository
 
 import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.model.database.DataStoreManager
+import com.ogos.apprandomizador.data.database.DataStoreManager
 
 interface IDefaultInitilization {
     suspend fun initializeDatabase(

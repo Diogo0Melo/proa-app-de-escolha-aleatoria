@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">AppRandomizador</string>
+    <string name="waiting_raffle">Aguardando sorteio...</string>
+    <string name="back">Voltar</string>
+    <string name="statistics">Estatísticas</string>
+    <string name="edit">Editar</string>
+    <string name="roll">RODAR</string>
+    <string name="disable">DESATIVAR</string>
+    <string name="reset">RESETAR</string>
+    <string name="draw_item_from_list">Sortear 1 item de uma lista</string>
+    <string name="add_new_item">Adicionar novo item</string>
+    <string name="draw">Sortear</string>
+    <string name="shuffle">Embaralhar</string>
+    <string name="fingers">Dedos</string>
+    <string name="modes">Modos</string>
+    <string name="items_count">Itens: %1$d</string>
+    <string name="uses_count">Usos: %1$d</string>
+    <string name="last_use">Último uso: %1$s</string>
+    <string name="created_at">Criado em: %1$s</string>
+    <string name="edit_item">Editar esse item</string>
+    <string name="use_roll_to_draw">USE RODAR PARA SORTEAR</string>
+    <string name="waiting_initialization">Aguardando inicialização...</string>
 </resources>

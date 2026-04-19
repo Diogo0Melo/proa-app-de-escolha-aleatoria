@@ -4,10 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -15,8 +17,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.ogos.apprandomizador.model.database.DataStoreManager
-import com.ogos.apprandomizador.model.repository.DefaultInitilize
+import com.ogos.apprandomizador.data.database.DataStoreManager
+import com.ogos.apprandomizador.data.repository.DefaultInitilize
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.ui.view.HomeRandomizeViewRoute
 import com.ogos.apprandomizador.ui.view.RandomizeViewRoute
@@ -40,8 +42,9 @@ class MainActivity : ComponentActivity() {
             AppRandomizadorTheme {
                 if (isReady) {
                     AppNavigation(factory)
+                } else {
+                    println(stringResource(R.string.waiting_initialization))
                 }
-                println("Aguardando inicialização...")
             }
         }
     }

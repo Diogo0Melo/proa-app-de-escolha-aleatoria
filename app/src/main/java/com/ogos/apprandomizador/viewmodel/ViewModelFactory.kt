@@ -2,9 +2,9 @@ package com.ogos.apprandomizador.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.ogos.apprandomizador.model.database.DataStoreManager
-import com.ogos.apprandomizador.model.repository.IDefaultInitilization
-import com.ogos.apprandomizador.model.repository.ItemListRepository
+import com.ogos.apprandomizador.data.database.DataStoreManager
+import com.ogos.apprandomizador.data.repository.IDefaultInitilization
+import com.ogos.apprandomizador.data.repository.ItemListRepository
 
 class ViewModelFactory(
     private val repository: ItemListRepository,
