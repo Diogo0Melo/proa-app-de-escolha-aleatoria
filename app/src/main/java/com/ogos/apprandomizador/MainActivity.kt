@@ -75,8 +75,8 @@ fun AppNavigation(factory: ViewModelProvider.Factory) {
                 onBack = {
                     navController.popBackStack()
                 },
+                itemID = itemID,
                 viewModel = viewModel,
-                itemID = itemID
             )
         }
     }

@@ -1,5 +1,7 @@
 package com.ogos.apprandomizador.ui.screens
 
+import android.content.Context
+import android.media.MediaPlayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,15 +26,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,23 +45,40 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ogos.apprandomizador.database.ItemDao
-import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.repository.ItemListRepository
+import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
-import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun ActiveRandomizerScreen(
     onBack: () -> Unit,
     itemID: Long,
-    viewModel: ChoiceViewModel = viewModel(),
+    viewModel: ChoiceViewModel,
 ) {
+    val context = LocalContext.current
+    val mediaPlayer = remember {
+        MediaPlayer.create(context, R.raw.roleta_audio)
+    }
+    val isSpinning by viewModel.isSpinning.collectAsState()
     val result by viewModel.currentRandomItem.collectAsState()
     val color = MaterialTheme.colorScheme.primary.toArgb().toLong()
     LaunchedEffect(itemID) {
         viewModel.setCurrentItem(itemID)
         viewModel.defaultText(color = color)
+    }
+    LaunchedEffect(isSpinning) {
+        if (isSpinning) {
+            mediaPlayer.isLooping = true
+            mediaPlayer.start()
+        } else {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+                mediaPlayer.seekTo(0)
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { mediaPlayer.release() }
     }
     if (result.isEmpty()) {
         println("Aguardando sorteio...")
@@ -220,19 +242,9 @@ fun ActiveRandomizerBottomBar(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun ActiveRandomizerScreenPreview() {
-    val fakeDao = object : ItemDao {
-        override suspend fun insertItem(item: ItemList) {}
-        override suspend fun updateItem(item: ItemList) {}
-        override fun readAllItems() = flowOf(emptyList<ItemList>())
-        override suspend fun getItem(id: Long): ItemList {
-            return ItemList()
-        }
-    }
-    ItemListRepository(fakeDao).apply {
-        createDefaultList()
-    }
     ActiveRandomizerScreen(
         onBack = {},
         itemID = 0,
+        viewModel = viewModel()
     )
 }

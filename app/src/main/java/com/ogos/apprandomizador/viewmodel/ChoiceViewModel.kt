@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.repository.ItemListRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import java.security.SecureRandom
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import kotlin.random.Random
 
 class ChoiceViewModel(private val repository: ItemListRepository) : ViewModel() {
 
@@ -18,27 +20,55 @@ class ChoiceViewModel(private val repository: ItemListRepository) : ViewModel() 
     private val _currentItemList = MutableStateFlow(ItemList())
     val currentItemList: StateFlow<ItemList> = _currentItemList.asStateFlow()
     private val _currentRandomItem = MutableStateFlow<Map<String, Long>>(mapOf())
-    val currentRandomItem: StateFlow<Map<String, Long>> = _currentRandomItem
+    val currentRandomItem: StateFlow<Map<String, Long>> = _currentRandomItem.asStateFlow()
+    private val _isSpinning = MutableStateFlow(false)
+    val isSpinning: StateFlow<Boolean> = _isSpinning.asStateFlow()
+
+    fun startSpinning() {
+        _isSpinning.value = true
+    }
+
+    fun stopSpinning() {
+        _isSpinning.value = false
+    }
 
     fun performRoll() {
         val item = currentItemList.value
 
         if (item.items.isEmpty()) return
+        viewModelScope.launch {
+            rollAnimation()
+            val newIndex = secureRandom.nextInt(item.items.size)
+            val resultKey = item.items[newIndex].keys.first()
+            val newHistory = item.resultHistory.toMutableList().apply { add(resultKey) }
+            val newTimeHistory =
+                item.dateTimeHistory.toMutableList().apply { add(LocalDateTime.now().toString()) }
+            val updatedItem = item.copy(
+                uses = item.uses + 1,
+                resultHistory = newHistory,
+                dateTimeHistory = newTimeHistory
+            )
 
-        val newIndex = secureRandom.nextInt(item.items.size)
-        val resultKey = item.items[newIndex].keys.first()
-        val newHistory = item.resultHistory.toMutableList().apply { add(resultKey) }
-        val newTimeHistory = item.dateTimeHistory.toMutableList().apply { add(LocalDateTime.now().toString()) }
-        val updatedItem = item.copy(
-            uses = item.uses + 1,
-            resultHistory = newHistory,
-            dateTimeHistory = newTimeHistory
-        )
-
-        _currentRandomItem.value = item.items[newIndex]
-        _currentItemList.value = updatedItem
-        updateItem(updatedItem)
+            _currentRandomItem.value = item.items[newIndex]
+            _currentItemList.value = updatedItem
+            updateItem(updatedItem)
+        }
     }
+
+    suspend fun rollAnimation() {
+        var sleepTime = 100L
+        val itemList = currentItemList.value
+        val range = itemList.items.size
+        repeat(40) { index ->
+            startSpinning()
+            if (index >= 36) sleepTime += sleepTime
+            val newIndex = Random.nextInt(range)
+            _currentRandomItem.value = itemList.items[newIndex]
+            delay(sleepTime)
+            stopSpinning()
+        }
+    }
+
 
     fun defaultText(color: Long) {
         _currentRandomItem.value = mapOf("USE RODAR PARA SORTEAR" to color)

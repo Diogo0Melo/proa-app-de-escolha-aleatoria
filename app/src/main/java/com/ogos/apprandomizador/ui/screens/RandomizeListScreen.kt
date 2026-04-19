@@ -55,7 +55,7 @@ import kotlinx.coroutines.flow.flowOf
 fun PresetSelectionScreen(
     onNavigateToActive: (index: Long) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ChoiceViewModel = viewModel(),
+    viewModel: ChoiceViewModel,
 ) {
     Scaffold(
         topBar = { RandomizeTopBar() },
@@ -290,6 +290,7 @@ private fun PresetSelectionScreenPreview() {
         createDefaultList()
     }
     PresetSelectionScreen(
-        onNavigateToActive = {}
+        onNavigateToActive = {},
+        viewModel = TODO()
     )
 }
