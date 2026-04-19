@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ogos.apprandomizador.model.database.DataStoreManager
+import com.ogos.apprandomizador.model.repository.DefaultInitilize
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.ui.view.HomeRandomizeViewRoute
 import com.ogos.apprandomizador.ui.view.RandomizeViewRoute
@@ -29,7 +30,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val app = application as RandomApplication
-            val factory = ViewModelFactory(app.repository, DataStoreManager(this))
+            val factory = ViewModelFactory(
+                app.repository, DataStoreManager(this),
+                DefaultInitilize()
+            )
             val mainViewModel: MainViewModel = viewModel(factory = factory)
             val isReady by mainViewModel.isReady.collectAsState()
 
