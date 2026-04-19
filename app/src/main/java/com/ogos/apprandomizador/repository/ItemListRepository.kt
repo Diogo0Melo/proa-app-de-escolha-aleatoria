@@ -5,7 +5,6 @@ import com.ogos.apprandomizador.database.ItemDao
 import com.ogos.apprandomizador.model.ItemList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 class ItemListRepository(private val itemDao: ItemDao) {
@@ -14,15 +13,16 @@ class ItemListRepository(private val itemDao: ItemDao) {
 
     suspend fun saveInDatabase(item: ItemList) {
         withContext(Dispatchers.IO) {
-                itemDao.insertItem(item)
+            itemDao.insertItem(item)
         }
     }
 
-    suspend fun updateInDatabase (item: ItemList) {
+    suspend fun updateInDatabase(item: ItemList) {
         withContext(Dispatchers.IO) {
             itemDao.updateItem(item)
         }
     }
+
     suspend fun getItem(id: Long): ItemList = itemDao.getItem(id)
 
 

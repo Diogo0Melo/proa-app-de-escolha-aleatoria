@@ -8,6 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,18 +22,19 @@ import com.ogos.apprandomizador.ui.screens.PresetSelectionScreen
 import com.ogos.apprandomizador.ui.screens.ActiveRandomizerScreen
 import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
 import com.ogos.apprandomizador.viewmodel.MainViewModel
+import com.ogos.apprandomizador.viewmodel.ViewModelFactory
 
 class MainActivity : ComponentActivity() {
-    @SuppressLint("ViewModelConstructorInComposable")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val app = application as RandomApplication
-            val repository = app.repository
-            val choiceViewModel = ChoiceViewModel(repository)
-            val mainViewModel = MainViewModel(repository, DataStoreManager(this))
+            val factory = ViewModelFactory(app.repository, DataStoreManager(this))
+            val mainViewModel: MainViewModel = viewModel(factory = factory)
+            val choiceViewModel: ChoiceViewModel = viewModel(factory = factory)
             val isReady by mainViewModel.isReady.collectAsState()
+
             AppRandomizadorTheme {
                 if (isReady) {
                     AppNavigation(viewModel = choiceViewModel)
