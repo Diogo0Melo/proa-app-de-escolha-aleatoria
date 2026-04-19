@@ -15,11 +15,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.ogos.apprandomizador.database.DataStoreManager
+import com.ogos.apprandomizador.model.database.DataStoreManager
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
-import com.ogos.apprandomizador.ui.screens.PresetSelectionScreen
-import com.ogos.apprandomizador.ui.screens.ActiveRandomizerScreen
-import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
+import com.ogos.apprandomizador.ui.view.HomeRandomizeViewRoute
+import com.ogos.apprandomizador.ui.view.RandomizeViewRoute
+import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 import com.ogos.apprandomizador.viewmodel.MainViewModel
 import com.ogos.apprandomizador.viewmodel.ViewModelFactory
 
@@ -51,27 +51,27 @@ fun AppNavigation(factory: ViewModelProvider.Factory) {
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry("preset_selection")
             }
-            val viewModel: ChoiceViewModel =
+            val viewModel: RandomizeViewModel =
                 viewModel(viewModelStoreOwner = parentEntry, factory = factory)
-            PresetSelectionScreen(
+            HomeRandomizeViewRoute(
                 viewModel = viewModel,
                 onNavigateToActive = { itemID ->
-                    navController.navigate("active_randomizer/$itemID")
+                    navController.navigate("randomize_route/$itemID")
                 }
             )
         }
         composable(
-            route = "active_randomizer/{itemID}", arguments = listOf(
+            route = "randomize_route/{itemID}", arguments = listOf(
                 navArgument("itemID") { type = NavType.LongType },
             )
         ) { backStackEntry ->
             val itemID = backStackEntry.arguments?.getLong("itemID") ?: -1
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry("active_randomizer/{itemID}")
+                navController.getBackStackEntry("randomize_route/{itemID}")
             }
-            val viewModel: ChoiceViewModel =
+            val viewModel: RandomizeViewModel =
                 viewModel(viewModelStoreOwner = parentEntry, factory = factory)
-            ActiveRandomizerScreen(
+            RandomizeViewRoute(
                 onBack = {
                     navController.popBackStack()
                 },

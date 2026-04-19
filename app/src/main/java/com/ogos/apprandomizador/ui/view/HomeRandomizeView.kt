@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.ui.screens
+package com.ogos.apprandomizador.ui.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,29 +43,34 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.database.ItemDao
 import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.repository.ItemListRepository
-import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
-import kotlinx.coroutines.flow.flowOf
+import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 
 @Composable
-fun PresetSelectionScreen(
+fun HomeRandomizeViewRoute(
     onNavigateToActive: (index: Long) -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: ChoiceViewModel,
+    viewModel: RandomizeViewModel,
+) {
+    val allItemsList = viewModel.getAllItems().collectAsState(initial = emptyList()).value
+
+    HomeRandomizeViewMain(onNavigateToActive = onNavigateToActive, allItemsList = allItemsList)
+}
+
+@Composable
+private fun HomeRandomizeViewMain(
+    onNavigateToActive: (index: Long) -> Unit,
+    allItemsList: List<ItemList>,
 ) {
     Scaffold(
-        topBar = { RandomizeTopBar() },
-        bottomBar = { RandomizeBottomBar() },
-        modifier = modifier.fillMaxSize(),
+        topBar = { HomeRandomizeViewTopBar() },
+        bottomBar = { HomeRandomizeViewBottomBar() },
+        modifier = Modifier.fillMaxSize(),
         content = { padding ->
-            PresetCollectionContent(
+            HomeRandomizeViewContent(
                 onNavigateToActive = onNavigateToActive,
                 modifier = Modifier.padding(padding),
-                viewModel = viewModel,
+                allItemsList = allItemsList
             )
         }
     )
@@ -73,12 +78,11 @@ fun PresetSelectionScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RandomizeTopBar(modifier: Modifier = Modifier) {
+private fun HomeRandomizeViewTopBar() {
     TopAppBar(
         title = {
             Text(text = "Sortear 1 item de uma lista")
         },
-        modifier = modifier,
         actions = {
             Icon(
                 imageVector = Icons.Filled.Add,
@@ -90,10 +94,8 @@ fun RandomizeTopBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun RandomizeBottomBar(modifier: Modifier = Modifier) {
-    BottomAppBar(
-        modifier = modifier,
-    ) {
+private fun HomeRandomizeViewBottomBar() {
+    BottomAppBar {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -165,18 +167,16 @@ fun RandomizeBottomBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun PresetCollectionContent(
+private fun HomeRandomizeViewContent(
     onNavigateToActive: (index: Long) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ChoiceViewModel
+    allItemsList: List<ItemList>,
 ) {
-    val itemList = viewModel.getAllItems().collectAsState(initial = emptyList()).value
-
     LazyColumn(
         modifier = modifier
     ) {
-        items(count = itemList.size) { index ->
-            val item = itemList[index]
+        items(count = allItemsList.size) { index ->
+            val item = allItemsList[index]
             val scrollState = rememberScrollState()
             Card(
                 onClick = { onNavigateToActive(item.id) },
@@ -200,13 +200,9 @@ fun PresetCollectionContent(
                             val times = if (item.items.size >= 7) item.items.size else 7
                             repeat(
                                 times = times,
-                            ) { index ->
-                                var index = index
-                                if (item.items.size < 7 && index >= item.items.size) {
-                                    index -= item.items.size
-                                }
-
-                                val item = item.items[index]
+                            ) { currentIndex ->
+                                val circularIndex = currentIndex % item.items.size
+                                val currentSubItem = item.items[circularIndex]
                                 Box(
                                     modifier = Modifier.width(108.dp),
                                     contentAlignment = Alignment.Center
@@ -215,10 +211,10 @@ fun PresetCollectionContent(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(16.dp),
-                                        color = Color(item.values.first())
+                                        color = Color(currentSubItem.values.first())
                                     ) {
                                         Text(
-                                            text = item.keys.first(),
+                                            text = currentSubItem.keys.first(),
                                             modifier = Modifier.wrapContentHeight(Alignment.CenterVertically),
                                             style = TextStyle(
                                                 fontSize = 8.sp,
@@ -233,7 +229,7 @@ fun PresetCollectionContent(
                                             )
                                         )
                                         Text(
-                                            text = item.keys.first(),
+                                            text = currentSubItem.keys.first(),
                                             modifier = Modifier.wrapContentHeight(Alignment.CenterVertically),
                                             style = TextStyle(
                                                 textAlign = TextAlign.Center,
@@ -277,20 +273,41 @@ fun PresetCollectionContent(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-private fun PresetSelectionScreenPreview() {
-    val fakeDao = object : ItemDao {
-        override suspend fun insertItem(item: ItemList) {}
-        override suspend fun updateItem(item: ItemList) {}
-        override fun readAllItems() = flowOf(emptyList<ItemList>())
-        override suspend fun getItem(id: Long): ItemList {
-            return ItemList()
-        }
-    }
-    ItemListRepository(fakeDao).apply {
-        createDefaultList()
-    }
-    PresetSelectionScreen(
+private fun HomeRandomizeViewMainPreview() {
+    HomeRandomizeViewMain(
         onNavigateToActive = {},
-        viewModel = TODO()
+        allItemsList = listOf(
+            ItemList(
+                topic = "O que jantar hoje?",
+                items = listOf(
+                    mapOf("Pizza" to 0xFFE91E63), // Rosa
+                    mapOf("Sushi" to 0xFF2196F3), // Azul
+                    mapOf("Hambúrguer" to 0xFF4CAF50), // Verde
+                    mapOf("Salada" to 0xFFFFEB3B), // Amarelo
+                    mapOf("Tacos" to 0xFFFF9800)  // Laranja
+                ),
+                uses = 12,
+                resultHistory = listOf("Pizza", "Salada", "Pizza")
+            ),
+            ItemList(
+                topic = "Foco de Estudos Mensal",
+                items = listOf(
+                    mapOf("Jetpack Compose Avançado" to 0xFF673AB7),
+                    mapOf("Kotlin Multiplatform (KMP)" to 0xFF00BCD4),
+                    mapOf("Arquitetura de Micro-serviços" to 0xFF795548)
+                ),
+                uses = 5,
+                resultHistory = listOf("Jetpack Compose Avançado")
+            ),
+            ItemList(
+                topic = "Cara ou Coroa",
+                items = listOf(
+                    mapOf("CARA" to 0xFFFFC107),
+                    mapOf("COROA" to 0xFF9E9E9E),
+                ),
+                uses = 150,
+                resultHistory = listOf("CARA", "CARA", "COROA", "CARA")
+            )
+        )
     )
 }

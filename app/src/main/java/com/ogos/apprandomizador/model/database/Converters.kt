@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.database
+package com.ogos.apprandomizador.model.database
 
 import androidx.room.TypeConverter
 import kotlinx.serialization.json.Json

@@ -1,7 +1,7 @@
-package com.ogos.apprandomizador.repository
+package com.ogos.apprandomizador.model.repository
 
-import com.ogos.apprandomizador.database.DataStoreManager
-import com.ogos.apprandomizador.database.ItemDao
+import com.ogos.apprandomizador.model.database.DataStoreManager
+import com.ogos.apprandomizador.model.database.ItemDao
 import com.ogos.apprandomizador.model.ItemList
 import kotlinx.coroutines.flow.Flow
 

@@ -2,8 +2,8 @@ package com.ogos.apprandomizador.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.ogos.apprandomizador.database.DataStoreManager
-import com.ogos.apprandomizador.repository.ItemListRepository
+import com.ogos.apprandomizador.model.database.DataStoreManager
+import com.ogos.apprandomizador.model.repository.ItemListRepository
 
 class ViewModelFactory(
     private val repository: ItemListRepository,
@@ -13,8 +13,8 @@ class ViewModelFactory(
         return when {
             modelClass.isAssignableFrom(MainViewModel::class.java) ->
                 MainViewModel(repository, dataStoreManager) as T
-            modelClass.isAssignableFrom(ChoiceViewModel::class.java) ->
-                ChoiceViewModel(repository) as T
+            modelClass.isAssignableFrom(RandomizeViewModel::class.java) ->
+                RandomizeViewModel(repository) as T
             else -> throw IllegalArgumentException("Unknown ViewModel class")
         }
     }

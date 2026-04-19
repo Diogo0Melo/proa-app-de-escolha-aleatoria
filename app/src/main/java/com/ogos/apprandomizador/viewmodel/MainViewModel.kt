@@ -2,8 +2,8 @@ package com.ogos.apprandomizador.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ogos.apprandomizador.database.DataStoreManager
-import com.ogos.apprandomizador.repository.ItemListRepository
+import com.ogos.apprandomizador.model.database.DataStoreManager
+import com.ogos.apprandomizador.model.repository.ItemListRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first

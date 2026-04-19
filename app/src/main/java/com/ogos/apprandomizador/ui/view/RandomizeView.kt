@@ -1,7 +1,15 @@
-package com.ogos.apprandomizador.ui.screens
+package com.ogos.apprandomizador.ui.view
 
-import android.content.Context
 import android.media.MediaPlayer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +18,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -22,37 +29,29 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.viewmodel.ChoiceViewModel
+import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
+
 
 @Composable
-fun ActiveRandomizerScreen(
+fun RandomizeViewRoute(
     onBack: () -> Unit,
     itemID: Long,
-    viewModel: ChoiceViewModel,
+    viewModel: RandomizeViewModel,
 ) {
     val context = LocalContext.current
     val mediaPlayer = remember {
@@ -61,6 +60,7 @@ fun ActiveRandomizerScreen(
     val isSpinning by viewModel.isSpinning.collectAsState()
     val result by viewModel.currentRandomItem.collectAsState()
     val color = MaterialTheme.colorScheme.primary.toArgb().toLong()
+    val onPerfomRoll = { viewModel.performRoll() }
     LaunchedEffect(itemID) {
         viewModel.setCurrentItem(itemID)
         viewModel.defaultText(color = color)
@@ -83,32 +83,39 @@ fun ActiveRandomizerScreen(
     if (result.isEmpty()) {
         println("Aguardando sorteio...")
     } else {
-        Scaffold(
-            topBar = { ActiveRandomizerTopBar(onBack = onBack) },
-            bottomBar = {
-                ActiveRandomizerBottomBar(viewModel = viewModel)
-            }
-        ) { paddingValues ->
-            ActiveRandomizerContent(
-                modifier = Modifier.padding(paddingValues),
-                result = result
-            )
+        RandomizeViewMain(
+            result = result,
+            onPerfomRoll = onPerfomRoll,
+            onBack = onBack,
+            isSpinning = isSpinning
+        )
+    }
+}
+
+@Composable
+fun RandomizeViewMain(result: Map<String, Long>, onPerfomRoll: () -> Unit, onBack: () -> Unit, isSpinning: Boolean) {
+    Scaffold(
+        topBar = { RandomizeViewTopBar(onBack = onBack) },
+        bottomBar = {
+            RandomizeViewBottomBar(onPerfomRoll = onPerfomRoll, isSpinning = isSpinning)
         }
+    ) { paddingValues ->
+        RandomizeViewContent(
+            modifier = Modifier.padding(paddingValues),
+            result = result
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActiveRandomizerTopBar(onBack: () -> Unit) {
+fun RandomizeViewTopBar(onBack: () -> Unit) {
 
     TopAppBar(
         title = { },
         navigationIcon = {
             IconButton(
-                onClick =
-                    {
-                        onBack()
-                    }
+                onClick = onBack
             ) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBackIosNew,
@@ -134,7 +141,7 @@ fun ActiveRandomizerTopBar(onBack: () -> Unit) {
 }
 
 @Composable
-fun ActiveRandomizerContent(
+fun RandomizeViewContent(
     modifier: Modifier = Modifier,
     result: Map<String, Long>
 ) {
@@ -194,12 +201,9 @@ fun ActiveRandomizerContent(
 }
 
 @Composable
-fun ActiveRandomizerBottomBar(
-    modifier: Modifier = Modifier,
-    viewModel: ChoiceViewModel,
-) {
+fun RandomizeViewBottomBar(onPerfomRoll: () -> Unit, isSpinning: Boolean) {
     BottomAppBar(
-        modifier = modifier.height(160.dp),
+        modifier = Modifier.height(160.dp),
         containerColor = MaterialTheme.colorScheme.surface,
 
         ) {
@@ -212,7 +216,8 @@ fun ActiveRandomizerBottomBar(
         ) {
             Button(
                 onClick = {
-                    viewModel.performRoll()
+                    if (isSpinning) return@Button
+                    onPerfomRoll()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -241,10 +246,11 @@ fun ActiveRandomizerBottomBar(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-private fun ActiveRandomizerScreenPreview() {
-    ActiveRandomizerScreen(
+private fun RandomizeViewPreview() {
+    RandomizeViewMain(
         onBack = {},
-        itemID = 0,
-        viewModel = viewModel()
+        result = mapOf("USE RODAR PARA SORTEAR" to 0xFF000000),
+        onPerfomRoll = { },
+        isSpinning = false
     )
 }

@@ -3,7 +3,7 @@ package com.ogos.apprandomizador.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.repository.ItemListRepository
+import com.ogos.apprandomizador.model.repository.ItemListRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import java.security.SecureRandom
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import kotlin.random.Random
 
-class ChoiceViewModel(private val repository: ItemListRepository) : ViewModel() {
+class RandomizeViewModel(private val repository: ItemListRepository) : ViewModel() {
 
     private val secureRandom = SecureRandom()
     private val _currentItemList = MutableStateFlow(ItemList())
@@ -51,24 +51,26 @@ class ChoiceViewModel(private val repository: ItemListRepository) : ViewModel() 
 
             _currentRandomItem.value = item.items[newIndex]
             _currentItemList.value = updatedItem
+            stopSpinning()
             updateItem(updatedItem)
         }
     }
 
     suspend fun rollAnimation() {
-        var sleepTime = 100L
         val itemList = currentItemList.value
         val range = itemList.items.size
-        repeat(40) { index ->
-            startSpinning()
-            if (index >= 36) sleepTime += sleepTime
+        if (range <= 0) return
+        startSpinning()
+        repeat(69) { index ->
+            val sleepTime = when {
+                index < 64 -> 15L
+                else -> (index - 64 + 1) * 40L
+            }
             val newIndex = Random.nextInt(range)
             _currentRandomItem.value = itemList.items[newIndex]
             delay(sleepTime)
-            stopSpinning()
         }
     }
-
 
     fun defaultText(color: Long) {
         _currentRandomItem.value = mapOf("USE RODAR PARA SORTEAR" to color)
