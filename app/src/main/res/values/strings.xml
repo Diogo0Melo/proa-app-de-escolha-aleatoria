@@ -20,4 +20,6 @@
     <string name="edit_item">Editar esse item</string>
     <string name="use_roll_to_draw">USE RODAR PARA SORTEAR</string>
     <string name="waiting_initialization">Aguardando inicialização...</string>
+    <string name="blank_text"></string>
+    <string name="shuffle_item_from_list">Embaralhar uma lista</string>
 </resources>

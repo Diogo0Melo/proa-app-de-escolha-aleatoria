@@ -18,19 +18,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,9 +42,9 @@ import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 
 @Composable
 fun RandomizeViewRoute(
-    onBack: () -> Unit,
     itemID: Long,
     viewModel: RandomizeViewModel,
+    modifier: Modifier
 ) {
     val context = LocalContext.current
     val mediaPlayer = remember {
@@ -87,58 +79,30 @@ fun RandomizeViewRoute(
         RandomizeViewMain(
             result = result,
             onPerfomRoll = onPerfomRoll,
-            onBack = onBack,
-            isSpinning = isSpinning
+            isSpinning = isSpinning,
+            modifier = modifier
         )
     }
 }
 
 @Composable
-fun RandomizeViewMain(result: Map<String, Long>, onPerfomRoll: () -> Unit, onBack: () -> Unit, isSpinning: Boolean) {
+fun RandomizeViewMain(
+    result: Map<String, Long>,
+    onPerfomRoll: () -> Unit,
+    isSpinning: Boolean,
+    modifier: Modifier
+) {
     Scaffold(
-        topBar = { RandomizeViewTopBar(onBack = onBack) },
+        topBar = { },
         bottomBar = {
             RandomizeViewBottomBar(onPerfomRoll = onPerfomRoll, isSpinning = isSpinning)
         }
     ) { paddingValues ->
         RandomizeViewContent(
-            modifier = Modifier.padding(paddingValues),
+            modifier = modifier.padding(paddingValues),
             result = result
         )
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RandomizeViewTopBar(onBack: () -> Unit) {
-
-    TopAppBar(
-        title = { },
-        navigationIcon = {
-            IconButton(
-                onClick = onBack
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBackIosNew,
-                    contentDescription = stringResource(R.string.back)
-                )
-            }
-        },
-        actions = {
-            IconButton(onClick = {}) {
-                Icon(
-                    imageVector = Icons.Default.Analytics,
-                    contentDescription = stringResource(R.string.statistics)
-                )
-            }
-            IconButton(onClick = {}) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = stringResource(R.string.edit)
-                )
-            }
-        }
-    )
 }
 
 @Composable
@@ -147,7 +111,8 @@ fun RandomizeViewContent(
     result: Map<String, Long>
 ) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -249,9 +214,9 @@ fun RandomizeViewBottomBar(onPerfomRoll: () -> Unit, isSpinning: Boolean) {
 @Composable
 private fun RandomizeViewPreview() {
     RandomizeViewMain(
-        onBack = {},
         result = mapOf(stringResource(R.string.use_roll_to_draw) to 0xFF000000),
         onPerfomRoll = { },
-        isSpinning = false
+        isSpinning = false,
+        modifier = Modifier
     )
 }
