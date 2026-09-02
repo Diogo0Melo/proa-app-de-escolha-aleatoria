@@ -16,7 +16,7 @@ class DataStoreManager(private val context: Context) {
         val IS_FIRST_TIME = booleanPreferencesKey("is_first_time")
     }
 
-    suspend fun saveFirstAcess(isFirstTime: Boolean) {
+    suspend fun saveFirstAccess(isFirstTime: Boolean) {
         dataStore.edit {
             it[IS_FIRST_TIME] = isFirstTime
         }

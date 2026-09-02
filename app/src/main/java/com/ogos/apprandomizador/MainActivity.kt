@@ -27,7 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ogos.apprandomizador.data.database.DataStoreManager
-import com.ogos.apprandomizador.data.repository.DefaultInitilize
+import com.ogos.apprandomizador.data.repository.DefaultInitialize
 import com.ogos.apprandomizador.model.TopBarAction
 import com.ogos.apprandomizador.model.TopBarState
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
             val app = application as RandomApplication
             val factory = ViewModelFactory(
                 app.repository, DataStoreManager(this),
-                DefaultInitilize()
+                DefaultInitialize()
             )
             val mainViewModel: MainViewModel = viewModel(factory = factory)
             val isReady by mainViewModel.isReady.collectAsState()

@@ -79,10 +79,10 @@ fun ListCollection(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(16.dp),
-                                        color = Color(currentSubItem.values.first())
+                                        color = Color(currentSubItem.color)
                                     ) {
                                         Text(
-                                            text = currentSubItem.keys.first(),
+                                            text = currentSubItem.name,
                                             modifier = Modifier.wrapContentHeight(Alignment.CenterVertically),
                                             style = TextStyle(
                                                 fontSize = 8.sp,
@@ -97,7 +97,7 @@ fun ListCollection(
                                             )
                                         )
                                         Text(
-                                            text = currentSubItem.keys.first(),
+                                            text = currentSubItem.name,
                                             modifier = Modifier.wrapContentHeight(Alignment.CenterVertically),
                                             style = TextStyle(
                                                 textAlign = TextAlign.Center,

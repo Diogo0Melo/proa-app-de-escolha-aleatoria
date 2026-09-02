@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "com.ogos.apprandomizador"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.ogos.apprandomizador"
         minSdk = 27
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
-        versionName = "0.0.1"
+        versionName = "Alpha 0.0.11"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

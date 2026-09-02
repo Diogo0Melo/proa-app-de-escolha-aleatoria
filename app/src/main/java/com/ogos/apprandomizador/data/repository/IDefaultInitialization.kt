@@ -3,7 +3,7 @@ package com.ogos.apprandomizador.data.repository
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.data.database.DataStoreManager
 
-interface IDefaultInitilization {
+interface IDefaultInitialization {
     suspend fun initializeDatabase(
         isFirstTime: Boolean,
         dataStoreManager: DataStoreManager,

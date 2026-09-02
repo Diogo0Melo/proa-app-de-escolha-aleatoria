@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.data.repository.ItemListRepository
+import com.ogos.apprandomizador.model.RaffleItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import java.security.SecureRandom
@@ -11,16 +12,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
+import java.time.Instant
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 class RandomizeViewModel(private val repository: ItemListRepository) : ViewModel() {
 
     private val secureRandom = SecureRandom()
     private val _currentItemList = MutableStateFlow(ItemList())
     val currentItemList: StateFlow<ItemList> = _currentItemList.asStateFlow()
-    private val _currentRandomItem = MutableStateFlow<Map<String, Long>>(mapOf())
-    val currentRandomItem: StateFlow<Map<String, Long>> = _currentRandomItem.asStateFlow()
+    private val _currentRandomItem = MutableStateFlow<RaffleItem>(RaffleItem("", 0))
+    val currentRandomItem: StateFlow<RaffleItem> = _currentRandomItem.asStateFlow()
     private val _isSpinning = MutableStateFlow(false)
     val isSpinning: StateFlow<Boolean> = _isSpinning.asStateFlow()
 
@@ -39,10 +41,10 @@ class RandomizeViewModel(private val repository: ItemListRepository) : ViewModel
         viewModelScope.launch {
             rollAnimation()
             val newIndex = secureRandom.nextInt(item.items.size)
-            val resultKey = item.items[newIndex].keys.first()
+            val resultKey = item.items[newIndex].name
             val newHistory = item.resultHistory.toMutableList().apply { add(resultKey) }
             val newTimeHistory =
-                item.dateTimeHistory.toMutableList().apply { add(LocalDateTime.now().toString()) }
+                item.dateTimeHistory.toMutableList().apply { add(Instant.now()) }
             val updatedItem = item.copy(
                 uses = item.uses + 1,
                 resultHistory = newHistory,
@@ -68,12 +70,12 @@ class RandomizeViewModel(private val repository: ItemListRepository) : ViewModel
             }
             val newIndex = Random.nextInt(range)
             _currentRandomItem.value = itemList.items[newIndex]
-            delay(sleepTime)
+            delay(sleepTime.milliseconds)
         }
     }
 
     fun defaultText(color: Long) {
-        _currentRandomItem.value = mapOf("USE RODAR PARA SORTEAR" to color)
+        _currentRandomItem.value = RaffleItem("USE RODAR PARA SORTEAR", color)
     }
 
     fun setCurrentItem(id: Long) {

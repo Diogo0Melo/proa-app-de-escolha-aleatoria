@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import com.ogos.apprandomizador.R
+import com.ogos.apprandomizador.model.RaffleItem
 import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 
 
@@ -53,7 +54,7 @@ fun RandomizeViewRoute(
     val isSpinning by viewModel.isSpinning.collectAsState()
     val result by viewModel.currentRandomItem.collectAsState()
     val color = MaterialTheme.colorScheme.primary.toArgb().toLong()
-    val onPerfomRoll = { viewModel.performRoll() }
+    val onPerformRoll = { viewModel.performRoll() }
     LaunchedEffect(itemID) {
         viewModel.setCurrentItem(itemID)
         viewModel.defaultText(color = color)
@@ -73,12 +74,12 @@ fun RandomizeViewRoute(
     DisposableEffect(Unit) {
         onDispose { mediaPlayer.release() }
     }
-    if (result.isEmpty()) {
+    if (result.isBlank()) {
         println(stringResource(R.string.waiting_raffle))
     } else {
         RandomizeViewMain(
             result = result,
-            onPerfomRoll = onPerfomRoll,
+            onPerformRoll = onPerformRoll,
             isSpinning = isSpinning,
             modifier = modifier
         )
@@ -87,15 +88,15 @@ fun RandomizeViewRoute(
 
 @Composable
 fun RandomizeViewMain(
-    result: Map<String, Long>,
-    onPerfomRoll: () -> Unit,
+    result: RaffleItem,
+    onPerformRoll: () -> Unit,
     isSpinning: Boolean,
     modifier: Modifier
 ) {
     Scaffold(
         topBar = { },
         bottomBar = {
-            RandomizeViewBottomBar(onPerfomRoll = onPerfomRoll, isSpinning = isSpinning)
+            RandomizeViewBottomBar(onPerformRoll = onPerformRoll, isSpinning = isSpinning)
         }
     ) { paddingValues ->
         RandomizeViewContent(
@@ -108,7 +109,7 @@ fun RandomizeViewMain(
 @Composable
 fun RandomizeViewContent(
     modifier: Modifier = Modifier,
-    result: Map<String, Long>
+    result: RaffleItem
 ) {
     Column(
         modifier = modifier
@@ -123,7 +124,7 @@ fun RandomizeViewContent(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = result.keys.first(),
+                text = result.name,
                 style = TextStyle(
                     fontSize = 40.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -138,7 +139,7 @@ fun RandomizeViewContent(
                 )
             )
             Text(
-                text = result.keys.first(),
+                text = result.name,
                 style = TextStyle(
                     fontSize = 40.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -153,13 +154,13 @@ fun RandomizeViewContent(
                 )
             )
             Text(
-                text = result.keys.first(),
+                text = result.name,
                 lineHeight = 40.sp,
                 style = TextStyle(
                     textAlign = TextAlign.Center,
                     fontSize = 40.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(result.values.first())
+                    color = Color(result.color)
                 )
             )
         }
@@ -167,7 +168,7 @@ fun RandomizeViewContent(
 }
 
 @Composable
-fun RandomizeViewBottomBar(onPerfomRoll: () -> Unit, isSpinning: Boolean) {
+fun RandomizeViewBottomBar(onPerformRoll: () -> Unit, isSpinning: Boolean) {
     BottomAppBar(
         modifier = Modifier.height(160.dp),
         containerColor = MaterialTheme.colorScheme.surface,
@@ -183,7 +184,7 @@ fun RandomizeViewBottomBar(onPerfomRoll: () -> Unit, isSpinning: Boolean) {
             Button(
                 onClick = {
                     if (isSpinning) return@Button
-                    onPerfomRoll()
+                    onPerformRoll()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -214,8 +215,8 @@ fun RandomizeViewBottomBar(onPerfomRoll: () -> Unit, isSpinning: Boolean) {
 @Composable
 private fun RandomizeViewPreview() {
     RandomizeViewMain(
-        result = mapOf(stringResource(R.string.use_roll_to_draw) to 0xFF000000),
-        onPerfomRoll = { },
+        result = RaffleItem(stringResource(R.string.use_roll_to_draw), 0xFF000000),
+        onPerformRoll = { },
         isSpinning = false,
         modifier = Modifier
     )

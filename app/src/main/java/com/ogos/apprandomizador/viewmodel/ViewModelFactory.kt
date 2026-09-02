@@ -3,13 +3,13 @@ package com.ogos.apprandomizador.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.ogos.apprandomizador.data.database.DataStoreManager
-import com.ogos.apprandomizador.data.repository.IDefaultInitilization
+import com.ogos.apprandomizador.data.repository.IDefaultInitialization
 import com.ogos.apprandomizador.data.repository.ItemListRepository
 
 class ViewModelFactory(
     private val repository: ItemListRepository,
     private val dataStoreManager: DataStoreManager,
-    private val defaultInitilization: IDefaultInitilization
+    private val defaultInitilization: IDefaultInitialization
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
