@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.model.ItemList
+import com.ogos.apprandomizador.ui.format.TimeAgoFormatter
 
 @Composable
 fun ListCollection(
@@ -46,6 +47,8 @@ fun ListCollection(
         items(count = allItemsList.size) { index ->
             val item = allItemsList[index]
             val scrollState = rememberScrollState()
+            val lastUse = TimeAgoFormatter.updateLastUse(item.dateTimeHistory.lastOrNull())
+            val createdAt = TimeAgoFormatter.formatCreatedAt(item.createdAtNotFormatted)
             Card(
                 onClick = { onNavigateToActive(item.id) },
                 modifier = Modifier
@@ -123,8 +126,8 @@ fun ListCollection(
                             )
                             Text(text = stringResource(R.string.items_count, item.items.size))
                             Text(text = stringResource(R.string.uses_count, item.uses))
-                            Text(text = stringResource(R.string.last_use, item.lastUse))
-                            Text(text = stringResource(R.string.created_at, item.createdAt))
+                            Text(text = stringResource(R.string.last_use, lastUse))
+                            Text(text = stringResource(R.string.created_at, createdAt))
                         }
                     }
                     Box() {
