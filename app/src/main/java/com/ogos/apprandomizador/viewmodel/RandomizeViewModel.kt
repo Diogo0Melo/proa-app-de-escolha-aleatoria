@@ -2,7 +2,7 @@ package com.ogos.apprandomizador.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ogos.apprandomizador.data.repository.ItemListRepository
+import com.ogos.apprandomizador.data.repository.IRepository
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.model.RaffleItem
 import kotlinx.coroutines.delay
@@ -15,7 +15,7 @@ import java.security.SecureRandom
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
-class RandomizeViewModel(private val repository: ItemListRepository) : ViewModel() {
+class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
 
     private val secureRandom = SecureRandom()
     private val _currentItemList = MutableStateFlow(ItemList())
@@ -78,13 +78,13 @@ class RandomizeViewModel(private val repository: ItemListRepository) : ViewModel
 
     fun updateItem(item: ItemList) {
         viewModelScope.launch {
-            repository.updateInDatabase(item)
+            repository.update(item)
         }
     }
 
     fun insertItem(item: ItemList) {
         viewModelScope.launch {
-            repository.saveInDatabase(item)
+            repository.save(item)
         }
     }
 

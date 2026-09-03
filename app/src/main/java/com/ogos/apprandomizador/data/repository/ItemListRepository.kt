@@ -6,13 +6,13 @@ import kotlinx.coroutines.flow.Flow
 
 class ItemListRepository(private val itemDao: ItemDao) : IRepository {
 
-    val allItems: Flow<List<ItemList>> = itemDao.readAllItems()
+    override val allItems: Flow<List<ItemList>> = itemDao.readAllItems()
 
-    override suspend fun saveInDatabase(item: ItemList) {
+    override suspend fun save(item: ItemList) {
         itemDao.insertItem(item)
     }
 
-    override suspend fun updateInDatabase(item: ItemList) {
+    override suspend fun update(item: ItemList) {
         itemDao.updateItem(item)
     }
 

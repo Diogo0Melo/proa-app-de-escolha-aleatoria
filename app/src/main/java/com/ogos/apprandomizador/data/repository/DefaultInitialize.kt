@@ -14,7 +14,7 @@ class DefaultInitialize : IDefaultInitialization {
         if (isFirstTime) {
             val defaultItems = createDefaultList()
             defaultItems.forEach { item ->
-                repository.saveInDatabase(item)
+                repository.save(item)
             }
             dataStoreManager.saveFirstAccess(false)
         }
