@@ -3,7 +3,6 @@ package com.ogos.apprandomizador.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.Instant
-import java.time.LocalDateTime
 
 @Entity(tableName = "item_list")
 data class ItemList(
@@ -13,5 +12,5 @@ data class ItemList(
     var uses: Int = 0,
     var resultHistory: List<String> = listOf(),
     var dateTimeHistory: List<Instant> = listOf(),
-    val createdAtNotFormatted: String = LocalDateTime.now().toString(),
+    val createdAt: Instant = Instant.now(),
 )

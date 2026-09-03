@@ -48,7 +48,7 @@ fun ListCollection(
             val item = allItemsList[index]
             val scrollState = rememberScrollState()
             val lastUse = TimeAgoFormatter.updateLastUse(item.dateTimeHistory.lastOrNull())
-            val createdAt = TimeAgoFormatter.formatCreatedAt(item.createdAtNotFormatted)
+            val createdAt = TimeAgoFormatter.formatCreatedAt(item.createdAt)
             Card(
                 onClick = { onNavigateToActive(item.id) },
                 modifier = Modifier

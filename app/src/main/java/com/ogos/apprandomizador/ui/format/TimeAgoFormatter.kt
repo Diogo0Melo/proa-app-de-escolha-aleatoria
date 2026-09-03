@@ -1,7 +1,6 @@
 package com.ogos.apprandomizador.ui.format
 
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -33,10 +32,9 @@ object TimeAgoFormatter {
             else -> "há $years anos"
         }
     }
-    fun formatCreatedAt(createdDateTime: String): String {
-        val dateTime = LocalDateTime.parse(createdDateTime)
-        val format = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-        return dateTime.format(format)
+    fun formatCreatedAt(createdDateTime: Instant): String {
+        val zoneId = ZoneId.systemDefault()
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(zoneId)
+        return formatter.format(createdDateTime)
     }
 }
