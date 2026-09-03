@@ -13,4 +13,16 @@ data class ItemList(
     var resultHistory: List<String> = listOf(),
     var dateTimeHistory: List<Instant> = listOf(),
     val createdAt: Instant = Instant.now(),
-)
+) {
+    fun recordDraw(drawItem: RaffleItem): ItemList {
+        val resultKey = drawItem.name
+        val newHistory = resultHistory + resultKey
+        val newTimeHistory = dateTimeHistory + Instant.now()
+
+        return copy(
+            uses = uses + 1,
+            resultHistory = newHistory,
+            dateTimeHistory = newTimeHistory
+        )
+    }
+}

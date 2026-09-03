@@ -2,17 +2,16 @@ package com.ogos.apprandomizador.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.data.repository.ItemListRepository
+import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.model.RaffleItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import java.security.SecureRandom
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.Instant
+import java.security.SecureRandom
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -40,16 +39,9 @@ class RandomizeViewModel(private val repository: ItemListRepository) : ViewModel
         if (item.items.isEmpty()) return
         viewModelScope.launch {
             rollAnimation()
+
             val newIndex = secureRandom.nextInt(item.items.size)
-            val resultKey = item.items[newIndex].name
-            val newHistory = item.resultHistory.toMutableList().apply { add(resultKey) }
-            val newTimeHistory =
-                item.dateTimeHistory.toMutableList().apply { add(Instant.now()) }
-            val updatedItem = item.copy(
-                uses = item.uses + 1,
-                resultHistory = newHistory,
-                dateTimeHistory = newTimeHistory
-            )
+            val updatedItem = item.recordDraw(item.items[newIndex])
 
             _currentRandomItem.value = item.items[newIndex]
             _currentItemList.value = updatedItem
