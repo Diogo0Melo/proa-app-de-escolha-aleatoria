@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ogos.apprandomizador.data.database.DataStoreManager
@@ -36,8 +37,8 @@ import com.ogos.apprandomizador.ui.view.HomeShuffleViewRoute
 import com.ogos.apprandomizador.ui.view.RandomizeViewRoute
 import com.ogos.apprandomizador.ui.view.component.BottomBar
 import com.ogos.apprandomizador.ui.view.component.TopBar
-import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 import com.ogos.apprandomizador.viewmodel.MainViewModel
+import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 import com.ogos.apprandomizador.viewmodel.ViewModelFactory
 
 class MainActivity : ComponentActivity() {
@@ -68,14 +69,15 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation(factory: ViewModelProvider.Factory) {
     val navController = rememberNavController()
-    val currentRoute = remember { mutableStateOf("home_randomize") }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     val topBarState = remember { mutableStateOf(TopBarState()) }
-    val bottomBarState = remember { mutableStateOf(true) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopBar(state = topBarState.value) },
         bottomBar = {
-            if (bottomBarState.value) BottomBar(
+            if (currentRoute in listOf("home_randomize", "home_shuffle")) BottomBar(
                 navController = navController,
                 currentRoute = currentRoute
             )
@@ -99,7 +101,6 @@ fun AppNavigation(factory: ViewModelProvider.Factory) {
                 }
                 val viewModel: RandomizeViewModel =
                     viewModel(viewModelStoreOwner = parentEntry, factory = factory)
-                bottomBarState.value = true
                 HomeRandomizeViewRoute(
                     viewModel = viewModel,
                     onNavigateToActive = { itemID ->
@@ -138,7 +139,6 @@ fun AppNavigation(factory: ViewModelProvider.Factory) {
                 }
                 val viewModel: RandomizeViewModel =
                     viewModel(viewModelStoreOwner = parentEntry, factory = factory)
-                bottomBarState.value = false
                 RandomizeViewRoute(
                     itemID = itemID,
                     viewModel = viewModel,
@@ -159,7 +159,6 @@ fun AppNavigation(factory: ViewModelProvider.Factory) {
                 )
                 val viewModel: RandomizeViewModel =
                     viewModel(factory = factory)
-                bottomBarState.value = true
                 HomeShuffleViewRoute(
                     viewModel = viewModel,
                     modifier = Modifier.padding(paddingValues)

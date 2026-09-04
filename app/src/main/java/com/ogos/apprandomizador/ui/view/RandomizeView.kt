@@ -1,20 +1,18 @@
 package com.ogos.apprandomizador.ui.view
 
+import android.annotation.SuppressLint
 import android.media.MediaPlayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -41,6 +39,7 @@ import com.ogos.apprandomizador.model.RaffleItem
 import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun RandomizeViewRoute(
     itemID: Long,
@@ -93,32 +92,38 @@ fun RandomizeViewMain(
     isSpinning: Boolean,
     modifier: Modifier
 ) {
-    Scaffold(
-        topBar = { },
-        bottomBar = {
-            RandomizeViewBottomBar(onPerformRoll = onPerformRoll, isSpinning = isSpinning)
-        }
-    ) { paddingValues ->
+    Column(modifier = modifier.fillMaxSize()) {
+
         RandomizeViewContent(
-            modifier = modifier.padding(paddingValues),
-            result = result
+            result = result,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        )
+
+        RandomizeViewBottomBar(
+            onPerformRoll = onPerformRoll,
+            isSpinning = isSpinning,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+
         )
     }
 }
 
 @Composable
 fun RandomizeViewContent(
-    modifier: Modifier = Modifier,
-    result: RaffleItem
+    result: RaffleItem,
+    modifier: Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -166,50 +171,55 @@ fun RandomizeViewContent(
         }
     }
 }
-
 @Composable
-fun RandomizeViewBottomBar(onPerformRoll: () -> Unit, isSpinning: Boolean) {
-    BottomAppBar(
-        modifier = Modifier.height(160.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
-
-        ) {
+fun RandomizeViewBottomBar(
+    onPerformRoll: () -> Unit,
+    isSpinning: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface
+    ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize(),
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Button(
                 onClick = {
-                    if (isSpinning) return@Button
-                    onPerformRoll()
+                    if (!isSpinning) {
+                        onPerformRoll()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.roll))
+                Text(stringResource(R.string.roll))
             }
-            Row {
-                OutlinedButton(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier.weight(1f),
 
-                    ) {
-                    Text(text = stringResource(R.string.disable))
-                }
-                Spacer(Modifier.padding(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 OutlinedButton(
-                    onClick = { /*TODO*/ },
+                    onClick = { /* TODO */ },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = stringResource(R.string.reset))
+                    Text(stringResource(R.string.disable))
+                }
+
+                OutlinedButton(
+                    onClick = { /* TODO */ },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(R.string.reset))
                 }
             }
         }
     }
 }
-
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable

@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.ogos.apprandomizador.data.database.DataStoreManager
 import com.ogos.apprandomizador.data.repository.IDefaultInitialization
-import com.ogos.apprandomizador.data.repository.ItemListRepository
+import com.ogos.apprandomizador.data.repository.IRepository
 
 class ViewModelFactory(
-    private val repository: ItemListRepository,
+    private val repository: IRepository,
     private val dataStoreManager: DataStoreManager,
     private val defaultInitialization: IDefaultInitialization
 ) : ViewModelProvider.Factory {
