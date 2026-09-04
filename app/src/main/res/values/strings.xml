@@ -22,4 +22,5 @@
     <string name="waiting_initialization">Aguardando inicialização...</string>
     <string name="blank_text"></string>
     <string name="shuffle_item_from_list">Embaralhar uma lista</string>
+    <string name="default_shuffle_text">USE RODAR PARA SORTEAR</string>
 </resources>

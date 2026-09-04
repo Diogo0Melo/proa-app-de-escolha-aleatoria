@@ -50,7 +50,7 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
         }
     }
 
-    suspend fun rollAnimation() {
+    private suspend fun rollAnimation() {
         val itemList = currentItemList.value
         val range = itemList.items.size
         if (range <= 0) return
@@ -66,8 +66,8 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
         }
     }
 
-    fun defaultText(color: Long) {
-        _currentRandomItem.value = RaffleItem("USE RODAR PARA SORTEAR", color)
+    fun defaultText(defaultString: String, color: Long) {
+        _currentRandomItem.value = RaffleItem(defaultString, color)
     }
 
     fun setCurrentItem(id: Long) {
