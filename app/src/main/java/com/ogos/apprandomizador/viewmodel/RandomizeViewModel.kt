@@ -5,65 +5,71 @@ import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.data.repository.IRepository
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.model.RaffleItem
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.security.SecureRandom
-import kotlin.random.Random
-import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * One pending draw. The ViewModel picks [targetIndex] FIRST; the 3D wheel
+ * in the View then animates the ring until that slot sits at the center and
+ * calls back via finishSpin(). [requestId] makes every roll a distinct key
+ * even when the same index is drawn twice in a row.
+ */
+data class SpinTarget(
+    val targetIndex: Int,
+    val requestId: Long
+)
 
 class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
 
     private val secureRandom = SecureRandom()
+    private var spinRequestId = 0L
+
     private val _currentItemList = MutableStateFlow(ItemList())
     val currentItemList: StateFlow<ItemList> = _currentItemList.asStateFlow()
     private val _currentRandomItem = MutableStateFlow<RaffleItem>(RaffleItem("", 0))
     val currentRandomItem: StateFlow<RaffleItem> = _currentRandomItem.asStateFlow()
     private val _isSpinning = MutableStateFlow(false)
     val isSpinning: StateFlow<Boolean> = _isSpinning.asStateFlow()
+    private val _spinTarget = MutableStateFlow<SpinTarget?>(null)
+    val spinTarget: StateFlow<SpinTarget?> = _spinTarget.asStateFlow()
 
-    fun startSpinning() {
+    /**
+     * Inverted roll flow: choose the winner up-front with SecureRandom, then
+     * hand the target to the View. No animation and no recording happens here;
+     * finishSpin() does that once the wheel lands.
+     */
+    fun performRoll() {
+        val list = currentItemList.value
+        if (list.items.isEmpty()) return
+        if (_isSpinning.value) return
+        val targetIndex = secureRandom.nextInt(list.items.size)
+        spinRequestId += 1
+        _spinTarget.value = SpinTarget(targetIndex, spinRequestId)
         _isSpinning.value = true
     }
 
-    fun stopSpinning() {
+    /**
+     * Wheel-completion callback. Preserves the original recording flow
+     * (ItemList.recordDraw -> uses/histories + repository.update) and clears
+     * the spinning state. The null-target check guards against double
+     * completion (e.g. animation finished + cancellation race).
+     */
+    fun finishSpin() {
+        val target = _spinTarget.value ?: return
+        val list = currentItemList.value
+        if (target.targetIndex in list.items.indices) {
+            val drawn = list.items[target.targetIndex]
+            val updated = list.recordDraw(drawn)
+            _currentItemList.value = updated
+            _currentRandomItem.value = drawn
+            updateItem(updated)
+        }
+        _spinTarget.value = null
         _isSpinning.value = false
-    }
-
-    fun performRoll() {
-        val item = currentItemList.value
-
-        if (item.items.isEmpty()) return
-        viewModelScope.launch {
-            rollAnimation()
-
-            val newIndex = secureRandom.nextInt(item.items.size)
-            val updatedItem = item.recordDraw(item.items[newIndex])
-
-            _currentRandomItem.value = item.items[newIndex]
-            _currentItemList.value = updatedItem
-            stopSpinning()
-            updateItem(updatedItem)
-        }
-    }
-
-    private suspend fun rollAnimation() {
-        val itemList = currentItemList.value
-        val range = itemList.items.size
-        if (range <= 0) return
-        startSpinning()
-        repeat(69) { index ->
-            val sleepTime = when {
-                index < 64 -> 15L
-                else -> (index - 64 + 1) * 40L
-            }
-            val newIndex = Random.nextInt(range)
-            _currentRandomItem.value = itemList.items[newIndex]
-            delay(sleepTime.milliseconds)
-        }
     }
 
     fun defaultText(defaultString: String, color: Long) {
