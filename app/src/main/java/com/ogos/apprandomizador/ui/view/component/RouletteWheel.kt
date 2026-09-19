@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.ui.theme.LocalRouletteBackground
 import com.ogos.apprandomizador.viewmodel.SpinTarget
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -46,8 +47,6 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.tan
-
-internal val RouletteScreenBg = Color(0xFF07080C)
 
 private const val MIN_TOTAL_SLOTS = 21
 internal const val WHEEL_FULL_TURNS = 2
@@ -61,7 +60,7 @@ private const val BACK_FACE_LIMIT_DEG = 90f
 private val CardShape = RoundedCornerShape(18.dp)
 private const val WHITE_ARGB = 0xFFFFFFFFL
 private const val BLACK_ARGB = 0xFF000000L
-private val ITEM_VERTICAL_GAP = 4.dp
+private val ITEM_VERTICAL_GAP = 6.dp
 
 internal object RouletteMath {
 
@@ -166,8 +165,6 @@ fun RouletteWheel(
     onSpinFinished: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (items.isEmpty()) return
-
     val density = LocalDensity.current
     val itemCount = items.size
     val totalSlots = RouletteMath.totalSlots(itemCount)
@@ -178,6 +175,7 @@ fun RouletteWheel(
     // Slot central discreto: recomposição só quando cruza fronteira de slot
     var centerSlot by remember { mutableIntStateOf(0) }
     LaunchedEffect(totalSlots) {
+        if (totalSlots == 0) return@LaunchedEffect
         snapshotFlow { ringAngle.value }
             .map { angle ->
                 (((angle / theta).roundToInt()) % totalSlots + totalSlots) % totalSlots
@@ -187,25 +185,23 @@ fun RouletteWheel(
     }
 
     // Driver do giro: ângulo contínuo/monotônico entre giros
-    LaunchedEffect(spinTarget?.requestId) {
+    LaunchedEffect(spinTarget?.requestId, totalSlots) {
         val target = spinTarget ?: return@LaunchedEffect
+        if (totalSlots == 0) return@LaunchedEffect
         val slot = target.targetIndex % totalSlots
         val start = ringAngle.value
         val end = RouletteMath.targetAngle(start, slot, totalSlots, WHEEL_FULL_TURNS)
-        try {
-            ringAngle.animateTo(
-                end,
-                animationSpec = tween(
-                    durationMillis = SPIN_DURATION_MS,
-                    easing = CubicBezierEasing(0.12f, 0.8f, 0.2f, 1f)
-                )
+        ringAngle.animateTo(
+            end,
+            animationSpec = tween(
+                durationMillis = SPIN_DURATION_MS,
+                easing = CubicBezierEasing(0.12f, 0.8f, 0.2f, 1f)
             )
-        } finally {
-            onSpinFinished()
-        }
+        )
+        onSpinFinished()
     }
 
-    BoxWithConstraints(modifier.background(RouletteScreenBg)) {
+    BoxWithConstraints(modifier.background(LocalRouletteBackground.current)) {
         val containerHeightPx = constraints.maxHeight.toFloat()
         val cardHeightPx = max(
             min(with(density) { 96.dp.toPx() }, containerHeightPx * 0.11f),

@@ -23,4 +23,9 @@
     <string name="blank_text"></string>
     <string name="shuffle_item_from_list">Embaralhar uma lista</string>
     <string name="default_shuffle_text">USE RODAR PARA SORTEAR</string>
+    <string name="theme_system">Seguir sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="cd_theme">Tema</string>
 </resources>

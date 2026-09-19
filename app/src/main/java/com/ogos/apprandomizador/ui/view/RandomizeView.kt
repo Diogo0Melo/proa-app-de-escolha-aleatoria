@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -23,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -56,7 +54,11 @@ fun RandomizeViewRoute(
     val onPerformRoll = { viewModel.performRoll() }
     LaunchedEffect(itemID) {
         viewModel.setCurrentItem(itemID)
-        viewModel.defaultText(defaultString = context.getString(R.string.default_shuffle_text), color = color)
+    }
+    LaunchedEffect(color) {
+        if (viewModel.currentItemList.value.uses == 0) {
+            viewModel.defaultText(defaultString = context.getString(R.string.default_shuffle_text), color = color)
+        }
     }
     LaunchedEffect(isSpinning) {
         if (isSpinning) {
@@ -73,9 +75,7 @@ fun RandomizeViewRoute(
     DisposableEffect(Unit) {
         onDispose { mediaPlayer.release() }
     }
-    if (result.isBlank()) {
-        println(stringResource(R.string.waiting_raffle))
-    } else {
+    if (!result.isBlank()) {
         RandomizeViewMain(
             result = result,
             items = itemList.items,
@@ -103,7 +103,6 @@ fun RandomizeViewMain(
     Column(modifier = modifier.fillMaxSize()) {
 
         RandomizeViewContent(
-            result = result,
             items = items,
             spinTarget = spinTarget,
             uses = uses,
@@ -119,15 +118,12 @@ fun RandomizeViewMain(
             isSpinning = isSpinning,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-
         )
     }
 }
 
 @Composable
 fun RandomizeViewContent(
-    result: RaffleItem,
     items: List<RaffleItem>,
     spinTarget: SpinTarget?,
     uses: Int,
@@ -165,7 +161,7 @@ fun RandomizeViewBottomBar(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp),
+                .padding(vertical = 12.dp, horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -173,12 +169,6 @@ fun RandomizeViewBottomBar(
                 onClick = onPerformRoll,
                 enabled = !isSpinning,
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFA8E01F),
-                    contentColor = Color.Black,
-                    disabledContainerColor = Color(0xFF1A1C22),
-                    disabledContentColor = Color(0xFF55596B)
-                ),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -217,7 +207,8 @@ private fun RandomizeViewPreview() {
         items = listOf(
             RaffleItem("Alpha", 0xFF9D4EDD),
             RaffleItem("Beta", 0xFF4CAF50),
-            RaffleItem("Gamma", 0xFFD6E024)
+            RaffleItem("Gamma", 0xFFD6E024),
+            RaffleItem("Delta", 0xFFD27024),
         ),
         spinTarget = null,
         uses = 0,

@@ -23,8 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -74,6 +72,8 @@ fun ListCollection(
                             ) { currentIndex ->
                                 val circularIndex = currentIndex % item.items.size
                                 val currentSubItem = item.items[circularIndex]
+                                val baseColor = RouletteMath.baseColorFor(currentSubItem, circularIndex)
+                                val contentColor = if (RouletteMath.isLightBase(baseColor)) Color.Black else Color.White
                                 Box(
                                     modifier = Modifier.width(108.dp),
                                     contentAlignment = Alignment.Center
@@ -82,7 +82,7 @@ fun ListCollection(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(16.dp),
-                                        color = Color(currentSubItem.color)
+                                        color = Color(baseColor)
                                     ) {
                                         Text(
                                             text = currentSubItem.name,
@@ -91,22 +91,7 @@ fun ListCollection(
                                                 fontSize = 8.sp,
                                                 fontWeight = FontWeight.Black,
                                                 textAlign = TextAlign.Center,
-                                                drawStyle = Stroke(
-                                                    miter = 10f,
-                                                    width = 8f,
-                                                    join = StrokeJoin.Round
-                                                ),
-                                                color = Color.Black
-                                            )
-                                        )
-                                        Text(
-                                            text = currentSubItem.name,
-                                            modifier = Modifier.wrapContentHeight(Alignment.CenterVertically),
-                                            style = TextStyle(
-                                                textAlign = TextAlign.Center,
-                                                fontSize = 8.sp,
-                                                fontWeight = FontWeight.Black,
-                                                color = Color.White
+                                                color = contentColor
                                             )
                                         )
                                     }
