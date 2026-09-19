@@ -1,7 +1,6 @@
 package com.ogos.apprandomizador.ui.view
 
 import android.annotation.SuppressLint
-import android.media.MediaPlayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,12 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.ui.sound.TickPlayer
 import com.ogos.apprandomizador.ui.view.component.RouletteWheel
 import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 import com.ogos.apprandomizador.viewmodel.SpinTarget
@@ -40,12 +43,11 @@ import com.ogos.apprandomizador.viewmodel.SpinTarget
 fun RandomizeViewRoute(
     itemID: Long,
     viewModel: RandomizeViewModel,
+    soundEnabled: Boolean,
     modifier: Modifier
 ) {
     val context = LocalContext.current
-    val mediaPlayer = remember {
-        MediaPlayer.create(context, R.raw.roleta_audio)
-    }
+    val tickPlayer = remember { TickPlayer(context.applicationContext, R.raw.roleta_audio) }
     val isSpinning by viewModel.isSpinning.collectAsState()
     val result by viewModel.currentRandomItem.collectAsState()
     val itemList by viewModel.currentItemList.collectAsState()
@@ -60,20 +62,26 @@ fun RandomizeViewRoute(
             viewModel.defaultText(defaultString = context.getString(R.string.default_shuffle_text), color = color)
         }
     }
-    LaunchedEffect(isSpinning) {
-        if (isSpinning) {
-            mediaPlayer.isLooping = true
-            mediaPlayer.start()
-        } else {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
-                mediaPlayer.seekTo(0)
-            }
-        }
+    val onSlotCrossed: (() -> Unit)? = if (isSpinning && soundEnabled) {
+        { tickPlayer.play(volume = 1f) }
+    } else {
+        null
     }
 
-    DisposableEffect(Unit) {
-        onDispose { mediaPlayer.release() }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> tickPlayer.pause()
+                Lifecycle.Event.ON_RESUME -> tickPlayer.resume()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            tickPlayer.release()
+        }
     }
     if (!result.isBlank()) {
         RandomizeViewMain(
@@ -83,6 +91,7 @@ fun RandomizeViewRoute(
             uses = itemList.uses,
             onPerformRoll = onPerformRoll,
             onSpinFinished = { viewModel.finishSpin() },
+            onSlotCrossed = onSlotCrossed,
             isSpinning = isSpinning,
             modifier = modifier
         )
@@ -97,6 +106,7 @@ fun RandomizeViewMain(
     uses: Int,
     onPerformRoll: () -> Unit,
     onSpinFinished: () -> Unit,
+    onSlotCrossed: (() -> Unit)?,
     isSpinning: Boolean,
     modifier: Modifier
 ) {
@@ -108,6 +118,7 @@ fun RandomizeViewMain(
             uses = uses,
             isSpinning = isSpinning,
             onSpinFinished = onSpinFinished,
+            onSlotCrossed = onSlotCrossed,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -129,6 +140,7 @@ fun RandomizeViewContent(
     uses: Int,
     isSpinning: Boolean,
     onSpinFinished: () -> Unit,
+    onSlotCrossed: (() -> Unit)?,
     modifier: Modifier
 ) {
     Column(
@@ -142,6 +154,7 @@ fun RandomizeViewContent(
             spinTarget = spinTarget,
             centerHighlighted = isSpinning || uses > 0,
             onSpinFinished = onSpinFinished,
+            onSlotCrossed = onSlotCrossed,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -214,6 +227,7 @@ private fun RandomizeViewPreview() {
         uses = 0,
         onPerformRoll = { },
         onSpinFinished = { },
+        onSlotCrossed = null,
         isSpinning = false,
         modifier = Modifier
     )

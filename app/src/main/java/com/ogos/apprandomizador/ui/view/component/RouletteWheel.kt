@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -163,6 +164,7 @@ fun RouletteWheel(
     spinTarget: SpinTarget?,
     centerHighlighted: Boolean,
     onSpinFinished: () -> Unit,
+    onSlotCrossed: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
@@ -174,6 +176,7 @@ fun RouletteWheel(
 
     // Slot central discreto: recomposição só quando cruza fronteira de slot
     var centerSlot by remember { mutableIntStateOf(0) }
+    val currentOnSlotCrossed by rememberUpdatedState(onSlotCrossed)
     LaunchedEffect(totalSlots) {
         if (totalSlots == 0) return@LaunchedEffect
         snapshotFlow { ringAngle.value }
@@ -181,7 +184,10 @@ fun RouletteWheel(
                 (((angle / theta).roundToInt()) % totalSlots + totalSlots) % totalSlots
             }
             .distinctUntilChanged()
-            .collect { centerSlot = it }
+            .collect {
+                centerSlot = it
+                currentOnSlotCrossed?.invoke()
+            }
     }
 
     // Driver do giro: ângulo contínuo/monotônico entre giros

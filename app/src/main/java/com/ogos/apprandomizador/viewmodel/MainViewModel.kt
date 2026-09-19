@@ -37,6 +37,19 @@ class MainViewModel(
         }
     }
 
+    val soundEnabled: StateFlow<Boolean> = dataStoreManager.isSoundOn
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = true
+        )
+
+    fun setSoundEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveSoundOn(enabled)
+        }
+    }
+
     init {
         viewModelScope.launch {
             val isFirstTime = dataStoreManager.isFirstTime.first()

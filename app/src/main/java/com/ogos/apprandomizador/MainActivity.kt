@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
             val mainViewModel: MainViewModel = viewModel(factory = factory)
             val isReady by mainViewModel.isReady.collectAsState()
             val themeMode by mainViewModel.themeMode.collectAsState()
+            val soundEnabled by mainViewModel.soundEnabled.collectAsState()
             val resolvedThemeMode = themeMode ?: ThemeMode.SYSTEM
 
             AppRandomizadorTheme(themeMode = resolvedThemeMode) {
@@ -62,7 +63,9 @@ class MainActivity : ComponentActivity() {
                     AppNavigation(
                         factory = factory,
                         themeMode = resolvedThemeMode,
-                        onThemeModeChange = mainViewModel::setThemeMode
+                        onThemeModeChange = mainViewModel::setThemeMode,
+                        soundEnabled = soundEnabled,
+                        onSoundToggle = mainViewModel::setSoundEnabled
                     )
                 } else {
                     Box(
@@ -82,7 +85,9 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation(
     factory: ViewModelProvider.Factory,
     themeMode: ThemeMode,
-    onThemeModeChange: (ThemeMode) -> Unit
+    onThemeModeChange: (ThemeMode) -> Unit,
+    soundEnabled: Boolean = true,
+    onSoundToggle: (Boolean) -> Unit = {}
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -122,7 +127,9 @@ fun AppNavigation(
             TopBar(
                 state = topBarState,
                 themeMode = themeMode,
-                onThemeModeChange = onThemeModeChange
+                onThemeModeChange = onThemeModeChange,
+                soundEnabled = soundEnabled,
+                onSoundToggle = onSoundToggle
             )
         },
         bottomBar = {
@@ -161,6 +168,7 @@ fun AppNavigation(
                 RandomizeViewRoute(
                     itemID = itemID,
                     viewModel = viewModel,
+                    soundEnabled = soundEnabled,
                     modifier = Modifier.padding(paddingValues)
                 )
             }
