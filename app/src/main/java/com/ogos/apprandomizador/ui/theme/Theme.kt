@@ -1,67 +1,83 @@
 package com.ogos.apprandomizador.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 
-private val DarkColorScheme = darkColorScheme(
-    primary = PurpleMain,
-    secondary = BlackText,
-    tertiary = RedMain,
-    background = BlackBackGround,
-    surface = BlackHighlight
+private val LightColors = lightColorScheme(
+    primary = PurplePrimaryLight,
+    onPrimary = PurpleOnPrimaryLight,
+    primaryContainer = PurplePrimaryContainerLight,
+    onPrimaryContainer = PurpleOnPrimaryContainerLight,
+    background = LightBackground,
+    onBackground = LightOnBackground,
+    surface = LightSurface,
+    onSurface = LightOnSurface,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightOnSurfaceVariant,
+    outline = LightOutline,
+    error = ErrorLight,
+    onError = OnErrorLight
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = PurpleMain,
-    secondary = BlackText,
-    tertiary = RedMain,
-    background = BlackBackGround,
-    surface = BlackHighlight
+private val DarkColors = darkColorScheme(
+    primary = PurplePrimaryDark,
+    onPrimary = PurpleOnPrimaryDark,
+    primaryContainer = PurplePrimaryContainerDark,
+    onPrimaryContainer = PurpleOnPrimaryContainerDark,
+    background = DarkBackground,
+    onBackground = DarkOnBackground,
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkOnSurfaceVariant,
+    outline = DarkOutline,
+    error = ErrorDark,
+    onError = OnErrorDark
 )
-/*
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
+
+private val AmoledColors = DarkColors.copy(
+    background = AmoledBackground,
+    surface = AmoledSurface,
+    surfaceVariant = AmoledSurfaceVariant,
+    outline = AmoledOutline,
+    surfaceContainerLowest = AmoledSurfaceContainerLowest,
+    surfaceContainerLow = AmoledSurfaceContainerLow,
+    surfaceContainer = AmoledSurfaceContainer,
+    surfaceContainerHigh = AmoledSurfaceContainerHigh,
+    surfaceContainerHighest = AmoledSurfaceContainerHighest
 )
- */
+
+val LocalRouletteBackground = staticCompositionLocalOf { RouletteLightBackground }
 
 @Composable
 fun AppRandomizadorTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val systemDark = isSystemInDarkTheme()
+    val colorScheme = when (themeMode) {
+        ThemeMode.SYSTEM -> if (systemDark) DarkColors else LightColors
+        ThemeMode.LIGHT -> LightColors
+        ThemeMode.DARK -> DarkColors
+        ThemeMode.AMOLED -> AmoledColors
+    }
+    val rouletteBackground = when (themeMode) {
+        ThemeMode.AMOLED -> RouletteAmoledBackground
+        ThemeMode.DARK -> RouletteDarkBackground
+        ThemeMode.LIGHT -> RouletteLightBackground
+        ThemeMode.SYSTEM -> if (systemDark) RouletteDarkBackground else RouletteLightBackground
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalRouletteBackground provides rouletteBackground) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }
