@@ -5,20 +5,21 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -32,6 +33,7 @@ import com.ogos.apprandomizador.data.repository.DefaultInitialize
 import com.ogos.apprandomizador.model.TopBarAction
 import com.ogos.apprandomizador.model.TopBarState
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
+import com.ogos.apprandomizador.ui.theme.ThemeMode
 import com.ogos.apprandomizador.ui.view.HomeRandomizeViewRoute
 import com.ogos.apprandomizador.ui.view.HomeShuffleViewRoute
 import com.ogos.apprandomizador.ui.view.RandomizeViewRoute
@@ -47,18 +49,28 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val app = application as RandomApplication
-            val factory = ViewModelFactory(
-                app.repository, DataStoreManager(this),
-                DefaultInitialize()
-            )
+            val factory = remember {
+                ViewModelFactory(app.repository, DataStoreManager(this), DefaultInitialize())
+            }
             val mainViewModel: MainViewModel = viewModel(factory = factory)
             val isReady by mainViewModel.isReady.collectAsState()
+            val themeMode by mainViewModel.themeMode.collectAsState()
+            val resolvedThemeMode = themeMode ?: ThemeMode.SYSTEM
 
-            AppRandomizadorTheme {
-                if (isReady) {
-                    AppNavigation(factory)
+            AppRandomizadorTheme(themeMode = resolvedThemeMode) {
+                if (isReady && themeMode != null) {
+                    AppNavigation(
+                        factory = factory,
+                        themeMode = resolvedThemeMode,
+                        onThemeModeChange = mainViewModel::setThemeMode
+                    )
                 } else {
-                    println(stringResource(R.string.waiting_initialization))
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }
@@ -67,15 +79,52 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AppNavigation(factory: ViewModelProvider.Factory) {
+fun AppNavigation(
+    factory: ViewModelProvider.Factory,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val topBarState = remember { mutableStateOf(TopBarState()) }
+    val topBarState = remember(currentRoute, navController) {
+        when {
+            currentRoute == "home_randomize" || currentRoute == null -> TopBarState(
+                titleRes = R.string.draw_item_from_list,
+                showBackButton = false,
+                actions = listOf(
+                    TopBarAction(Icons.Filled.Add, R.string.add_new_item) { }
+                )
+            )
+            currentRoute == "home_shuffle" -> TopBarState(
+                titleRes = R.string.shuffle_item_from_list,
+                showBackButton = false,
+                actions = listOf(
+                    TopBarAction(Icons.Filled.Add, R.string.add_new_item) { }
+                )
+            )
+            currentRoute.startsWith("randomize_route/") -> TopBarState(
+                titleRes = R.string.blank_text,
+                showBackButton = true,
+                onBackClick = { navController.popBackStack() },
+                actions = listOf(
+                    TopBarAction(Icons.Default.Analytics, R.string.statistics) { },
+                    TopBarAction(Icons.Default.Edit, R.string.edit) { }
+                )
+            )
+            else -> TopBarState()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { TopBar(state = topBarState.value) },
+        topBar = {
+            TopBar(
+                state = topBarState,
+                themeMode = themeMode,
+                onThemeModeChange = onThemeModeChange
+            )
+        },
         bottomBar = {
             if (currentRoute in listOf("home_randomize", "home_shuffle")) BottomBar(
                 navController = navController,
@@ -85,17 +134,6 @@ fun AppNavigation(factory: ViewModelProvider.Factory) {
     ) { paddingValues ->
         NavHost(navController = navController, startDestination = "home_randomize") {
             composable("home_randomize") { backStackEntry ->
-                topBarState.value = TopBarState(
-                    titleRes = R.string.draw_item_from_list,
-                    showBackButton = false,
-                    actions = listOf(
-                        TopBarAction(
-                            iconImageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(R.string.add_new_item),
-                            onClick = { }
-                        )
-                    )
-                )
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("home_randomize")
                 }
@@ -114,25 +152,6 @@ fun AppNavigation(factory: ViewModelProvider.Factory) {
                     navArgument("itemID") { type = NavType.LongType },
                 )
             ) { backStackEntry ->
-                topBarState.value = TopBarState(
-                    titleRes = R.string.blank_text,
-                    showBackButton = true,
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
-                    actions = listOf(
-                        TopBarAction(
-                            iconImageVector = Icons.Default.Analytics,
-                            contentDescription = stringResource(R.string.statistics),
-                            onClick = {}
-                        ),
-                        TopBarAction(
-                            Icons.Default.Edit,
-                            contentDescription = stringResource(R.string.edit),
-                            onClick = {}
-                        )
-                    )
-                )
                 val itemID = backStackEntry.arguments?.getLong("itemID") ?: -1
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("randomize_route/{itemID}")
@@ -145,18 +164,7 @@ fun AppNavigation(factory: ViewModelProvider.Factory) {
                     modifier = Modifier.padding(paddingValues)
                 )
             }
-            composable("home_shuffle") { backStackEntry ->
-                topBarState.value = TopBarState(
-                    titleRes = R.string.shuffle_item_from_list,
-                    showBackButton = false,
-                    actions = listOf(
-                        TopBarAction(
-                            iconImageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(R.string.add_new_item),
-                            onClick = { }
-                        )
-                    )
-                )
+            composable("home_shuffle") {
                 val viewModel: RandomizeViewModel =
                     viewModel(factory = factory)
                 HomeShuffleViewRoute(

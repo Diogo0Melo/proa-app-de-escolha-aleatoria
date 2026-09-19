@@ -2,20 +2,35 @@ package com.ogos.apprandomizador.ui.view.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.model.TopBarState
+import com.ogos.apprandomizador.ui.theme.ThemeMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
-    state: TopBarState
+    state: TopBarState,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
 ) {
+    var themeMenuExpanded by remember { mutableStateOf(false) }
+
     TopAppBar(
         title = {
             Text(text = stringResource(state.titleRes))
@@ -25,7 +40,7 @@ fun TopBar(
                 IconButton(onClick = state.onBackClick) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Voltar"
+                        contentDescription = stringResource(R.string.back)
                     )
                 }
             }
@@ -35,7 +50,39 @@ fun TopBar(
                 IconButton(onClick = action.onClick) {
                     Icon(
                         imageVector = action.iconImageVector,
-                        contentDescription = action.contentDescription
+                        contentDescription = stringResource(action.contentDescriptionRes)
+                    )
+                }
+            }
+
+            IconButton(onClick = { themeMenuExpanded = true }) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = stringResource(R.string.cd_theme)
+                )
+            }
+
+            DropdownMenu(
+                expanded = themeMenuExpanded,
+                onDismissRequest = { themeMenuExpanded = false }
+            ) {
+                ThemeMode.entries.forEach { mode ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(mode.labelRes),
+                                fontWeight = if (mode == themeMode) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        trailingIcon = {
+                            if (mode == themeMode) {
+                                Icon(Icons.Filled.Check, contentDescription = null)
+                            }
+                        },
+                        onClick = {
+                            onThemeModeChange(mode)
+                            themeMenuExpanded = false
+                        }
                     )
                 }
             }
