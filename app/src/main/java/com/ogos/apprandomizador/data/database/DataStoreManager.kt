@@ -3,6 +3,7 @@ package com.ogos.apprandomizador.data.database
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -14,6 +15,7 @@ class DataStoreManager(private val context: Context) {
 
     companion object {
         val IS_FIRST_TIME = booleanPreferencesKey("is_first_time")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
     }
 
     suspend fun saveFirstAccess(isFirstTime: Boolean) {
@@ -22,8 +24,18 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
-    val isFirstTime: Flow<Boolean> = context.dataStore.data.map {
+    val isFirstTime: Flow<Boolean> = dataStore.data.map {
         it[IS_FIRST_TIME] ?: true
+    }
+
+    val themeMode: Flow<String> = dataStore.data.map {
+        it[THEME_MODE] ?: "system"
+    }
+
+    suspend fun saveThemeMode(mode: String) {
+        dataStore.edit {
+            it[THEME_MODE] = mode
+        }
     }
 
 }

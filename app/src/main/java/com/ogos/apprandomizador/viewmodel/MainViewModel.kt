@@ -5,9 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.data.database.DataStoreManager
 import com.ogos.apprandomizador.data.repository.IDefaultInitialization
 import com.ogos.apprandomizador.data.repository.IRepository
+import com.ogos.apprandomizador.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MainViewModel(
@@ -17,6 +22,20 @@ class MainViewModel(
 ) : ViewModel() {
     private val _isReady = MutableStateFlow(false)
     val isReady = _isReady.asStateFlow()
+
+    val themeMode: StateFlow<ThemeMode?> = dataStoreManager.themeMode
+        .map<String, ThemeMode?> { ThemeMode.fromKey(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
+
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch {
+            dataStoreManager.saveThemeMode(mode.key)
+        }
+    }
 
     init {
         viewModelScope.launch {
