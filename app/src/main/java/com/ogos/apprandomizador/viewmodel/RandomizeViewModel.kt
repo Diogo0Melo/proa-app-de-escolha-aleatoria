@@ -87,7 +87,10 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
 
     fun setCurrentItem(id: Long) {
         viewModelScope.launch {
-            _currentItemList.value = repository.getItem(id)
+            val item = repository.getItem(id)
+            if (item != null) {
+                _currentItemList.value = item
+            }
         }
     }
 

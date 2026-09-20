@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.ogos.apprandomizador.model.DrawHistoryEntry
 import com.ogos.apprandomizador.model.ItemList
 
-@Database(entities = [ItemList::class, DrawHistoryEntry::class], version = 1, exportSchema = true)
+@Database(entities = [ItemList::class, DrawHistoryEntry::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao

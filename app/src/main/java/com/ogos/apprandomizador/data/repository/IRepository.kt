@@ -8,7 +8,9 @@ interface IRepository {
     val allItems: Flow<List<ItemList>>
     suspend fun save(item: ItemList)
     suspend fun update(item: ItemList)
-    suspend fun getItem(id: Long): ItemList
+    suspend fun delete(item: ItemList)
+    suspend fun deleteById(id: Long)
+    suspend fun getItem(id: Long): ItemList?
     suspend fun saveDrawHistory(entry: DrawHistoryEntry)
     fun getDrawHistory(itemListId: Long): Flow<List<DrawHistoryEntry>>
 }

@@ -21,7 +21,15 @@ class ItemListRepository(
         itemDao.updateItem(item)
     }
 
-    override suspend fun getItem(id: Long): ItemList = itemDao.getItem(id)
+    override suspend fun delete(item: ItemList) {
+        itemDao.deleteItem(item)
+    }
+
+    override suspend fun deleteById(id: Long) {
+        itemDao.deleteItemById(id)
+    }
+
+    override suspend fun getItem(id: Long): ItemList? = itemDao.getItem(id)
 
     override suspend fun saveDrawHistory(entry: DrawHistoryEntry) {
         drawHistoryDao.insert(entry)
