@@ -3,6 +3,7 @@ package com.ogos.apprandomizador.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.data.repository.IRepository
+import com.ogos.apprandomizador.model.DrawHistoryEntry
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.model.RaffleItem
 import kotlinx.coroutines.flow.Flow
@@ -53,10 +54,10 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
     }
 
     /**
-     * Wheel-completion callback. Preserves the original recording flow
-     * (ItemList.recordDraw -> uses/histories + repository.update) and clears
-     * the spinning state. The null-target check guards against double
-     * completion (e.g. animation finished + cancellation race).
+     * Wheel-completion callback. Records the draw in the separate
+     * draw_history table (infinite, queryable) and updates ItemList
+     * counters. The null-target check guards against double completion
+     * (e.g. animation finished + cancellation race).
      */
     fun finishSpin() {
         val target = _spinTarget.value ?: return
@@ -67,6 +68,14 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
             _currentItemList.value = updated
             _currentRandomItem.value = drawn
             updateItem(updated)
+            viewModelScope.launch {
+                repository.saveDrawHistory(
+                    DrawHistoryEntry(
+                        itemListId = list.id,
+                        resultName = drawn.name
+                    )
+                )
+            }
         }
         _spinTarget.value = null
         _isSpinning.value = false

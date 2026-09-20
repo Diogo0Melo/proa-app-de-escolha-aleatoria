@@ -5,12 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.ogos.apprandomizador.model.DrawHistoryEntry
 import com.ogos.apprandomizador.model.ItemList
 
-@Database(entities = [ItemList::class], version = 1, exportSchema = true)
+@Database(entities = [ItemList::class, DrawHistoryEntry::class], version = 1, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao
+    abstract fun drawHistoryDao(): DrawHistoryDao
 
     companion object {
         @Volatile

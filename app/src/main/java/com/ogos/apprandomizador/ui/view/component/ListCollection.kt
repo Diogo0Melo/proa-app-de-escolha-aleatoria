@@ -45,7 +45,7 @@ fun ListCollection(
         items(count = allItemsList.size) { index ->
             val item = allItemsList[index]
             val scrollState = rememberScrollState()
-            val lastUse = TimeAgoFormatter.updateLastUse(item.dateTimeHistory.lastOrNull())
+            val lastUse = TimeAgoFormatter.updateLastUse(item.lastUsedAt)
             val createdAt = TimeAgoFormatter.formatCreatedAt(item.createdAt)
             Card(
                 onClick = { onNavigateToActive(item.id) },
@@ -115,7 +115,7 @@ fun ListCollection(
                             Text(text = stringResource(R.string.created_at, createdAt))
                         }
                     }
-                    Box() {
+                    Box {
                         Icon(
                             imageVector = Icons.Filled.Edit,
                             contentDescription = stringResource(R.string.edit_item),

@@ -19,24 +19,6 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromHistory(value: List<String>?): String = gson.toJson(value)
-
-    @TypeConverter
-    fun toHistory(value: String?): List<String>? {
-        val type = object : TypeToken<List<String>>() {}.type
-        return gson.fromJson(value, type)
-    }
-
-    @TypeConverter
-    fun fromInstantList(value: List<Instant>?): String = gson.toJson(value)
-
-    @TypeConverter
-    fun toInstantList(value: String?): List<Instant>? {
-        val type = object : TypeToken<List<Instant>>() {}.type
-        return gson.fromJson(value, type)
-    }
-
-    @TypeConverter
     fun fromInstant(value: Instant?): Long? =
         value?.toEpochMilli()
 
