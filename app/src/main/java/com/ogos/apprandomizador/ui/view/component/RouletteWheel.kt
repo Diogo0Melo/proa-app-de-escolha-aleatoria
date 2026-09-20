@@ -49,7 +49,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.tan
 
-private const val MIN_TOTAL_SLOTS = 21
+private const val MIN_TOTAL_SLOTS = 24
 internal const val WHEEL_FULL_TURNS = 2
 private const val SPIN_DURATION_MS = 2500
 
@@ -65,9 +65,8 @@ private val ITEM_VERTICAL_GAP = 6.dp
 
 internal object RouletteMath {
 
-    // Cilindro sempre com 21 slots → perspectiva idêntica pra qualquer lista
-    fun totalSlots(itemCount: Int): Int =
-        if (itemCount <= 0) 0 else MIN_TOTAL_SLOTS
+    // Cilindro sempre com 24 slots → perspectiva idêntica pra qualquer lista
+    fun totalSlots(itemCount: Int): Int = if (itemCount <= 0) 0 else MIN_TOTAL_SLOTS
 
     fun thetaDegrees(totalSlots: Int): Float = 360f / totalSlots
 

@@ -1,7 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -13,7 +14,7 @@ android {
         minSdk = 27
         targetSdk = 34
         versionCode = 1
-        versionName = "Alpha 0.0.11"
+        versionName = "Alpha 0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -31,6 +32,12 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    //noinspection WrongGradleMethod
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
     buildFeatures {
         compose = true
@@ -52,8 +59,6 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.gson)
     implementation(libs.androidx.compose.ui.text)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)

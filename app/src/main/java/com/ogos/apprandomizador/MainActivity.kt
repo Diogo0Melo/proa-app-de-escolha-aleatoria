@@ -28,10 +28,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.ogos.apprandomizador.data.database.DataStoreManager
 import com.ogos.apprandomizador.data.repository.DefaultInitialize
 import com.ogos.apprandomizador.model.TopBarAction
 import com.ogos.apprandomizador.model.TopBarState
+import com.ogos.apprandomizador.ui.navigation.Routes
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.ui.theme.ThemeMode
 import com.ogos.apprandomizador.ui.view.HomeRandomizeViewRoute
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val app = application as RandomApplication
             val factory = remember {
-                ViewModelFactory(app.repository, DataStoreManager(this), DefaultInitialize())
+                ViewModelFactory(app.repository, app.dataStoreManager, DefaultInitialize())
             }
             val mainViewModel: MainViewModel = viewModel(factory = factory)
             val isReady by mainViewModel.isReady.collectAsState()
@@ -94,21 +94,23 @@ fun AppNavigation(
     val currentRoute = navBackStackEntry?.destination?.route
     val topBarState = remember(currentRoute, navController) {
         when {
-            currentRoute == "home_randomize" || currentRoute == null -> TopBarState(
+            currentRoute == Routes.HOME_RANDOMIZE || currentRoute == null -> TopBarState(
                 titleRes = R.string.draw_item_from_list,
                 showBackButton = false,
                 actions = listOf(
                     TopBarAction(Icons.Filled.Add, R.string.add_new_item) { }
                 )
             )
-            currentRoute == "home_shuffle" -> TopBarState(
+
+            currentRoute == Routes.HOME_SHUFFLE -> TopBarState(
                 titleRes = R.string.shuffle_item_from_list,
                 showBackButton = false,
                 actions = listOf(
                     TopBarAction(Icons.Filled.Add, R.string.add_new_item) { }
                 )
             )
-            currentRoute.startsWith("randomize_route/") -> TopBarState(
+
+            currentRoute.startsWith("${Routes.RANDOMIZE_ROUTE}/") -> TopBarState(
                 titleRes = R.string.blank_text,
                 showBackButton = true,
                 onBackClick = { navController.popBackStack() },
@@ -133,35 +135,35 @@ fun AppNavigation(
             )
         },
         bottomBar = {
-            if (currentRoute in listOf("home_randomize", "home_shuffle")) BottomBar(
+            if (currentRoute in listOf(Routes.HOME_RANDOMIZE, Routes.HOME_SHUFFLE)) BottomBar(
                 navController = navController,
                 currentRoute = currentRoute
             )
         },
     ) { paddingValues ->
-        NavHost(navController = navController, startDestination = "home_randomize") {
-            composable("home_randomize") { backStackEntry ->
+        NavHost(navController = navController, startDestination = Routes.HOME_RANDOMIZE) {
+            composable(Routes.HOME_RANDOMIZE) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry("home_randomize")
+                    navController.getBackStackEntry(Routes.HOME_RANDOMIZE)
                 }
                 val viewModel: RandomizeViewModel =
                     viewModel(viewModelStoreOwner = parentEntry, factory = factory)
                 HomeRandomizeViewRoute(
                     viewModel = viewModel,
                     onNavigateToActive = { itemID ->
-                        navController.navigate("randomize_route/$itemID")
+                        navController.navigate(Routes.randomizeWithId(itemID))
                     },
                     modifier = Modifier.padding(paddingValues)
                 )
             }
             composable(
-                route = "randomize_route/{itemID}", arguments = listOf(
+                route = Routes.RANDOMIZE_FULL, arguments = listOf(
                     navArgument("itemID") { type = NavType.LongType },
                 )
             ) { backStackEntry ->
                 val itemID = backStackEntry.arguments?.getLong("itemID") ?: -1
                 val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry("randomize_route/{itemID}")
+                    navController.getBackStackEntry(Routes.RANDOMIZE_FULL)
                 }
                 val viewModel: RandomizeViewModel =
                     viewModel(viewModelStoreOwner = parentEntry, factory = factory)
@@ -172,7 +174,7 @@ fun AppNavigation(
                     modifier = Modifier.padding(paddingValues)
                 )
             }
-            composable("home_shuffle") {
+            composable(Routes.HOME_SHUFFLE) {
                 val viewModel: RandomizeViewModel =
                     viewModel(factory = factory)
                 HomeShuffleViewRoute(

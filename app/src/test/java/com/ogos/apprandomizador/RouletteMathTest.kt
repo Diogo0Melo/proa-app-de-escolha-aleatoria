@@ -77,9 +77,9 @@ class RouletteMathTest {
     // --- totalSlots (geometria fixa) ------------------------------------------
 
     @Test
-    fun totalSlotsIsAlways21ForAnyNonEmptyList() {
+    fun totalSlotsIsAlways24ForAnyNonEmptyList() {
         for (n in listOf(1, 2, 3, 7, 10, 15, 21)) {
-            assertEquals("itemCount=$n", 21, RouletteMath.totalSlots(n))
+            assertEquals("itemCount=$n", 24, RouletteMath.totalSlots(n))
         }
     }
 

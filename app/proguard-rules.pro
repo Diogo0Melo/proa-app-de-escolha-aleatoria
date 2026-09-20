@@ -8,9 +8,15 @@
 # Preserve line number information for debugging stack traces.
 -keepattributes SourceFile,LineNumberTable
 
-# Gson serialization (used in Room TypeConverters)
--keep class com.ogos.apprandomizador.model.** { *; }
--keepclassmembers class com.ogos.apprandomizador.model.** { *; }
+# kotlinx.serialization (used in Room TypeConverters)
+-keepattributes *Annotation*, InnerClasses
+-dontwarn kotlinx.serialization.**
+-keepclassmembers class com.ogos.apprandomizador.model.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.ogos.apprandomizador.model.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
 
 # Room
 -keep class * extends androidx.room.RoomDatabase

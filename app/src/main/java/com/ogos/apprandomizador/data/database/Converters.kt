@@ -1,22 +1,19 @@
 package com.ogos.apprandomizador.data.database
 
 import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.ogos.apprandomizador.model.RaffleItem
+import kotlinx.serialization.json.Json
 import java.time.Instant
 
 class Converters {
-    private val gson = Gson()
+    private val json = Json { ignoreUnknownKeys = true }
 
     @TypeConverter
-    fun fromRaffleItemList(value: List<RaffleItem>): String = gson.toJson(value)
+    fun fromRaffleItemList(value: List<RaffleItem>): String = json.encodeToString(value)
 
     @TypeConverter
-    fun toRaffleItemList(value: String): List<RaffleItem> {
-        val type = object : TypeToken<List<RaffleItem>>() {}.type
-        return gson.fromJson(value, type) ?: emptyList()
-    }
+    fun toRaffleItemList(value: String): List<RaffleItem> =
+        json.decodeFromString(value)
 
     @TypeConverter
     fun fromInstant(value: Instant?): Long? =

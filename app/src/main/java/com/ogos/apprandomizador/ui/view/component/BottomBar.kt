@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ogos.apprandomizador.R
+import com.ogos.apprandomizador.ui.navigation.Routes
 
 @Composable
 fun BottomBar(
@@ -25,9 +26,13 @@ fun BottomBar(
 ) {
     NavigationBar {
         NavigationBarItem(
-            selected = currentRoute == "home_randomize",
+            selected = currentRoute == Routes.HOME_RANDOMIZE,
             onClick = {
-                navController.navigate(route = "home_randomize")
+                navController.navigate(Routes.HOME_RANDOMIZE) {
+                    popUpTo(Routes.HOME_RANDOMIZE) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
             },
             icon = {
                 Icon(
@@ -45,9 +50,13 @@ fun BottomBar(
             }
         )
         NavigationBarItem(
-            selected = currentRoute == "home_shuffle",
+            selected = currentRoute == Routes.HOME_SHUFFLE,
             onClick = {
-                navController.navigate(route = "home_shuffle")
+                navController.navigate(Routes.HOME_SHUFFLE) {
+                    popUpTo(Routes.HOME_RANDOMIZE) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
             },
             icon = {
                 Icon(

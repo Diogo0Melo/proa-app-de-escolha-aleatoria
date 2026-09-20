@@ -64,7 +64,7 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
         val list = currentItemList.value
         if (target.targetIndex in list.items.indices) {
             val drawn = list.items[target.targetIndex]
-            val updated = list.recordDraw(drawn)
+            val updated = list.recordDraw()
             _currentItemList.value = updated
             _currentRandomItem.value = drawn
             updateItem(updated)

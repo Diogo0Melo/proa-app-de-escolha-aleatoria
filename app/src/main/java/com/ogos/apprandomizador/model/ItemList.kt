@@ -13,7 +13,7 @@ data class ItemList(
     val lastUsedAt: Instant? = null,
     val createdAt: Instant = Instant.now(),
 ) {
-    fun recordDraw(drawItem: RaffleItem): ItemList {
+    fun recordDraw(): ItemList {
         return copy(
             uses = uses + 1,
             lastUsedAt = Instant.now()

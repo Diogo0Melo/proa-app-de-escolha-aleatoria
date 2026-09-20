@@ -2,10 +2,10 @@ package com.ogos.apprandomizador.ui.view.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.VolumeOff
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.VolumeOff
-import androidx.compose.material.icons.outlined.VolumeUp
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,7 +74,7 @@ fun TopBar(
                     text = { Text(stringResource(if (soundEnabled) R.string.sound_on else R.string.sound_off)) },
                     leadingIcon = {
                         Icon(
-                            imageVector = if (soundEnabled) Icons.Outlined.VolumeUp else Icons.Outlined.VolumeOff,
+                            imageVector = if (soundEnabled) Icons.AutoMirrored.Outlined.VolumeUp else Icons.AutoMirrored.Outlined.VolumeOff,
                             contentDescription = null
                         )
                     },

@@ -1,0 +1,10 @@
+package com.ogos.apprandomizador.ui.navigation
+
+object Routes {
+    const val HOME_RANDOMIZE = "home_randomize"
+    const val HOME_SHUFFLE = "home_shuffle"
+    const val RANDOMIZE_ROUTE = "randomize_route"
+    const val RANDOMIZE_FULL = "randomize_route/{itemID}"
+
+    fun randomizeWithId(id: Long) = "randomize_route/$id"
+}
