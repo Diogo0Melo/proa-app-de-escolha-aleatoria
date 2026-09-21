@@ -7,6 +7,12 @@ import com.ogos.apprandomizador.data.repository.ItemListRepository
 
 class RandomApplication : Application() {
     val database by lazy { AppDatabase.getDatabase(this) }
-    val repository by lazy { ItemListRepository(database.itemDao(), database.drawHistoryDao()) }
+    val repository by lazy {
+        ItemListRepository(
+            database,
+            database.itemDao(),
+            database.drawHistoryDao()
+        )
+    }
     val dataStoreManager by lazy { DataStoreManager(this) }
 }

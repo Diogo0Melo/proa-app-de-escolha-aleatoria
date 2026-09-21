@@ -1,12 +1,16 @@
 package com.ogos.apprandomizador.data.repository
 
+import androidx.room.withTransaction
+import com.ogos.apprandomizador.data.database.AppDatabase
 import com.ogos.apprandomizador.data.database.DrawHistoryDao
 import com.ogos.apprandomizador.data.database.ItemDao
 import com.ogos.apprandomizador.model.DrawHistoryEntry
 import com.ogos.apprandomizador.model.ItemList
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 
 class ItemListRepository(
+    private val database: AppDatabase,
     private val itemDao: ItemDao,
     private val drawHistoryDao: DrawHistoryDao
 ) : IRepository {
@@ -29,10 +33,16 @@ class ItemListRepository(
         itemDao.deleteItemById(id)
     }
 
-    override suspend fun getItem(id: Long): ItemList? = itemDao.getItem(id)
 
-    override suspend fun saveDrawHistory(entry: DrawHistoryEntry) {
-        drawHistoryDao.insert(entry)
+    override fun getItemFlow(id: Long): Flow<ItemList?> = itemDao.getItemFlow(id)
+
+    override suspend fun recordDraw(listId: Long, itemName: String) {
+        database.withTransaction {
+            itemDao.incrementUses(listId, Instant.now())
+            drawHistoryDao.insert(
+                DrawHistoryEntry(itemListId = listId, resultName = itemName)
+            )
+        }
     }
 
     override fun getDrawHistory(itemListId: Long): Flow<List<DrawHistoryEntry>> =

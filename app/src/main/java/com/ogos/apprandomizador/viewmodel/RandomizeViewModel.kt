@@ -3,9 +3,9 @@ package com.ogos.apprandomizador.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.data.repository.IRepository
-import com.ogos.apprandomizador.model.DrawHistoryEntry
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.model.RaffleItem
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,13 +14,16 @@ import kotlinx.coroutines.launch
 import java.security.SecureRandom
 
 /**
- * One pending draw. The ViewModel picks [targetIndex] FIRST; the 3D wheel
- * in the View then animates the ring until that slot sits at the center and
- * calls back via finishSpin(). [requestId] makes every roll a distinct key
- * even when the same index is drawn twice in a row.
+ * One pending draw. The ViewModel picks the winning [targetItem] FIRST; the 3D wheel
+ * in the View then locates that item in the displayed (shuffled) list, animates the
+ * ring until its slot sits at the center and calls back via finishSpin(). [listId]
+ * ties the target to the list it was drawn from, guarding against list changes
+ * during a spin. [requestId] makes every roll a distinct key even when the same
+ * item is drawn twice in a row.
  */
 data class SpinTarget(
-    val targetIndex: Int,
+    val targetItem: RaffleItem,
+    val listId: Long,
     val requestId: Long
 )
 
@@ -28,6 +31,8 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
 
     private val secureRandom = SecureRandom()
     private var spinRequestId = 0L
+
+    private var currentItemJob: Job? = null
 
     private val _currentItemList = MutableStateFlow(ItemList())
     val currentItemList: StateFlow<ItemList> = _currentItemList.asStateFlow()
@@ -47,34 +52,28 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
         val list = currentItemList.value
         if (list.items.isEmpty()) return
         if (_isSpinning.value) return
-        val targetIndex = secureRandom.nextInt(list.items.size)
+        val winner = list.items[secureRandom.nextInt(list.items.size)]
         spinRequestId += 1
-        _spinTarget.value = SpinTarget(targetIndex, spinRequestId)
+        _spinTarget.value =
+            SpinTarget(targetItem = winner, listId = list.id, requestId = spinRequestId)
         _isSpinning.value = true
     }
 
     /**
-     * Wheel-completion callback. Records the draw in the separate
-     * draw_history table (infinite, queryable) and updates ItemList
-     * counters. The null-target check guards against double completion
+     * Wheel-completion callback. Records the draw atomically via the repository's
+     * recordDraw (draw_history entry + ItemList counters in one transaction).
+     * The item/listId validation guards against list changes during the spin, and
+     * the null-target check guards against double completion
      * (e.g. animation finished + cancellation race).
      */
     fun finishSpin() {
         val target = _spinTarget.value ?: return
         val list = currentItemList.value
-        if (target.targetIndex in list.items.indices) {
-            val drawn = list.items[target.targetIndex]
-            val updated = list.recordDraw()
-            _currentItemList.value = updated
-            _currentRandomItem.value = drawn
-            updateItem(updated)
+        // Validate the item is still in the current list (guards against list change during spin)
+        if (target.targetItem in list.items && list.id == target.listId) {
+            _currentRandomItem.value = target.targetItem
             viewModelScope.launch {
-                repository.saveDrawHistory(
-                    DrawHistoryEntry(
-                        itemListId = list.id,
-                        resultName = drawn.name
-                    )
-                )
+                repository.recordDraw(listId = target.listId, itemName = target.targetItem.name)
             }
         }
         _spinTarget.value = null
@@ -86,10 +85,16 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
     }
 
     fun setCurrentItem(id: Long) {
-        viewModelScope.launch {
-            val item = repository.getItem(id)
-            if (item != null) {
-                _currentItemList.value = item
+        // Cancel any in-progress spin when switching lists
+        _spinTarget.value = null
+        _isSpinning.value = false
+        // Cancel previous collection and start reactive observation
+        currentItemJob?.cancel()
+        currentItemJob = viewModelScope.launch {
+            repository.getItemFlow(id).collect { item ->
+                if (item != null) {
+                    _currentItemList.value = item
+                }
             }
         }
     }

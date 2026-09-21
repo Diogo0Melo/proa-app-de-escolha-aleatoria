@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ogos.apprandomizador.model.ItemList
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 
 @Dao
 interface ItemDao {
@@ -26,6 +27,10 @@ interface ItemDao {
     @Query("SELECT * FROM item_list")
     fun readAllItems(): Flow<List<ItemList>>
 
+
     @Query("SELECT * FROM item_list WHERE id = :id")
-    suspend fun getItem(id: Long): ItemList?
+    fun getItemFlow(id: Long): Flow<ItemList?>
+
+    @Query("UPDATE item_list SET uses = uses + 1, lastUsedAt = :now WHERE id = :id")
+    suspend fun incrementUses(id: Long, now: Instant)
 }

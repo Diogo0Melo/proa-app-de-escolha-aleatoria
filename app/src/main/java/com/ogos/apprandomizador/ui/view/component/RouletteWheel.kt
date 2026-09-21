@@ -49,7 +49,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.tan
 
-private const val MIN_TOTAL_SLOTS = 24
+internal const val MAX_DISPLAY_SLOTS = 24
 internal const val WHEEL_FULL_TURNS = 2
 private const val SPIN_DURATION_MS = 2500
 
@@ -65,8 +65,9 @@ private val ITEM_VERTICAL_GAP = 6.dp
 
 internal object RouletteMath {
 
-    // Cilindro sempre com 24 slots → perspectiva idêntica pra qualquer lista
-    fun totalSlots(itemCount: Int): Int = if (itemCount <= 0) 0 else MIN_TOTAL_SLOTS
+    // O cilindro renderiza a sequência de exibição 1:1; o teto de 24 slots
+    // (MAX_DISPLAY_SLOTS) é garantido a montante por quem monta a sequência.
+    fun totalSlots(itemCount: Int): Int = itemCount
 
     fun thetaDegrees(totalSlots: Int): Float = 360f / totalSlots
 
@@ -192,8 +193,15 @@ fun RouletteWheel(
     // Driver do giro: ângulo contínuo/monotônico entre giros
     LaunchedEffect(spinTarget?.requestId, totalSlots) {
         val target = spinTarget ?: return@LaunchedEffect
-        if (totalSlots == 0) return@LaunchedEffect
-        val slot = target.targetIndex % totalSlots
+        if (totalSlots == 0) {
+            onSpinFinished(); return@LaunchedEffect
+        }
+        val slot = items.indexOf(target.targetItem).let { idx ->
+            if (idx < 0) {
+                onSpinFinished(); return@LaunchedEffect
+            }  // item not in displayed list
+            idx  // 1:1 mapping — display sequence is already capped at MAX_DISPLAY_SLOTS
+        }
         val start = ringAngle.value
         val end = RouletteMath.targetAngle(start, slot, totalSlots, WHEEL_FULL_TURNS)
         ringAngle.animateTo(
@@ -222,7 +230,9 @@ fun RouletteWheel(
 
         Box(modifier = Modifier.fillMaxSize()) {
             for (slot in 0 until totalSlots) {
-                val itemIndex = slot % itemCount
+                // 1:1 mapping — the display sequence is already capped upstream
+                val item = items[slot]
+                val itemIndex = items.indexOf(item)
                 RouletteCard(
                     slot = slot,
                     centerSlot = centerSlot,
@@ -231,7 +241,7 @@ fun RouletteWheel(
                     cylinderRadius = cylinderRadius,
                     cameraDistance = cameraDistance,
                     cardHeight = cardHeight,
-                    item = items[itemIndex],
+                    item = item,
                     itemIndex = itemIndex,
                     isCenter = centerHighlighted && slot == centerSlot,
                     ringAngle = ringAngle,

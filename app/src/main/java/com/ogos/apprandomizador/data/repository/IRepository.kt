@@ -10,7 +10,7 @@ interface IRepository {
     suspend fun update(item: ItemList)
     suspend fun delete(item: ItemList)
     suspend fun deleteById(id: Long)
-    suspend fun getItem(id: Long): ItemList?
-    suspend fun saveDrawHistory(entry: DrawHistoryEntry)
+    fun getItemFlow(id: Long): Flow<ItemList?>
+    suspend fun recordDraw(listId: Long, itemName: String)
     fun getDrawHistory(itemListId: Long): Flow<List<DrawHistoryEntry>>
 }

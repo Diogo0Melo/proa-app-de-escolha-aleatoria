@@ -1,7 +1,7 @@
 package com.ogos.apprandomizador.data.repository
 
-import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.data.database.DataStoreManager
+import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.model.RaffleItem
 
 class DefaultInitialize : IDefaultInitialization {
@@ -64,6 +64,26 @@ class DefaultInitialize : IDefaultInitialization {
                 uses = 0,
             )
         )
+        allItems.add(createNumberedList("Teste 2 itens", 2))
+        allItems.add(createNumberedList("Teste 13 itens", 13))
+        allItems.add(createNumberedList("Teste 24 itens", 24))
+        allItems.add(createNumberedList("Teste 50 itens", 50))
+        allItems.add(createNumberedList("Teste 100 itens", 100))
         return allItems
+    }
+
+    private fun createNumberedList(topic: String, count: Int): ItemList {
+        val colors = listOf(
+            0xFF9D4EDDL, 0xFF4CAF50L, 0xFFD6E024L, 0xFFE5484DL,
+            0xFF2BD4C8L, 0xFF8FA3B0L, 0xFFB07A50L, 0xFF2196F3L,
+            0xFFFF9800L, 0xFFE91E63L
+        )
+        return ItemList(
+            topic = topic,
+            items = (1..count).map { index ->
+                RaffleItem("Item $index", colors[(index - 1) % colors.size])
+            }.toMutableList(),
+            uses = 0
+        )
     }
 }

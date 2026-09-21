@@ -12,11 +12,4 @@ data class ItemList(
     val uses: Int = 0,
     val lastUsedAt: Instant? = null,
     val createdAt: Instant = Instant.now(),
-) {
-    fun recordDraw(): ItemList {
-        return copy(
-            uses = uses + 1,
-            lastUsedAt = Instant.now()
-        )
-    }
-}
+)
