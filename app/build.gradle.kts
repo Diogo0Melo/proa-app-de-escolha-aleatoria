@@ -13,8 +13,8 @@ android {
         applicationId = "com.ogos.apprandomizador"
         minSdk = 27
         targetSdk = 34
-        versionCode = 1
-        versionName = "Alpha 0.2.0"
+        versionCode = 2
+        versionName = "Alpha 0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
