@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -61,9 +62,9 @@ class MainActivity : ComponentActivity() {
                 ViewModelFactory(app.repository, app.dataStoreManager, DefaultInitialize())
             }
             val mainViewModel: MainViewModel = viewModel(factory = factory)
-            val isReady by mainViewModel.isReady.collectAsState()
-            val themeMode by mainViewModel.themeMode.collectAsState()
-            val soundEnabled by mainViewModel.soundEnabled.collectAsState()
+            val isReady by mainViewModel.isReady.collectAsStateWithLifecycle()
+            val themeMode by mainViewModel.themeMode.collectAsStateWithLifecycle()
+            val soundEnabled by mainViewModel.soundEnabled.collectAsStateWithLifecycle()
             val resolvedThemeMode = themeMode ?: ThemeMode.SYSTEM
 
             AppRandomizadorTheme(themeMode = resolvedThemeMode) {

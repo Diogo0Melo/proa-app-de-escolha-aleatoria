@@ -51,10 +51,13 @@ class MainViewModel(
     }
 
     init {
+        // Seeding runs in the background; isReady flips immediately so the first
+        // screen renders as soon as the theme resolves. Room flows stream the
+        // seeded lists into the UI as each insert lands.
         viewModelScope.launch {
             val isFirstTime = dataStoreManager.isFirstTime.first()
             defaultInitilization.initializeDatabase(isFirstTime, dataStoreManager, repository)
-            _isReady.value = true
         }
+        _isReady.value = true
     }
 }

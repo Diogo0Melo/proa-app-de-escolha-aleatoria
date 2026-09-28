@@ -1,8 +1,8 @@
 package com.ogos.apprandomizador.ui.view
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ogos.apprandomizador.ui.view.component.ListCollection
 import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 
@@ -12,7 +12,7 @@ fun HomeRandomizeViewRoute(
     viewModel: RandomizeViewModel,
     modifier: Modifier = Modifier
 ) {
-    val allItemsList = viewModel.getAllItems().collectAsState(initial = emptyList()).value
+    val allItemsList = viewModel.getAllItems().collectAsStateWithLifecycle(initialValue = emptyList()).value
     ListCollection(
         onNavigateToActive = onNavigateToActive,
         modifier = modifier,

@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,6 +22,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +39,8 @@ import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.ui.format.TimeAgoFormatter
 
+private const val MaxVisibleChips = 7
+
 @Composable
 fun ListCollection(
     onNavigateToActive: (index: Long) -> Unit,
@@ -42,11 +50,17 @@ fun ListCollection(
     LazyColumn(
         modifier = modifier
     ) {
-        items(count = allItemsList.size) { index ->
-            val item = allItemsList[index]
+        items(
+            items = allItemsList,
+            key = { it.id }
+        ) { item ->
             val scrollState = rememberScrollState()
+            var expanded by remember(item.id) { mutableStateOf(false) }
             val lastUse = TimeAgoFormatter.updateLastUse(item.lastUsedAt)
             val createdAt = TimeAgoFormatter.formatCreatedAt(item.createdAt)
+            val totalChips = if (item.items.isEmpty()) 0 else maxOf(MaxVisibleChips, item.items.size)
+            val visibleChips = if (expanded) totalChips else minOf(totalChips, MaxVisibleChips)
+            val hiddenChips = totalChips - visibleChips
             Card(
                 onClick = { onNavigateToActive(item.id) },
                 modifier = Modifier
@@ -66,9 +80,8 @@ fun ListCollection(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            val times = if (item.items.size >= 7) item.items.size else 7
                             repeat(
-                                times = times,
+                                times = visibleChips,
                             ) { currentIndex ->
                                 val circularIndex = currentIndex % item.items.size
                                 val currentSubItem = item.items[circularIndex]
@@ -95,6 +108,28 @@ fun ListCollection(
                                             )
                                         )
                                     }
+                                }
+                            }
+                            if (hiddenChips > 0 || expanded) {
+                                Surface(
+                                    modifier = Modifier
+                                        .width(108.dp)
+                                        .height(16.dp)
+                                        .clickable { expanded = !expanded },
+                                    color = Color.Gray
+                                ) {
+                                    Text(
+                                        text = if (expanded) "-" else "+$hiddenChips",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .wrapContentHeight(Alignment.CenterVertically),
+                                        style = TextStyle(
+                                            fontSize = 8.sp,
+                                            fontWeight = FontWeight.Black,
+                                            textAlign = TextAlign.Center,
+                                            color = Color.White
+                                        )
+                                    )
                                 }
                             }
                         }

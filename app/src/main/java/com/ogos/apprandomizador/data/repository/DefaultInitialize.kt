@@ -3,6 +3,9 @@ package com.ogos.apprandomizador.data.repository
 import com.ogos.apprandomizador.data.database.DataStoreManager
 import com.ogos.apprandomizador.model.ItemList
 import com.ogos.apprandomizador.model.RaffleItem
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class DefaultInitialize : IDefaultInitialization {
 
@@ -11,13 +14,23 @@ class DefaultInitialize : IDefaultInitialization {
         dataStoreManager: DataStoreManager,
         repository: IRepository
     ) {
-        if (isFirstTime) {
-            val defaultItems = createDefaultList()
-            defaultItems.forEach { item ->
-                repository.save(item)
-            }
+        if (!isFirstTime) return
+        // Idempotency: never re-seed if lists already exist (e.g. a previous run
+        // was killed mid-seeding before the first-access flag was cleared).
+        if (repository.allItems.first().isNotEmpty()) {
             dataStoreManager.saveFirstAccess(false)
+            return
         }
+        val defaultItems = createDefaultList()
+        // Insert concurrently instead of awaiting each save sequentially.
+        // coroutineScope awaits all children before clearing the first-access
+        // flag, so the seed-then-clear ordering keeps initialization idempotent.
+        coroutineScope {
+            defaultItems.forEach { item ->
+                launch { repository.save(item) }
+            }
+        }
+        dataStoreManager.saveFirstAccess(false)
     }
 
     override fun createDefaultList(): List<ItemList> {
