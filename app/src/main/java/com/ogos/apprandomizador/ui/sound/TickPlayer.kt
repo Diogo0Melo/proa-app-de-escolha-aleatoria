@@ -12,6 +12,13 @@ import androidx.annotation.RawRes
  */
 class TickPlayer(context: Context, @RawRes tickRes: Int) {
 
+    private companion object {
+        // Faixa util para o tick: 0.8f soa mais grave e lento, 1.2f mais agudo
+        // e apressado. Fora disso o som degrada de forma perceptivel.
+        const val MIN_PITCH = 0.8f
+        const val MAX_PITCH = 1.2f
+    }
+
     private val soundPool: SoundPool = SoundPool.Builder()
         .setMaxStreams(2)
         .setAudioAttributes(
@@ -37,9 +44,10 @@ class TickPlayer(context: Context, @RawRes tickRes: Int) {
         soundId = soundPool.load(context, tickRes, 1)
     }
 
-    fun play(volume: Float): Int {
+    fun play(volume: Float, pitch: Float = 1f): Int {
         if (released || volume <= 0f || !ready) return 0
-        return soundPool.play(soundId, volume, volume, 1, 0, 1f)
+        val rate = pitch.coerceIn(MIN_PITCH, MAX_PITCH)
+        return soundPool.play(soundId, volume, volume, 1, 0, rate)
     }
 
     fun pause() {

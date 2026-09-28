@@ -2,7 +2,7 @@ package com.ogos.apprandomizador.ui.view.component
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.ogos.apprandomizador.model.RaffleItem
 import com.ogos.apprandomizador.ui.theme.LocalRouletteBackground
+import com.ogos.apprandomizador.viewmodel.SpinCosmetics
 import com.ogos.apprandomizador.viewmodel.SpinTarget
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -53,12 +55,19 @@ import kotlin.math.tan
 internal const val MAX_DISPLAY_SLOTS = 24
 internal const val WHEEL_FULL_TURNS = 2
 
-// Física do giro: 3000ms com ease-out forte (partida rápida, frenagem longa)
-private const val SPIN_DURATION_MS = 3000
-private val SPIN_EASING = CubicBezierEasing(0.16f, 0.84f, 0.28f, 1.0f)
+// Física do giro: ver SpinMotion.kt. O roteiro (percurso, excesso, vacilo,
+// duração) é sorteado por rodada a partir do mesmo fluxo criptográfico do
+// vencedor; a curva é amostrada quadro a quadro dentro da coroutine do driver.
 
-// Percurso do giro em itens (aleatório entre 8 e 16 itens por giro)
-private val SPIN_TRAVEL_RANGE = 8..16
+// Fracão do percurso reservada ao cruzeiro em listas curtas: listas pequenas
+// giram menos cartas absolutas, então o percurso é escalado pelo tamanho.
+private const val TRAVEL_SIZE_REFERENCE = MAX_DISPLAY_SLOTS.toFloat()
+private const val TRAVEL_SIZE_FLOOR = 0.4f
+
+// Probabilidade do excesso: ~45% dos giros param exatamente no ponto, ~33%
+// passam 1 carta, ~22% passam 2. Sorteado do fluxo, nunca de padrão fixo.
+private const val OVERSHOOT_NONE_THRESHOLD = 0.45f
+private const val OVERSHOOT_ONE_THRESHOLD = 0.78f
 
 // Carrossel pseudo-cilíndrico por JANELA DE POSIÇÃO: position é contínua em
 // unidades de item (0f = item 0 centralizado). A janela visível cobre
@@ -112,9 +121,12 @@ private val CARD_HEIGHT_BASE = 104.dp
 private val CARD_HEIGHT_MIN = 96.dp
 private val CARD_HEIGHT_MAX = 110.dp
 
-// Micro-pop do vencedor: 1.04 -> 1.0 em 150ms ao virar o centro (sem overshoot)
-private const val POP_SCALE = 1.04f
-private const val POP_DURATION_MS = 150
+// Micro-assentamento do vencedor: respiração amortecida em escala + balanço
+// vertical, ambos dirigidos por SpinMotion.settleScale/settleBob. A duração é
+// derivada do amortecimento (envelope abaixo do limiar).
+private val SETTLE_DURATION_MS =
+    ((settleDurationSeconds(SETTLE_SCALE_AMPLITUDE)) * 1000f).roundToInt().coerceAtLeast(1)
+private val SETTLE_DURATION_SECONDS = SETTLE_DURATION_MS / 1000f
 
 // Elevação do cartão central: sombra preta suave (sem glow colorido)
 private val CENTER_SHADOW_ELEVATION = 12.dp
@@ -238,13 +250,105 @@ internal object RouletteMath {
 // texto. Computados uma vez por mudança de sequência (nunca por frame).
 private class ShellVisuals(val brush: Brush, val lightBase: Boolean)
 
+/**
+ * Estado vivo do giro para o relógio de som. Guarda apenas escalares (roteiro,
+ * instante inicial, duração) — nada de snapshots por frame. O pitch é calculado
+ * sob demanda no cruzamento de slot (~uma dezena de vezes por giro), lendo o
+ * relógio passado por argumento, nunca o Animatable.
+ */
+private class SpinRuntime {
+    private var plan: SpinMotionPlan? = null
+    private var startNanos: Long = -1L
+    private var durationNanos: Long = 1L
+
+    fun begin(motionPlan: SpinMotionPlan, motionDurationNanos: Long) {
+        plan = motionPlan
+        durationNanos = motionDurationNanos.coerceAtLeast(1L)
+        startNanos = -1L
+    }
+
+    fun markStart(frameNanos: Long) {
+        startNanos = frameNanos
+    }
+
+    fun end() {
+        plan = null
+        startNanos = -1L
+    }
+
+    /** Pitch atual do tick: 1.2 no cruzeiro, 0.8 no fim da dúvida. 1f em repouso. */
+    fun currentPitch(nowNanos: Long): Float {
+        val active = plan ?: return 1f
+        if (startNanos < 0L) return 1f
+        val elapsed = nowNanos - startNanos
+        if (elapsed <= 0L) return TICK_PITCH_MAX
+        val t = if (elapsed >= durationNanos) 1f
+        else elapsed.toFloat() / durationNanos.toFloat()
+        return tickPitchForSpeed(normalizedAdvanceSpeed(active, t))
+    }
+}
+
+/**
+ * Converte as unidades sorteadas em `[0,1)` do roteiro concreto deste giro.
+ * Puro: recebe posição, tamanho da roda e as unidades criptográficas; devolve o
+ * plano com o pouso já corrigido modularmente no slot do vencedor.
+ */
+private fun buildSpinPlan(
+    cosmetics: SpinCosmetics,
+    startPosition: Float,
+    winnerIndex: Int,
+    totalSlots: Int
+): SpinMotionPlan {
+    val slots = max(1, totalSlots)
+    val currentInt = startPosition.roundToInt()
+
+    // Percurso assimétrico 10..28 cartas, escalado pelo tamanho da roda: listas
+    // curtas giram menos cartas absolutas (mas ainda várias voltas), listas
+    // cheias têm o alcance completo. Nunca o mesmo número duas vezes seguidas,
+    // porque a unidade vem do fluxo criptográfico da rodada.
+    val sizeScale = (slots / TRAVEL_SIZE_REFERENCE).coerceIn(TRAVEL_SIZE_FLOOR, 1f)
+    val travelCeiling = TRAVEL_MIN_SLOTS +
+        (TRAVEL_MAX_SLOTS - TRAVEL_MIN_SLOTS) * sizeScale
+    val travel = (TRAVEL_MIN_SLOTS + cosmetics.travelUnit * (travelCeiling - TRAVEL_MIN_SLOTS))
+        .roundToInt()
+        .coerceIn(TRAVEL_MIN_SLOTS, TRAVEL_MAX_SLOTS)
+
+    // Correção modular idêntica à da onda 1: o resultado é fixo, a roda é teatro.
+    val rawTarget = currentInt + travel
+    val remainder = ((rawTarget % slots) + slots) % slots
+    val delta = ((winnerIndex - remainder) % slots + slots) % slots
+    val winner = (rawTarget + delta).toFloat()
+
+    // Excesso probabilístico: ~45% param no ponto, ~33% passam 1 carta, ~22% 2.
+    val overshoot = when {
+        cosmetics.overshootUnit < OVERSHOOT_NONE_THRESHOLD -> 0f
+        cosmetics.overshootUnit < OVERSHOOT_ONE_THRESHOLD -> 1f
+        else -> 2f
+    }
+
+    return SpinMotionPlan(
+        start = startPosition,
+        winner = winner,
+        hesitationAmplitude = HESITATION_AMPLITUDE_MIN +
+            cosmetics.hesitationAmplitudeUnit * (HESITATION_AMPLITUDE_MAX - HESITATION_AMPLITUDE_MIN),
+        hesitationCycles = HESITATION_CYCLES_MIN +
+            cosmetics.hesitationCyclesUnit * (HESITATION_CYCLES_MAX - HESITATION_CYCLES_MIN),
+        overshootSlots = overshoot
+    )
+}
+
+/** Duração deste giro, 2,5–3,5 s, sorteada do mesmo fluxo. */
+private fun spinDurationMillis(cosmetics: SpinCosmetics): Int =
+    (SPIN_DURATION_MIN_MS + cosmetics.durationUnit *
+        (SPIN_DURATION_MAX_MS - SPIN_DURATION_MIN_MS)).roundToInt()
+
 @Composable
 fun RouletteWheel(
     items: List<RaffleItem>,
     spinTarget: SpinTarget?,
     centerHighlighted: Boolean,
     onSpinFinished: () -> Unit,
-    onSlotCrossed: (() -> Unit)? = null,
+    onSlotCrossed: ((pitch: Float) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
@@ -254,6 +358,10 @@ fun RouletteWheel(
     // O giro anima position; TODOS os transforms por frame leem position apenas
     // dentro de graphicsLayer (draw phase) — composição não toca no Animatable.
     val position = remember { Animatable(0f) }
+
+    // Relogio vivo do giro para o pitch do tick. Escalares apenas; escrito pela
+    // coroutine do driver, lido nos cruzamentos de slot - nunca pela composicao.
+    val spinRuntime = remember { SpinRuntime() }
 
     val currentOnSlotCrossed by rememberUpdatedState(onSlotCrossed)
 
@@ -269,22 +377,33 @@ fun RouletteWheel(
     }
 
     // Tick sonoro: fronteira inteira (roundToInt), exatamente como antes —
-    // só chama o callback, sem estado lido em composição.
+    // só chama o callback, sem estado lido em composição. O pitch acompanha a
+    // velocidade real do giro naquele instante: agudo e apressado no cruzeiro,
+    // fino e hesitante na aproximação. Leitura de relógio dentro da coroutine,
+    // nunca da composição.
     LaunchedEffect(totalItems) {
         if (totalItems == 0) return@LaunchedEffect
         snapshotFlow { position.value }
             .map { pos -> ((pos.roundToInt()) % totalItems + totalItems) % totalItems }
             .distinctUntilChanged()
             .collect {
-                currentOnSlotCrossed?.invoke()
+                val pitch = spinRuntime.currentPitch(System.nanoTime())
+                currentOnSlotCrossed?.invoke(pitch)
             }
     }
 
-    // Sinal de pouso: true somente após animateTo completar (micro-pop usa isso)
+    // Sinal de pouso: true somente após animateTo completar (assentamento usa isso)
     var justLanded by remember { mutableStateOf(false) }
 
-    // Driver do giro: percurso de 8–16 itens + correção modular para pousar
-    // exatamente no vencedor; posição cresce monotonicamente entre giros.
+    // Driver do giro: roteiro sorteado por rodada (percurso escalado pelo
+    // tamanho da lista, excesso probabilístico, vacilo, duração 2,5–3,5 s) a
+    // partir do MESMO fluxo criptográfico do vencedor, mais a correção modular
+    // de sempre para pousar exatamente no slot do vencedor.
+    //
+    // A curva é amostrada quadro a quadro dentro desta coroutine: cada frame faz
+    // um snapTo do valor contínuo. Isso mantém o contrato da onda 1 — a
+    // composição nunca lê `position`, só os graphicsLayer leem (draw phase) — e
+    // nenhuma estrutura é alocada por frame: o roteiro nasce aqui, uma vez.
     LaunchedEffect(spinTarget?.requestId, totalItems) {
         val target = spinTarget ?: return@LaunchedEffect
         if (totalItems == 0) {
@@ -295,20 +414,40 @@ fun RouletteWheel(
             onSpinFinished(); return@LaunchedEffect
         }
         justLanded = false  // reset no início do giro
-        val currentInt = position.value.roundToInt()
-        val baseTravel = SPIN_TRAVEL_RANGE.random()
-        val rawTarget = currentInt + baseTravel
-        val remainder = ((rawTarget % totalItems) + totalItems) % totalItems
-        val delta = ((winnerIndex - remainder) % totalItems + totalItems) % totalItems
-        val finalTarget = (rawTarget + delta).toFloat()
-        position.animateTo(
-            finalTarget,
-            animationSpec = tween(
-                durationMillis = SPIN_DURATION_MS,
-                easing = SPIN_EASING
-            )
+        val plan = buildSpinPlan(
+            cosmetics = target.cosmetics,
+            startPosition = position.value,
+            winnerIndex = winnerIndex,
+            totalSlots = totalItems
         )
-        justLanded = true  // pouso completo — micro-pop pode disparar
+        val durationNanos = spinDurationMillis(target.cosmetics) * 1_000_000L
+        spinRuntime.begin(plan, durationNanos)
+        // Estado do laço vivo uma única vez por giro: nada é alocado por frame.
+        var firstFrameNanos = -1L
+        var frameValue = plan.start
+        var settled = false
+        try {
+            while (!settled) {
+                withFrameNanos { frameNanos ->
+                    if (firstFrameNanos < 0L) {
+                        firstFrameNanos = frameNanos
+                        spinRuntime.markStart(frameNanos)
+                    }
+                    val elapsed = frameNanos - firstFrameNanos
+                    val t = if (elapsed >= durationNanos) 1f
+                    else elapsed.toFloat() / durationNanos.toFloat()
+                    frameValue = evaluatePose(plan, t)
+                    if (t >= 1f) settled = true
+                }
+                // snapTo fora do callback (que não é suspend), mas ainda dentro do
+                // mesmo frame: a coroutine retoma dentro de doFrame, antes do draw.
+                // O valor por frame vem da curva sorteada, não de uma AnimationSpec.
+                position.snapTo(frameValue)
+            }
+        } finally {
+            spinRuntime.end()
+        }
+        justLanded = true  // pouso completo — assentamento pode disparar
         onSpinFinished()
     }
 
@@ -399,20 +538,26 @@ private fun RouletteShell(
     val highlighted = isCenterShell && centerHighlighted
     // Cor do texto estática por item (sem lerp por frame): o escurecimento por
     // profundidade vem do overlay preto com alpha animado abaixo.
-    val textColor = when {
-        highlighted -> Color.White
-        visuals.lightBase -> Color.Black
-        else -> Color.White
-    }
+    // Realce não inverte mais para branco fixo: a classe claro/escuro da base
+    // manda mesmo em destaque — texto branco sobre amarelo-da-paleta ficava
+    // ilegível justamente na carta que importa.
+    val textColor = if (visuals.lightBase) Color.Black else Color.White
 
-    // Micro-pop do vencedor: dispara SOMENTE ao pousar (justLanded), não durante
-    // o giro. centerHighlighted pode ser true durante o spin — justLanded garante
-    // que o pop só acontece quando a animação termina.
-    val pop = remember { Animatable(1f) }
+    // Micro-assentamento do vencedor: dispara SOMENTE ao pousar (justLanded), não
+    // durante o giro. O Animatable é um relógio 0→1; a onda amortecida de escala e
+    // o balanço vertical são derivados dele dentro de graphicsLayer (draw phase),
+    // então a composição continua estática.
+    //
+    // A amplitude é zerada fora da shell central: as outras shells nunca rodam o
+    // relógio e ficariam presas no pico da onda. O relógio nasce em 1 (onda já
+    // extinta) para o repouso ser neutro — idêntico ao visual de repouso da onda 1.
+    val settle = remember { Animatable(1f) }
+    val settleScaleAmp = if (isCenterShell) SETTLE_SCALE_AMPLITUDE else 0f
+    val settleBobAmp = if (isCenterShell) SETTLE_BOB_SLOTS else 0f
     LaunchedEffect(justLanded, isCenterShell) {
         if (justLanded && isCenterShell) {
-            pop.snapTo(POP_SCALE)
-            pop.animateTo(1f, tween(POP_DURATION_MS))
+            settle.snapTo(0f)
+            settle.animateTo(1f, tween(durationMillis = SETTLE_DURATION_MS, easing = LinearEasing))
         }
     }
 
@@ -439,11 +584,16 @@ private fun RouletteShell(
                 rotationX = (if (d < 0f) tilt else -tilt)
                     .coerceIn(-TILT_CLAMP_DEGREES, TILT_CLAMP_DEGREES)
                 // Pilha vertical uniforme (window picker); sem soft-cap dentro de ±4.5
-                translationY = d * pitchPx
+                // Mais o balanço amortecido do assentamento, quando este cartão é o
+                // vencedor recém-pousado.
+                val settleSeconds = settle.value * SETTLE_DURATION_SECONDS
+                translationY = d * pitchPx +
+                    settleBob(settleSeconds, settleBobAmp) * pitchPx
                 this.cameraDistance = cameraDistance
-                // Escala contínua por distância; micro-pop multiplicado no centro
+                // Escala contínua por distância; respiração amortecida no centro
                 val scale =
-                    rampBeyond(SCALE_KEYS, SCALE_VALUES, SCALE_BEYOND_WINDOW, ad) * pop.value
+                    rampBeyond(SCALE_KEYS, SCALE_VALUES, SCALE_BEYOND_WINDOW, ad) *
+                        settleScale(settleSeconds, settleScaleAmp)
                 scaleX = scale
                 scaleY = scale
             }

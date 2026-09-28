@@ -39,6 +39,9 @@ import com.ogos.apprandomizador.ui.view.component.MAX_DISPLAY_SLOTS
 import com.ogos.apprandomizador.ui.view.component.RouletteWheel
 import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 import com.ogos.apprandomizador.viewmodel.SpinTarget
+import com.ogos.apprandomizador.viewmodel.cryptoShuffled
+import com.ogos.apprandomizador.viewmodel.shuffleStreamFrom
+import com.ogos.apprandomizador.viewmodel.uniformInt
 
 
 private const val MIN_SEQUENCE_SLOTS = 4
@@ -48,19 +51,25 @@ private const val MIN_SEQUENCE_SLOTS = 4
  *
  * - <= maxDisplaySlots items: every real item once; lists smaller than
  *   MIN_SEQUENCE_SLOTS are cycled up to avoid degenerate cylinder math.
- * - > maxDisplaySlots items: a random subset of maxDisplaySlots unique
- *   indices that ALWAYS includes [target] (the winner picked by the
- *   ViewModel), so the spin can land on the exact winning item.
+ * - > maxDisplaySlots items: a subset of maxDisplaySlots unique indices that
+ *   ALWAYS includes [target] (the winner picked by the ViewModel), so the spin
+ *   can land on the exact winning item.
+ *
+ * Ordering comes from [randomBound] when supplied — a uniform integer generator
+ * backed by the spin's cryptographic stream, so the card order is part of the
+ * same chance as the winner. With no generator (idle state, unit tests) it falls
+ * back to the platform shuffle.
  */
 internal fun buildDisplaySequence(
     items: List<RaffleItem>,
     target: RaffleItem?,
-    maxDisplaySlots: Int = MAX_DISPLAY_SLOTS
+    maxDisplaySlots: Int = MAX_DISPLAY_SLOTS,
+    randomBound: ((Int) -> Int)? = null
 ): List<RaffleItem> {
     if (items.isEmpty()) return emptyList()
 
     if (items.size <= maxDisplaySlots) {
-        val base = items.shuffled()
+        val base = shuffleOf(items, randomBound)
         if (base.size >= MIN_SEQUENCE_SLOTS) return base
         return buildList {
             while (size < MIN_SEQUENCE_SLOTS) {
@@ -70,23 +79,25 @@ internal fun buildDisplaySequence(
     }
 
     if (target == null) {
-        return items.shuffled().take(maxDisplaySlots)
+        return shuffleOf(items, randomBound).take(maxDisplaySlots)
     }
 
     val targetIndex = items.indexOf(target)
     if (targetIndex < 0) {
-        return items.shuffled().take(maxDisplaySlots)
+        return shuffleOf(items, randomBound).take(maxDisplaySlots)
     }
 
-    val otherIndices = items.indices
-        .filter { it != targetIndex }
-        .shuffled()
-        .take(maxDisplaySlots - 1)
+    val otherIndices = shuffleOf(
+        items.indices.filter { it != targetIndex },
+        randomBound
+    ).take(maxDisplaySlots - 1)
 
-    return (listOf(targetIndex) + otherIndices)
-        .shuffled()
-        .map { items[it] }
+    return shuffleOf(listOf(targetIndex) + otherIndices, randomBound).map { items[it] }
 }
+
+/** Embaralha por [randomBound] quando houver fluxo criptográfico; senão, o padrão. */
+private fun <T> shuffleOf(source: List<T>, randomBound: ((Int) -> Int)?): List<T> =
+    if (randomBound != null) cryptoShuffled(source, randomBound) else source.shuffled()
 
 /**
  * A display sequence frozen right after a spin landed, paired with the real
@@ -122,8 +133,11 @@ fun RandomizeViewRoute(
             viewModel.defaultText(defaultString = context.getString(R.string.default_shuffle_text), color = color)
         }
     }
-    val onSlotCrossed: (() -> Unit)? = if (isSpinning && soundEnabled) {
-        { tickPlayer.play(volume = 1f) }
+    // Callback do tick: criado APENAS quando ha giro ativo e som ligado, entao a
+    // roleta nao compone caminho morto com o som desligado. O pitch chega pela
+    // roleta (velocidade real do giro naquele instante) e vai direto ao SoundPool.
+    val onSlotCrossed: ((Float) -> Unit)? = if (isSpinning && soundEnabled) {
+        { pitch -> tickPlayer.play(volume = 1f, pitch = pitch) }
     } else {
         null
     }
@@ -166,7 +180,7 @@ fun RandomizeViewMain(
     uses: Int,
     onPerformRoll: () -> Unit,
     onSpinFinished: () -> Unit,
-    onSlotCrossed: (() -> Unit)?,
+    onSlotCrossed: ((Float) -> Unit)?,
     isSpinning: Boolean,
     modifier: Modifier
 ) {
@@ -200,7 +214,7 @@ fun RandomizeViewContent(
     uses: Int,
     isSpinning: Boolean,
     onSpinFinished: () -> Unit,
-    onSlotCrossed: (() -> Unit)?,
+    onSlotCrossed: ((Float) -> Unit)?,
     modifier: Modifier
 ) {
     Column(
@@ -213,7 +227,10 @@ fun RandomizeViewContent(
         val spinSequence = remember(spinTarget?.requestId) {
             val target = spinTarget
             if (target != null) {
-                buildDisplaySequence(items, target.targetItem)
+                val stream = shuffleStreamFrom(target.shuffleSeed)
+                buildDisplaySequence(items, target.targetItem) { bound ->
+                    stream.uniformInt(bound)
+                }
             } else {
                 emptyList()
             }
