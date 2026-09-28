@@ -68,16 +68,28 @@ class RandomizeViewModel(private val repository: IRepository) : ViewModel() {
      */
     fun finishSpin() {
         val target = _spinTarget.value ?: return
+        // Clear the target synchronously: guards against double completion and
+        // lets the View lock the landed sequence immediately.
+        _spinTarget.value = null
         val list = currentItemList.value
         // Validate the item is still in the current list (guards against list change during spin)
         if (target.targetItem in list.items && list.id == target.listId) {
-            _currentRandomItem.value = target.targetItem
+            // Persist-before-publish: the draw is recorded FIRST; the result is
+            // only surfaced (and the button re-enabled) after the Room write
+            // commits, so a process death between landing and commit can never
+            // show an unpersisted result.
             viewModelScope.launch {
                 repository.recordDraw(listId = target.listId, itemName = target.targetItem.name)
+                // Re-check after the await: if the list switched mid-write, discard
+                // the publish (silent-discard semantics), but always re-enable.
+                if (currentItemList.value.id == target.listId) {
+                    _currentRandomItem.value = target.targetItem
+                }
+                _isSpinning.value = false
             }
+        } else {
+            _isSpinning.value = false
         }
-        _spinTarget.value = null
-        _isSpinning.value = false
     }
 
     fun defaultText(defaultString: String, color: Long) {

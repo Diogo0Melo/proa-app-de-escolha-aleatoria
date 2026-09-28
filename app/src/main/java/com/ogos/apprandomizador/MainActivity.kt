@@ -2,9 +2,15 @@ package com.ogos.apprandomizador
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,7 +23,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
@@ -90,6 +98,7 @@ fun AppNavigation(
     onSoundToggle: (Boolean) -> Unit = {}
 ) {
     val navController = rememberNavController()
+    var lastRandomizeNavTime by remember { mutableLongStateOf(0L) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val topBarState = remember(currentRoute, navController) {
@@ -151,7 +160,13 @@ fun AppNavigation(
                 HomeRandomizeViewRoute(
                     viewModel = viewModel,
                     onNavigateToActive = { itemID ->
-                        navController.navigate(Routes.randomizeWithId(itemID))
+                        val now = SystemClock.uptimeMillis()
+                        if (now - lastRandomizeNavTime >= 800L) {
+                            lastRandomizeNavTime = now
+                            navController.navigate(Routes.randomizeWithId(itemID)) {
+                                launchSingleTop = true
+                            }
+                        }
                     },
                     modifier = Modifier.padding(paddingValues)
                 )
@@ -159,7 +174,19 @@ fun AppNavigation(
             composable(
                 route = Routes.RANDOMIZE_FULL, arguments = listOf(
                     navArgument("itemID") { type = NavType.LongType },
-                )
+                ),
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { it / 4 }) + fadeIn(tween(200))
+                },
+                exitTransition = {
+                    slideOutHorizontally(targetOffsetX = { it / 4 }) + fadeOut(tween(150))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn(tween(200))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { -it / 4 }) + fadeOut(tween(150))
+                }
             ) { backStackEntry ->
                 val itemID = backStackEntry.arguments?.getLong("itemID") ?: -1
                 val parentEntry = remember(backStackEntry) {
