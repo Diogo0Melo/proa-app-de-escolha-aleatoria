@@ -1,5 +1,6 @@
 package com.ogos.apprandomizador.modes.ui.yesno
 
+import android.os.SystemClock
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,10 +16,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,8 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -50,7 +51,9 @@ fun YesNoRoute(
 
     LaunchedEffect(state.requestId, state.phase) {
         if (state.phase == YesNoPhase.Revealing) {
-            delay(state.durationMillis)
+            val deadline = state.revealStartElapsedRealtime + state.durationMillis
+            val remaining = deadline - SystemClock.elapsedRealtime()
+            if (remaining > 0L) delay(remaining)
             viewModel.onRevealFinished(state.requestId)
         }
     }
@@ -61,7 +64,7 @@ fun YesNoRoute(
         onQuestionChange = { question = it.take(140) },
         onAsk = {
             keyboard?.hide()
-            viewModel.onAsk(question)
+            viewModel.onAsk()
         },
         onReset = {
             viewModel.onReset()
@@ -81,7 +84,9 @@ fun YesNoScreen(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxSize().padding(24.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -99,7 +104,9 @@ fun YesNoScreen(
             supportingText = { Text(stringResource(R.string.question_not_saved)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { onAsk() })
+            keyboardActions = KeyboardActions(onDone = {
+                if (state.phase != YesNoPhase.Revealed) onAsk()
+            })
         )
         Spacer(Modifier.height(28.dp))
         Surface(
@@ -141,7 +148,9 @@ fun YesNoScreen(
             Button(
                 onClick = onAsk,
                 enabled = state.phase != YesNoPhase.Revealing,
-                modifier = Modifier.fillMaxWidth().height(56.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
             ) {
                 Text(
                     if (state.phase == YesNoPhase.Revealing) stringResource(R.string.revealing)

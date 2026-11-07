@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
@@ -40,8 +39,8 @@ import androidx.navigation.navArgument
 import com.ogos.apprandomizador.data.repository.DefaultInitialize
 import com.ogos.apprandomizador.model.TopBarAction
 import com.ogos.apprandomizador.model.TopBarState
-import com.ogos.apprandomizador.ui.navigation.Routes
 import com.ogos.apprandomizador.modes.ui.modesGraph
+import com.ogos.apprandomizador.ui.navigation.Routes
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.ui.theme.ThemeMode
 import com.ogos.apprandomizador.ui.view.HomeRandomizeViewRoute
@@ -52,6 +51,8 @@ import com.ogos.apprandomizador.ui.view.component.TopBar
 import com.ogos.apprandomizador.viewmodel.MainViewModel
 import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 import com.ogos.apprandomizador.viewmodel.ViewModelFactory
+
+private val BOTTOM_BAR_ROUTES = setOf(Routes.HOME_RANDOMIZE, Routes.HOME_SHUFFLE, Routes.HOME_MODES)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,6 +133,12 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() }
             )
 
+            currentRoute == Routes.MODE_TAROT -> TopBarState(
+                titleRes = R.string.mode_tarot,
+                showBackButton = true,
+                onBackClick = { navController.popBackStack() }
+            )
+
             currentRoute.startsWith("${Routes.RANDOMIZE_ROUTE}/") -> TopBarState(
                 titleRes = R.string.blank_text,
                 showBackButton = true,
@@ -157,7 +164,7 @@ fun AppNavigation(
             )
         },
         bottomBar = {
-            if (currentRoute in listOf(Routes.HOME_RANDOMIZE, Routes.HOME_SHUFFLE, Routes.HOME_MODES)) BottomBar(
+            if (currentRoute in BOTTOM_BAR_ROUTES) BottomBar(
                 navController = navController,
                 currentRoute = currentRoute
             )

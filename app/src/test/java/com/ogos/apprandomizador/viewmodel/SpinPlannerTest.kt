@@ -43,6 +43,26 @@ class SpinPlannerTest {
     }
 
     @Test
+    fun `stream consumption order is winner then five cosmetics then shuffle seed`() {
+        val stream = deriveSpinStream(seed, 1L)
+        val winnerIndex = pickWinnerIndex(stream, 24) { 0 }
+        val expectedUnits = List(5) { stream.nextDouble().toFloat() }
+        val expectedShuffle = stream.nextIntNonNegative().toLong() and 0xFFFFFFFFL
+        val target = planSpin(items.take(24), 9L, seed, 1L) { 0 }
+        assertEquals("Item $winnerIndex", target.targetItem.name)
+        assertEquals(
+            expectedUnits, listOf(
+                target.cosmetics.travelUnit,
+                target.cosmetics.overshootUnit,
+                target.cosmetics.hesitationAmplitudeUnit,
+                target.cosmetics.hesitationCyclesUnit,
+                target.cosmetics.durationUnit
+            )
+        )
+        assertEquals(expectedShuffle, target.shuffleSeed)
+    }
+
+    @Test
     fun `request id changes cosmetics`() {
         val first = planSpin(items.take(24), 1L, seed, 1L) { 0 }
         val second = planSpin(items.take(24), 1L, seed, 2L) { 0 }

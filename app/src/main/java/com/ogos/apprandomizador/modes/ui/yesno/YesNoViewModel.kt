@@ -3,7 +3,9 @@ package com.ogos.apprandomizador.modes.ui.yesno
 import androidx.lifecycle.ViewModel
 import com.ogos.apprandomizador.modes.domain.YesNoAnswer
 import com.ogos.apprandomizador.modes.domain.YesNoOracle
+import com.ogos.apprandomizador.viewmodel.AndroidMonotonicClock
 import com.ogos.apprandomizador.viewmodel.EntropySource
+import com.ogos.apprandomizador.viewmodel.MonotonicClock
 import com.ogos.apprandomizador.viewmodel.deriveOracleStream
 import com.ogos.apprandomizador.viewmodel.nextIntInRange
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,19 +23,20 @@ data class YesNoUiState(
     val answer: YesNoAnswer? = null,
     val requestId: Long = 0L,
     val durationMillis: Long = 0L,
-    val question: String? = null
+    val revealStartElapsedRealtime: Long = 0L
 )
 
 class YesNoViewModel(
-    private val entropySource: EntropySource
+    private val entropySource: EntropySource,
+    private val clock: MonotonicClock = AndroidMonotonicClock
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(YesNoUiState())
     val uiState: StateFlow<YesNoUiState> = _uiState.asStateFlow()
 
     private var nextRequestId = 0L
 
-    fun onAsk(question: String?) {
-        if (_uiState.value.phase == YesNoPhase.Revealing) return
+    fun onAsk() {
+        if (_uiState.value.phase != YesNoPhase.Idle) return
 
         val requestId = ++nextRequestId
         val stream = deriveOracleStream(entropySource.nextSeed(), requestId)
@@ -45,7 +48,7 @@ class YesNoViewModel(
             answer = answer,
             requestId = requestId,
             durationMillis = duration.toLong(),
-            question = question?.trim()?.takeIf(String::isNotEmpty)
+            revealStartElapsedRealtime = clock.nowMillis()
         )
     }
 
@@ -56,6 +59,8 @@ class YesNoViewModel(
     }
 
     fun onReset() {
+        // Uma revelação em andamento é concluída; reset não descarta um resultado já sorteado.
+        if (_uiState.value.phase == YesNoPhase.Revealing) return
         _uiState.value = YesNoUiState()
     }
 
