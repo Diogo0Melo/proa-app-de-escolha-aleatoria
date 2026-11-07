@@ -1,14 +1,25 @@
+# Normalize text files to LF in the repository
 * text=auto eol=lf
+
+# Binary assets - never touch line endings (includes gradle-wrapper.jar)
+*.png -text
+*.webp -text
+*.jpg -text
+*.jpeg -text
+*.jar -text
+*.keystore -text
+*.ttf -text
+*.otf -text
+*.wav -text
+*.mp3 -text
+*.apk -text
+
+# Explicit text sources: LF on checkout, all platforms
 *.kt text eol=lf
+*.kts text eol=lf
 *.xml text eol=lf
-*.gradle.kts text eol=lf
-*.properties text eol=lf
-*.pro text eol=lf
-*.png binary
-*.webp binary
-*.jpg binary
-*.jpeg binary
-*.gif binary
-*.mp3 binary
-*.wav binary
-*.ogg binary
+*.gradle text eol=lf
+
+# Windows batch scripts must keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf

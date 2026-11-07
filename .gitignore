@@ -38,3 +38,11 @@ google-services.json
 
 # Deepwork progress (kept local)
 .slim/deepwork/
+
+# OpenCode session data
+.opencode/
+
+# Generated AI bundle (via bundle.bat)
+aleastra-bundle.md
+bundle.bat
+bundle-project.mjs

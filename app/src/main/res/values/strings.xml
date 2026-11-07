@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Aleastra</string>
-    <string name="waiting_raffle">Aguardando sorteio...</string>
     <string name="back">Voltar</string>
     <string name="statistics">Estatísticas</string>
     <string name="edit">Editar</string>
@@ -19,7 +18,6 @@
     <string name="created_at">Criado em: %1$s</string>
     <string name="edit_item">Editar esse item</string>
     <string name="use_roll_to_draw">USE RODAR PARA SORTEAR</string>
-    <string name="waiting_initialization">Aguardando inicialização...</string>
     <string name="blank_text"></string>
     <string name="shuffle_item_from_list">Embaralhar uma lista</string>
     <string name="default_shuffle_text">USE RODAR PARA SORTEAR</string>
