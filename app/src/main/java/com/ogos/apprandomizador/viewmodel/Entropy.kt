@@ -213,3 +213,10 @@ private fun putLong(target: ByteArray, offset: Int, value: Long) {
     target[offset + 6] = (value ushr 8).toByte()
     target[offset + 7] = value.toByte()
 }
+
+
+/** Tag de domínio independente: bytes do oráculo nunca reutilizam o fluxo da roleta. */
+private const val ORACLE_STREAM_TAG = 0x4F_52_43_4C // "ORCL"
+
+internal fun deriveOracleStream(seed: ByteArray, requestId: Long): EntropyStream =
+    EntropyStream(sha256(tagged(seed, ORACLE_STREAM_TAG, requestId)))

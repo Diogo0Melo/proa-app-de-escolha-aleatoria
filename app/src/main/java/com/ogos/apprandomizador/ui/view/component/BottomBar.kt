@@ -92,8 +92,14 @@ fun BottomBar(
             }
         )
         NavigationBarItem(
-            selected = false,
-            onClick = {},
+            selected = currentRoute == Routes.HOME_MODES,
+            onClick = {
+                navController.navigate(Routes.HOME_MODES) {
+                    popUpTo(Routes.HOME_RANDOMIZE) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Stream,

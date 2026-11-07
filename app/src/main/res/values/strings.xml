@@ -12,6 +12,16 @@
     <string name="shuffle">Embaralhar</string>
     <string name="fingers">Dedos</string>
     <string name="modes">Modos</string>
+    <string name="mode_yes_no">Sim ou Não</string>
+    <string name="mode_yes_no_description">Faça uma pergunta e receba uma resposta aleatória.</string>
+    <string name="yes_no_prompt">O que você deseja perguntar?</string>
+    <string name="optional_question">Pergunta (opcional)</string>
+    <string name="question_not_saved">Opcional: sua pergunta não é salva.</string>
+    <string name="ask">Perguntar</string>
+    <string name="answer_yes">SIM</string>
+    <string name="answer_no">NÃO</string>
+    <string name="ask_again">Perguntar de novo</string>
+    <string name="revealing">Revelando…</string>
     <string name="items_count">Itens: %1$d</string>
     <string name="uses_count">Usos: %1$d</string>
     <string name="last_use">Último uso: %1$s</string>

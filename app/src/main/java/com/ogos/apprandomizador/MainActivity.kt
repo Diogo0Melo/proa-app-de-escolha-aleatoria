@@ -41,6 +41,7 @@ import com.ogos.apprandomizador.data.repository.DefaultInitialize
 import com.ogos.apprandomizador.model.TopBarAction
 import com.ogos.apprandomizador.model.TopBarState
 import com.ogos.apprandomizador.ui.navigation.Routes
+import com.ogos.apprandomizador.modes.ui.modesGraph
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.ui.theme.ThemeMode
 import com.ogos.apprandomizador.ui.view.HomeRandomizeViewRoute
@@ -59,7 +60,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val app = application as RandomApplication
             val factory = remember {
-                ViewModelFactory(app.repository, app.dataStoreManager, DefaultInitialize())
+                ViewModelFactory(app.repository, app.dataStoreManager, DefaultInitialize(), app.entropySource)
             }
             val mainViewModel: MainViewModel = viewModel(factory = factory)
             val isReady by mainViewModel.isReady.collectAsStateWithLifecycle()
@@ -120,6 +121,17 @@ fun AppNavigation(
                 )
             )
 
+            currentRoute == Routes.HOME_MODES -> TopBarState(
+                titleRes = R.string.modes,
+                showBackButton = false
+            )
+
+            currentRoute == Routes.MODE_YES_NO -> TopBarState(
+                titleRes = R.string.mode_yes_no,
+                showBackButton = true,
+                onBackClick = { navController.popBackStack() }
+            )
+
             currentRoute.startsWith("${Routes.RANDOMIZE_ROUTE}/") -> TopBarState(
                 titleRes = R.string.blank_text,
                 showBackButton = true,
@@ -145,7 +157,7 @@ fun AppNavigation(
             )
         },
         bottomBar = {
-            if (currentRoute in listOf(Routes.HOME_RANDOMIZE, Routes.HOME_SHUFFLE)) BottomBar(
+            if (currentRoute in listOf(Routes.HOME_RANDOMIZE, Routes.HOME_SHUFFLE, Routes.HOME_MODES)) BottomBar(
                 navController = navController,
                 currentRoute = currentRoute
             )
@@ -210,6 +222,11 @@ fun AppNavigation(
                     modifier = Modifier.padding(paddingValues)
                 )
             }
+            modesGraph(
+                navController = navController,
+                factory = factory,
+                modifier = Modifier.padding(paddingValues)
+            )
         }
     }
 }
