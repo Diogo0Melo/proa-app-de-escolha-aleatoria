@@ -1,10 +1,10 @@
 package com.ogos.apprandomizador.modes.domain
 
 import com.ogos.apprandomizador.viewmodel.deriveOracleStream
+import java.security.MessageDigest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.security.MessageDigest
 
 class YesNoOracleTest {
     @Test

@@ -1,6 +1,5 @@
 package com.ogos.apprandomizador.modes.ui.yesno
 
-import android.os.SystemClock
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,10 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,10 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import android.os.SystemClock
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -84,16 +86,15 @@ fun YesNoScreen(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier = modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = stringResource(R.string.yes_no_prompt),
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.semantics { heading() }
         )
         Spacer(Modifier.height(20.dp))
         OutlinedTextField(
@@ -125,7 +126,7 @@ fun YesNoScreen(
                 ) { answer ->
                     Text(
                         text = when {
-                            answer == null && state.phase == YesNoPhase.Revealing -> "…"
+                            answer == null && (state.phase == YesNoPhase.Revealing || state.phase == YesNoPhase.Recording) -> "…"
                             answer == null -> stringResource(R.string.ask)
                             answer == com.ogos.apprandomizador.modes.domain.YesNoAnswer.YES ->
                                 stringResource(R.string.answer_yes)
@@ -147,16 +148,29 @@ fun YesNoScreen(
         } else {
             Button(
                 onClick = onAsk,
-                enabled = state.phase != YesNoPhase.Revealing,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
+                enabled = state.phase == YesNoPhase.Idle,
+                modifier = Modifier.fillMaxWidth().height(56.dp)
             ) {
                 Text(
-                    if (state.phase == YesNoPhase.Revealing) stringResource(R.string.revealing)
+                    if (state.phase == YesNoPhase.Revealing || state.phase == YesNoPhase.Recording) stringResource(R.string.revealing)
                     else stringResource(R.string.ask)
                 )
             }
         }
+    }
+}
+
+
+@Preview(showBackground = true, name = "Sim ou Não")
+@Composable
+private fun YesNoScreenPreview() {
+    com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme {
+        YesNoScreen(
+            state = YesNoUiState(),
+            question = "",
+            onQuestionChange = {},
+            onAsk = {},
+            onReset = {}
+        )
     }
 }
