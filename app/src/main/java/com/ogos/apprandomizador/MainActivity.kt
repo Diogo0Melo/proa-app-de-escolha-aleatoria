@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -39,8 +40,8 @@ import androidx.navigation.navArgument
 import com.ogos.apprandomizador.data.repository.DefaultInitialize
 import com.ogos.apprandomizador.model.TopBarAction
 import com.ogos.apprandomizador.model.TopBarState
-import com.ogos.apprandomizador.modes.ui.modesGraph
 import com.ogos.apprandomizador.ui.navigation.Routes
+import com.ogos.apprandomizador.modes.ui.modesGraph
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.ui.theme.ThemeMode
 import com.ogos.apprandomizador.ui.view.HomeRandomizeViewRoute
@@ -61,7 +62,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val app = application as RandomApplication
             val factory = remember {
-                ViewModelFactory(app.repository, app.dataStoreManager, DefaultInitialize(), app.entropySource)
+                ViewModelFactory(app.repository, app.dataStoreManager, DefaultInitialize(), app.entropySource, oracleRepository = app.oracleRepository, aiSettingsRepository = app.aiSettingsRepository, aiReadingService = app.aiReadingService, aiClient = app.llmClient)
             }
             val mainViewModel: MainViewModel = viewModel(factory = factory)
             val isReady by mainViewModel.isReady.collectAsStateWithLifecycle()
@@ -124,7 +125,14 @@ fun AppNavigation(
 
             currentRoute == Routes.HOME_MODES -> TopBarState(
                 titleRes = R.string.modes,
-                showBackButton = false
+                showBackButton = false,
+                actions = listOf(TopBarAction(Icons.Filled.Settings, R.string.ai_settings) { navController.navigate(Routes.MODE_AI_SETTINGS) })
+            )
+
+            currentRoute == Routes.MODE_AI_SETTINGS -> TopBarState(
+                titleRes = R.string.ai_settings,
+                showBackButton = true,
+                onBackClick = { navController.popBackStack() }
             )
 
             currentRoute == Routes.MODE_YES_NO -> TopBarState(
@@ -232,6 +240,7 @@ fun AppNavigation(
             modesGraph(
                 navController = navController,
                 factory = factory,
+                soundEnabled = soundEnabled,
                 modifier = Modifier.padding(paddingValues)
             )
         }

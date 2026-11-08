@@ -50,15 +50,13 @@ class SpinPlannerTest {
         val expectedShuffle = stream.nextIntNonNegative().toLong() and 0xFFFFFFFFL
         val target = planSpin(items.take(24), 9L, seed, 1L) { 0 }
         assertEquals("Item $winnerIndex", target.targetItem.name)
-        assertEquals(
-            expectedUnits, listOf(
-                target.cosmetics.travelUnit,
-                target.cosmetics.overshootUnit,
-                target.cosmetics.hesitationAmplitudeUnit,
-                target.cosmetics.hesitationCyclesUnit,
-                target.cosmetics.durationUnit
-            )
-        )
+        assertEquals(expectedUnits, listOf(
+            target.cosmetics.travelUnit,
+            target.cosmetics.overshootUnit,
+            target.cosmetics.hesitationAmplitudeUnit,
+            target.cosmetics.hesitationCyclesUnit,
+            target.cosmetics.durationUnit
+        ))
         assertEquals(expectedShuffle, target.shuffleSeed)
     }
 

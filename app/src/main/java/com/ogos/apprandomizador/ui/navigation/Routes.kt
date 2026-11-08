@@ -6,6 +6,7 @@ object Routes {
     const val HOME_MODES = "home_modes"
     const val MODE_YES_NO = "mode_yes_no"
     const val MODE_TAROT = "mode_tarot"
+    const val MODE_AI_SETTINGS = "mode_ai_settings"
     const val RANDOMIZE_ROUTE = "randomize_route"
     const val RANDOMIZE_FULL = "randomize_route/{itemID}"
 
