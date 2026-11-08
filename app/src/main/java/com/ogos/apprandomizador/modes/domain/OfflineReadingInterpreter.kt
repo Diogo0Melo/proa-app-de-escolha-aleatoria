@@ -14,11 +14,7 @@ class OfflineReadingInterpreter : ReadingInterpreter {
             ReadingSection(
                 position = drawn.position,
                 title = "$title · ${drawn.card.name}",
-                text = "${drawn.meaning.essence} Palavras-chave: ${
-                    drawn.meaning.keywords.joinToString(
-                        ", "
-                    )
-                }. (Carta $orientation.)"
+                text = "${drawn.meaning.essence} Palavras-chave: ${drawn.meaning.keywords.joinToString(", ")}. (Carta $orientation.)"
             )
         }
         val reversedCount = draw.count(DrawnCard::reversed)

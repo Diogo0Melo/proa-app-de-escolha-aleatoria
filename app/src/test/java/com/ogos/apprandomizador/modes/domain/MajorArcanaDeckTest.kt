@@ -7,8 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MajorArcanaDeckTest {
-    @Test
-    fun `deck has 22 unique numbered cards with complete meanings`() {
+    @Test fun `deck has 22 unique numbered cards with complete meanings`() {
         val deck = MajorArcanaDeck.getDeck()
         assertEquals(22, deck.size)
         assertEquals(22, deck.map { it.id }.distinct().size)

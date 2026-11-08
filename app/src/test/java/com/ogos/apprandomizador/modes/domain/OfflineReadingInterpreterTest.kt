@@ -7,8 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class OfflineReadingInterpreterTest {
-    @Test
-    fun `all card orientations produce useful offline text`() = runBlocking {
+    @Test fun `all card orientations produce useful offline text`() = runBlocking {
         val interpreter = OfflineReadingInterpreter()
         MajorArcanaDeck.getDeck().forEach { card ->
             listOf(card.upright, card.reversed).forEachIndexed { index, meaning ->
@@ -23,16 +22,13 @@ class OfflineReadingInterpreterTest {
         }
     }
 
-    @Test
-    fun `reading uses question context and position labels`() = runBlocking {
+    @Test fun `reading uses question context and position labels`() = runBlocking {
         val card = MajorArcanaDeck.getDeck().first()
-        val reading = OfflineReadingInterpreter().interpret(
-            "Devo mudar?", listOf(
-                DrawnCard(card, false, SpreadPosition.PAST),
-                DrawnCard(MajorArcanaDeck.getDeck()[1], true, SpreadPosition.PRESENT),
-                DrawnCard(MajorArcanaDeck.getDeck()[2], false, SpreadPosition.FUTURE)
-            )
-        )
+        val reading = OfflineReadingInterpreter().interpret("Devo mudar?", listOf(
+            DrawnCard(card, false, SpreadPosition.PAST),
+            DrawnCard(MajorArcanaDeck.getDeck()[1], true, SpreadPosition.PRESENT),
+            DrawnCard(MajorArcanaDeck.getDeck()[2], false, SpreadPosition.FUTURE)
+        ))
         assertTrue(reading.summary.contains("Devo mudar?"))
         assertTrue(reading.sections.map { it.title }.any { it.startsWith("Passado") })
         assertTrue(reading.sections.map { it.title }.any { it.startsWith("Presente") })

@@ -1,13 +1,6 @@
 package com.ogos.apprandomizador.modes.domain
 
-data class TarotCard(
-    val id: String,
-    val number: Int,
-    val name: String,
-    val upright: CardMeaning,
-    val reversed: CardMeaning
-)
-
+data class TarotCard(val id: String, val number: Int, val name: String, val upright: CardMeaning, val reversed: CardMeaning)
 data class CardMeaning(val keywords: List<String>, val essence: String)
 enum class SpreadPosition { SINGLE, PAST, PRESENT, FUTURE }
 enum class Spread(val cardCount: Int) { SINGLE(1), PAST_PRESENT_FUTURE(3) }

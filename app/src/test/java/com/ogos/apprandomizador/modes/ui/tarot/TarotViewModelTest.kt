@@ -14,10 +14,8 @@ class TarotViewModelTest {
         override fun nextSeed(): ByteArray = ByteArray(32) { (it + seed++).toByte() }
     }
 
-    @Test
-    fun `draw enters revealing with selected spread and no duplicate cards`() {
-        val vm =
-            TarotViewModel(FakeEntropySource(), MajorArcanaDeck, clock = MonotonicClock { 5_000L })
+    @Test fun `draw enters revealing with selected spread and no duplicate cards`() {
+        val vm = TarotViewModel(FakeEntropySource(), MajorArcanaDeck, clock = MonotonicClock { 5_000L })
         vm.onQuestionChange("Qual caminho explorar?")
         vm.onSpreadChange(Spread.PAST_PRESENT_FUTURE)
         vm.onDraw()
@@ -31,10 +29,8 @@ class TarotViewModelTest {
         assertEquals(first.requestId, vm.uiState.value.requestId)
     }
 
-    @Test
-    fun `reset cannot interrupt a reveal already decided by the oracle`() {
-        val vm =
-            TarotViewModel(FakeEntropySource(), MajorArcanaDeck, clock = MonotonicClock { 5_000L })
+    @Test fun `reset cannot interrupt a reveal already decided by the oracle`() {
+        val vm = TarotViewModel(FakeEntropySource(), MajorArcanaDeck, clock = MonotonicClock { 5_000L })
         vm.onDraw()
         val request = vm.uiState.value.requestId
         vm.onReset()

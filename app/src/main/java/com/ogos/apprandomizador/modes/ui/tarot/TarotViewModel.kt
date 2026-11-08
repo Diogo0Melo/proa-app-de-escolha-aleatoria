@@ -2,6 +2,11 @@ package com.ogos.apprandomizador.modes.ui.tarot
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ogos.apprandomizador.data.repository.IOracleRepository
+import com.ogos.apprandomizador.modes.domain.AiReadingResult
+import com.ogos.apprandomizador.modes.domain.AiSettingsRepository
+import com.ogos.apprandomizador.modes.domain.StoredOutcome
+import com.ogos.apprandomizador.modes.domain.StoredTarotCard
 import com.ogos.apprandomizador.modes.domain.DeckProvider
 import com.ogos.apprandomizador.modes.domain.DrawnCard
 import com.ogos.apprandomizador.modes.domain.OfflineReadingInterpreter
@@ -10,9 +15,9 @@ import com.ogos.apprandomizador.modes.domain.ReadingInterpreter
 import com.ogos.apprandomizador.modes.domain.ReadingSection
 import com.ogos.apprandomizador.modes.domain.Spread
 import com.ogos.apprandomizador.modes.domain.TarotDrawer
-import com.ogos.apprandomizador.viewmodel.AndroidMonotonicClock
 import com.ogos.apprandomizador.viewmodel.EntropySource
 import com.ogos.apprandomizador.viewmodel.MonotonicClock
+import com.ogos.apprandomizador.viewmodel.AndroidMonotonicClock
 import com.ogos.apprandomizador.viewmodel.deriveOracleStream
 import com.ogos.apprandomizador.viewmodel.uniformInt
 import kotlinx.coroutines.CancellationException
@@ -37,18 +42,41 @@ data class TarotUiState(
     val revealStartElapsedRealtime: Long = 0L,
     val durationMillis: Long = 900L,
     val drawn: List<DrawnCard> = emptyList(),
-    val reading: Reading? = null
+    val reading: Reading? = null,
+    val aiEnabled: Boolean = false,
+    val aiReading: Reading? = null,
+    val aiModel: String? = null,
+    val aiLoading: Boolean = false,
+    val aiError: String? = null
 )
 
 class TarotViewModel(
     private val entropySource: EntropySource,
     private val deckProvider: DeckProvider,
     private val readingInterpreter: ReadingInterpreter = OfflineReadingInterpreter(),
-    private val clock: MonotonicClock = AndroidMonotonicClock
+    private val clock: MonotonicClock = AndroidMonotonicClock,
+    private val oracleRepository: IOracleRepository? = null,
+    private val aiReadingService: com.ogos.apprandomizador.modes.domain.AiReadingService? = null,
+    aiSettingsRepository: AiSettingsRepository? = null
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TarotUiState())
     val uiState: StateFlow<TarotUiState> = _uiState.asStateFlow()
     private var nextRequestId = 0L
+    private var aiJob: kotlinx.coroutines.Job? = null
+
+    init {
+        aiSettingsRepository?.let { repository ->
+            viewModelScope.launch {
+                repository.settings.collect { settings ->
+                    val config = settings.config
+                    val enabled = config != null && config.enabled && settings.hasApiKey && runCatching {
+                        settings.consentedAuthority == com.ogos.apprandomizador.modes.domain.BaseUrlNormalizer.authority(config.baseUrl)
+                    }.getOrDefault(false)
+                    _uiState.value = _uiState.value.copy(aiEnabled = enabled)
+                }
+            }
+        }
+    }
 
     fun onQuestionChange(value: String) {
         if (_uiState.value.phase != TarotPhase.Idle) return
@@ -70,8 +98,7 @@ class TarotViewModel(
         val current = _uiState.value
         val requestId = ++nextRequestId
         val stream = deriveOracleStream(entropySource.nextSeed(), requestId)
-        val drawn =
-            TarotDrawer.draw(deckProvider.getDeck(), current.spread, stream, current.allowReversed)
+        val drawn = TarotDrawer.draw(deckProvider.getDeck(), current.spread, stream, current.allowReversed)
         val duration = 700L + stream.uniformInt(501)
         _uiState.value = current.copy(
             phase = TarotPhase.Revealing,
@@ -88,6 +115,19 @@ class TarotViewModel(
         if (current.phase != TarotPhase.Revealing || current.requestId != requestId) return
         _uiState.value = current.copy(phase = TarotPhase.Interpreting)
         viewModelScope.launch {
+            try {
+                oracleRepository?.record(
+                    "tarot",
+                    StoredOutcome.Tarot(
+                        spread = current.spread.name,
+                        cards = current.drawn.map { StoredTarotCard(it.card.id, it.reversed) }
+                    )
+                )
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                java.util.logging.Logger.getLogger("TarotViewModel").log(java.util.logging.Level.WARNING, "Não foi possível registrar o uso do oráculo", error)
+            }
             val reading = try {
                 readingInterpreter.interpret(current.question, current.drawn)
             } catch (cancelled: CancellationException) {
@@ -107,13 +147,39 @@ class TarotViewModel(
         }
     }
 
+    fun onDeepenWithAi() {
+        val current = _uiState.value
+        if (current.phase != TarotPhase.Revealed || !current.aiEnabled || current.aiLoading) return
+        val service = aiReadingService ?: return
+        aiJob?.cancel()
+        val requestId = current.requestId
+        aiJob = viewModelScope.launch {
+            _uiState.value = current.copy(aiLoading = true, aiError = null, aiReading = null, aiModel = null)
+            when (val result = service.deepen(current.question, current.drawn)) {
+                is AiReadingResult.Success -> {
+                    val latest = _uiState.value
+                    if (latest.phase == TarotPhase.Revealed && latest.requestId == requestId) {
+                        _uiState.value = latest.copy(aiLoading = false, aiReading = result.reading, aiModel = result.modelId, aiError = null)
+                    }
+                }
+                is AiReadingResult.Failure -> {
+                    val latest = _uiState.value
+                    if (latest.phase == TarotPhase.Revealed && latest.requestId == requestId) {
+                        _uiState.value = latest.copy(aiLoading = false, aiError = result.reason)
+                    }
+                }
+            }
+        }
+    }
+
+    fun onCancelAi() {
+        aiJob?.cancel()
+        _uiState.value = _uiState.value.copy(aiLoading = false)
+    }
+
     fun onReset() {
         if (_uiState.value.phase == TarotPhase.Revealing || _uiState.value.phase == TarotPhase.Interpreting) return
-        _uiState.value = _uiState.value.copy(
-            question = "",
-            phase = TarotPhase.Idle,
-            drawn = emptyList(),
-            reading = null
-        )
+        aiJob?.cancel()
+        _uiState.value = _uiState.value.copy(question = "", phase = TarotPhase.Idle, drawn = emptyList(), reading = null, aiReading = null, aiModel = null, aiLoading = false, aiError = null)
     }
 }
