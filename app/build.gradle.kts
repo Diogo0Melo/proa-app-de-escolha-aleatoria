@@ -13,8 +13,8 @@ android {
         applicationId = "com.ogos.apprandomizador"
         minSdk = 27
         targetSdk = 34
-        versionCode = 2
-        versionName = "Alpha 0.3.0"
+        versionCode = 4
+        versionName = "Alpha 0.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -44,6 +44,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -59,9 +63,14 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation(libs.androidx.compose.ui.text)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
