@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation(libs.coil.compose)
     implementation(libs.androidx.compose.ui.text)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)

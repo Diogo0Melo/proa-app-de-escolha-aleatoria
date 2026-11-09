@@ -2,7 +2,7 @@ package com.ogos.apprandomizador.modes.ui.tarot
 
 import com.ogos.apprandomizador.data.database.OracleModeStats
 import com.ogos.apprandomizador.data.repository.IOracleRepository
-import com.ogos.apprandomizador.modes.data.MajorArcanaDeck
+import com.ogos.apprandomizador.modes.data.FullTarotDeck
 import com.ogos.apprandomizador.modes.domain.StoredOutcome
 import com.ogos.apprandomizador.modes.domain.AiConfig
 import com.ogos.apprandomizador.modes.domain.AiReadingService
@@ -29,7 +29,7 @@ class TarotPersistenceTest {
         val repository = FakeOracleRepository()
         val vm = TarotViewModel(
             entropySource = EntropySource { ByteArray(32) { it.toByte() } },
-            deckProvider = MajorArcanaDeck,
+            deckProvider = FullTarotDeck,
             clock = MonotonicClock { 1_000L },
             oracleRepository = repository
         )
@@ -49,7 +49,7 @@ class TarotPersistenceTest {
         val repository = FakeOracleRepository(fail = true)
         val vm = TarotViewModel(
             entropySource = EntropySource { ByteArray(32) { (it + 1).toByte() } },
-            deckProvider = MajorArcanaDeck,
+            deckProvider = FullTarotDeck,
             clock = MonotonicClock { 1_000L },
             oracleRepository = repository
         )
@@ -70,7 +70,7 @@ class TarotPersistenceTest {
         }, settings)
         val vm = TarotViewModel(
             entropySource = EntropySource { ByteArray(32) { (it + 2).toByte() } },
-            deckProvider = MajorArcanaDeck,
+            deckProvider = FullTarotDeck,
             clock = MonotonicClock { 1_000L },
             aiReadingService = aiService,
             aiSettingsRepository = settings

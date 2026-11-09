@@ -12,14 +12,14 @@ import com.ogos.apprandomizador.modes.ui.tarot.TarotViewModel
 import com.ogos.apprandomizador.modes.domain.DeckProvider
 import com.ogos.apprandomizador.modes.domain.OfflineReadingInterpreter
 import com.ogos.apprandomizador.modes.domain.ReadingInterpreter
-import com.ogos.apprandomizador.modes.data.MajorArcanaDeck
+import com.ogos.apprandomizador.modes.data.FullTarotDeck
 
 class ViewModelFactory(
     private val repository: IRepository,
     private val dataStoreManager: DataStoreManager,
     private val defaultInitialization: IDefaultInitialization,
     private val entropySource: EntropySource,
-    private val deckProvider: DeckProvider = MajorArcanaDeck,
+    private val deckProvider: DeckProvider = FullTarotDeck,
     private val readingInterpreter: ReadingInterpreter = OfflineReadingInterpreter(),
     private val oracleRepository: IOracleRepository,
     private val aiSettingsRepository: com.ogos.apprandomizador.modes.domain.AiSettingsRepository,

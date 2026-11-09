@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
-import com.ogos.apprandomizador.modes.data.MajorArcanaDeck
+import com.ogos.apprandomizador.modes.data.FullTarotDeck
 import com.ogos.apprandomizador.modes.domain.Spread
 import com.ogos.apprandomizador.viewmodel.EntropySource
 import com.ogos.apprandomizador.viewmodel.MonotonicClock
@@ -15,7 +15,7 @@ class TarotViewModelTest {
     }
 
     @Test fun `draw enters revealing with selected spread and no duplicate cards`() {
-        val vm = TarotViewModel(FakeEntropySource(), MajorArcanaDeck, clock = MonotonicClock { 5_000L })
+        val vm = TarotViewModel(FakeEntropySource(), FullTarotDeck, clock = MonotonicClock { 5_000L })
         vm.onQuestionChange("Qual caminho explorar?")
         vm.onSpreadChange(Spread.PAST_PRESENT_FUTURE)
         vm.onDraw()
@@ -30,7 +30,7 @@ class TarotViewModelTest {
     }
 
     @Test fun `reset cannot interrupt a reveal already decided by the oracle`() {
-        val vm = TarotViewModel(FakeEntropySource(), MajorArcanaDeck, clock = MonotonicClock { 5_000L })
+        val vm = TarotViewModel(FakeEntropySource(), FullTarotDeck, clock = MonotonicClock { 5_000L })
         vm.onDraw()
         val request = vm.uiState.value.requestId
         vm.onReset()

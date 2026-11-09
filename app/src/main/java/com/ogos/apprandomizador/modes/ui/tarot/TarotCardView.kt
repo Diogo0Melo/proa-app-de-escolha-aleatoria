@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -34,7 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import com.ogos.apprandomizador.R
+import coil.compose.AsyncImage
 import com.ogos.apprandomizador.modes.domain.DrawnCard
+import com.ogos.apprandomizador.modes.domain.Suit
 import com.ogos.apprandomizador.modes.domain.SpreadPosition
 import kotlinx.coroutines.delay
 
@@ -54,6 +58,11 @@ internal fun TarotCardView(
     val haptics = LocalHapticFeedback.current
     val density = LocalDensity.current
     val currentOnFlip by rememberUpdatedState(onFlip)
+    // Falha de carregamento troca para o desenho tipográfico; o estado é por carta e por verso.
+    var frontImageFailed by remember(drawn.card.id) { mutableStateOf(false) }
+    var backImageFailed by remember { mutableStateOf(false) }
+    val frontImage = remember(drawn.card.id) { TarotCardImages.assetPathFor(drawn.card.id)?.let(TarotCardImages::assetUri) }
+    val backImage = remember { TarotCardImages.assetUri(TarotCardImages.CARD_BACK_PATH) }
 
     LaunchedEffect(requestId, revealed, animate) {
         if (!revealed) {
@@ -127,23 +136,63 @@ internal fun TarotCardView(
             contentAlignment = Alignment.Center
         ) {
             if (showFront) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(position.uppercase(), style = MaterialTheme.typography.labelMedium)
-                    Text(toRoman(drawn.card.number), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text(drawn.card.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    if (drawn.reversed) {
-                        Text(
-                            stringResource(R.string.tarot_reversed),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.error
+                val image = frontImage?.takeUnless { frontImageFailed }
+                if (image != null) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(position.uppercase(), style = MaterialTheme.typography.labelMedium)
+                        AsyncImage(
+                            model = image,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            onError = { frontImageFailed = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(CARD_ASPECT)
+                                .graphicsLayer { rotationZ = if (drawn.reversed) 180f else 0f }
                         )
+                        Text(drawn.card.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        if (drawn.reversed) {
+                            Text(
+                                stringResource(R.string.tarot_reversed),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
-                    Text(drawn.meaning.keywords.joinToString(" · "), style = MaterialTheme.typography.bodySmall)
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(position.uppercase(), style = MaterialTheme.typography.labelMedium)
+                        // Números romanos só fazem sentido nos Arcanos Maiores; os Menores já trazem o nome completo.
+                        if (drawn.card.suit == Suit.MAJOR) {
+                            Text(toRoman(drawn.card.number), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                        }
+                        Text(drawn.card.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        if (drawn.reversed) {
+                            Text(
+                                stringResource(R.string.tarot_reversed),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        Text(drawn.meaning.keywords.joinToString(" · "), style = MaterialTheme.typography.bodySmall)
+                    }
                 }
+            } else if (!backImageFailed) {
+                AsyncImage(
+                    model = backImage,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    onError = { backImageFailed = true },
+                    modifier = Modifier.fillMaxWidth().aspectRatio(CARD_ASPECT)
+                )
             } else {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
@@ -162,6 +211,9 @@ internal fun TarotCardView(
         }
     }
 }
+
+/** Proporção das imagens de carta (424×632), para não distorcer a arte. */
+private const val CARD_ASPECT = 424f / 632f
 
 private fun toRoman(number: Int): String {
     if (number == 0) return "0"

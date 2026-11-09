@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.modes.data.MajorArcanaDeck
+import com.ogos.apprandomizador.modes.data.FullTarotDeck
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -9,7 +9,7 @@ import org.junit.Test
 class OfflineReadingInterpreterTest {
     @Test fun `all card orientations produce useful offline text`() = runBlocking {
         val interpreter = OfflineReadingInterpreter()
-        MajorArcanaDeck.getDeck().forEach { card ->
+        FullTarotDeck.getDeck().forEach { card ->
             listOf(card.upright, card.reversed).forEachIndexed { index, meaning ->
                 val drawn = DrawnCard(card, index == 1, SpreadPosition.SINGLE)
                 val reading = interpreter.interpret(null, listOf(drawn))
@@ -23,11 +23,11 @@ class OfflineReadingInterpreterTest {
     }
 
     @Test fun `reading uses question context and position labels`() = runBlocking {
-        val card = MajorArcanaDeck.getDeck().first()
+        val card = FullTarotDeck.getDeck().first()
         val reading = OfflineReadingInterpreter().interpret("Devo mudar?", listOf(
             DrawnCard(card, false, SpreadPosition.PAST),
-            DrawnCard(MajorArcanaDeck.getDeck()[1], true, SpreadPosition.PRESENT),
-            DrawnCard(MajorArcanaDeck.getDeck()[2], false, SpreadPosition.FUTURE)
+            DrawnCard(FullTarotDeck.getDeck()[1], true, SpreadPosition.PRESENT),
+            DrawnCard(FullTarotDeck.getDeck()[2], false, SpreadPosition.FUTURE)
         ))
         assertTrue(reading.summary.contains("Devo mudar?"))
         assertTrue(reading.sections.map { it.title }.any { it.startsWith("Passado") })
