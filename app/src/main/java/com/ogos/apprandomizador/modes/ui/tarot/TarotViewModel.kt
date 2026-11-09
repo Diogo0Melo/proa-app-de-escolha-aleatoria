@@ -1,6 +1,9 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
 import androidx.compose.runtime.Immutable
+import com.ogos.apprandomizador.modes.domain.isAiReady
+import com.ogos.apprandomizador.modes.ui.ai.AiAction
+import com.ogos.apprandomizador.modes.ui.ai.aiActionFor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.data.repository.IOracleRepository
@@ -31,9 +34,6 @@ sealed interface TarotPhase {
     data object Revealed : TarotPhase
 }
 
-/** Ação de IA disponível na leitura. Derivada do estado: a tela não combina flags soltas. */
-enum class AiAction { None, Deepen, Loading, Retry }
-
 @Immutable
 data class TarotUiState(
     val question: String = "",
@@ -60,13 +60,7 @@ data class TarotUiState(
      * Só há nova chamada se houve erro ou cancelamento.
      */
     val aiAction: AiAction
-        get() = when {
-            !aiEnabled || phase != TarotPhase.Revealed -> AiAction.None
-            aiReading != null -> AiAction.None
-            aiLoading -> AiAction.Loading
-            aiError != null || aiCancelled -> AiAction.Retry
-            else -> AiAction.Deepen
-        }
+        get() = aiActionFor(aiEnabled, phase == TarotPhase.Revealed, aiReading != null, aiLoading, aiError, aiCancelled)
 }
 
 class TarotViewModel(
@@ -86,10 +80,7 @@ class TarotViewModel(
         aiSettingsRepository?.let { repository ->
             viewModelScope.launch {
                 repository.settings.collect { settings ->
-                    val config = settings.config
-                    val enabled = config != null && config.enabled && settings.hasApiKey && runCatching {
-                        settings.consentedAuthority == com.ogos.apprandomizador.modes.domain.BaseUrlNormalizer.authority(config.baseUrl)
-                    }.getOrDefault(false)
+                    val enabled = settings.isAiReady()
                     _uiState.value = _uiState.value.copy(aiEnabled = enabled)
                     if (!enabled) clearAiState()
                 }
