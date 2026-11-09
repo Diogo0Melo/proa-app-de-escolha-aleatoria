@@ -47,6 +47,8 @@ data class TarotUiState(
     val aiReading: Reading? = null,
     val aiModel: String? = null,
     val aiLoading: Boolean = false,
+    /** Número da tentativa em curso (1 = primeira). Valores acima de 1 indicam nova tentativa. */
+    val aiAttempt: Int = 0,
     val aiError: String? = null
 )
 
@@ -154,18 +156,22 @@ class TarotViewModel(
         aiJob?.cancel()
         val requestId = current.requestId
         aiJob = viewModelScope.launch {
-            _uiState.value = current.copy(aiLoading = true, aiError = null, aiReading = null, aiModel = null)
-            when (val result = service.deepen(current.question, current.drawn)) {
+            _uiState.value = current.copy(aiLoading = true, aiAttempt = 1, aiError = null, aiReading = null, aiModel = null)
+            val onRetry: (Int) -> Unit = { attempt ->
+                val latest = _uiState.value
+                if (latest.aiLoading && latest.requestId == requestId) _uiState.value = latest.copy(aiAttempt = attempt)
+            }
+            when (val result = service.deepen(current.question, current.drawn, onRetry)) {
                 is AiReadingResult.Success -> {
                     val latest = _uiState.value
                     if (latest.phase == TarotPhase.Revealed && latest.requestId == requestId) {
-                        _uiState.value = latest.copy(aiLoading = false, aiReading = result.reading, aiModel = result.modelId, aiError = null)
+                        _uiState.value = latest.copy(aiLoading = false, aiAttempt = 0, aiReading = result.reading, aiModel = result.modelId, aiError = null)
                     }
                 }
                 is AiReadingResult.Failure -> {
                     val latest = _uiState.value
                     if (latest.phase == TarotPhase.Revealed && latest.requestId == requestId) {
-                        _uiState.value = latest.copy(aiLoading = false, aiError = result.reason)
+                        _uiState.value = latest.copy(aiLoading = false, aiAttempt = 0, aiError = result.reason)
                     }
                 }
             }
@@ -174,12 +180,12 @@ class TarotViewModel(
 
     fun onCancelAi() {
         aiJob?.cancel()
-        _uiState.value = _uiState.value.copy(aiLoading = false)
+        _uiState.value = _uiState.value.copy(aiLoading = false, aiAttempt = 0)
     }
 
     fun onReset() {
         if (_uiState.value.phase == TarotPhase.Revealing || _uiState.value.phase == TarotPhase.Interpreting) return
         aiJob?.cancel()
-        _uiState.value = _uiState.value.copy(question = "", phase = TarotPhase.Idle, drawn = emptyList(), reading = null, aiReading = null, aiModel = null, aiLoading = false, aiError = null)
+        _uiState.value = _uiState.value.copy(question = "", phase = TarotPhase.Idle, drawn = emptyList(), reading = null, aiReading = null, aiModel = null, aiLoading = false, aiAttempt = 0, aiError = null)
     }
 }

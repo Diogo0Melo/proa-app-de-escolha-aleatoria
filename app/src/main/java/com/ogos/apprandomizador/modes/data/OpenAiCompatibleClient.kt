@@ -3,6 +3,7 @@ package com.ogos.apprandomizador.modes.data
 import com.ogos.apprandomizador.modes.domain.BaseUrlNormalizer
 import com.ogos.apprandomizador.modes.domain.LlmClient
 import com.ogos.apprandomizador.modes.domain.LlmHttpException
+import com.ogos.apprandomizador.modes.domain.LlmResponseFormatException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -72,7 +73,7 @@ class OpenAiCompatibleClient(
         val root = json.parseToJsonElement(request("POST", endpoint(baseUrl, "/chat/completions"), apiKey, payload)).jsonObject
         return root["choices"]?.jsonArray?.firstOrNull()?.jsonObject
             ?.get("message")?.jsonObject?.get("content")?.jsonPrimitive?.contentOrNull
-            ?.takeIf(String::isNotBlank) ?: throw IOException("Formato inesperado do provedor")
+            ?.takeIf(String::isNotBlank) ?: throw LlmResponseFormatException("Formato inesperado do provedor")
     }
 
     private suspend fun request(method: String, url: String, apiKey: String, body: String? = null): String {

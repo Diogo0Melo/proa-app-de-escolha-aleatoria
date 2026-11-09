@@ -15,6 +15,7 @@ object ApiErrorMapper {
             detail.contains("chave", ignoreCase = true) -> "Informe a chave da API."
             detail.contains("model ID", ignoreCase = true) -> "Informe o model ID para testar este provedor."
             detail.startsWith("HTTP") -> "O provedor respondeu num formato inesperado."
+            error is LlmResponseFormatException -> "O provedor respondeu num formato inesperado."
             error is IOException -> "Sem conexão com o provedor."
             else -> "O provedor respondeu num formato inesperado."
         }

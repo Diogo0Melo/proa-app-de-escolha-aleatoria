@@ -18,4 +18,8 @@ class ApiErrorMapperTest {
         assertEquals("Falha de segurança na conexão (certificado).", ApiErrorMapper.message(SSLException("bad cert")))
         assertEquals("O provedor respondeu num formato inesperado.", ApiErrorMapper.message(IllegalStateException("invalid JSON")))
     }
+
+    @Test fun `resposta fora do formato nao aparece como falha de conexao`() {
+        assertEquals("O provedor respondeu num formato inesperado.", ApiErrorMapper.message(LlmResponseFormatException("Formato inesperado do provedor")))
+    }
 }

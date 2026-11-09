@@ -13,5 +13,7 @@ class PromptBuilderTest {
         assertTrue(prompt.contains("invertida"))
         assertFalse(prompt.contains("api_key"))
         assertFalse(prompt.contains("segredo-de-teste"))
+        assertTrue(prompt.contains("\"synthesis\""))
+        assertTrue(prompt.contains("\"guidance\""))
     }
 }
