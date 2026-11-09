@@ -5,6 +5,7 @@ import com.ogos.apprandomizador.viewmodel.deriveOracleStream
 import java.security.MessageDigest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -49,5 +50,12 @@ class TarotDrawerTest {
     @Test fun `reversed cards are disabled when requested`() {
         val result = TarotDrawer.draw(FullTarotDeck.getDeck(), Spread.PAST_PRESENT_FUTURE, deriveOracleStream(seed(8), 1), false)
         assertTrue(result.none { it.reversed })
+    }
+
+    @Test fun `rejects a deck smaller than the spread`() {
+        val smallDeck = FullTarotDeck.getDeck().take(2)
+        assertThrows(IllegalArgumentException::class.java) {
+            TarotDrawer.draw(smallDeck, Spread.PAST_PRESENT_FUTURE, deriveOracleStream(seed(1), 1), true)
+        }
     }
 }

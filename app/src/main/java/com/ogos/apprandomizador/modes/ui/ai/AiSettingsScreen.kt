@@ -50,7 +50,7 @@ fun AiSettingsRoute(viewModel: AiSettingsViewModel, modifier: Modifier = Modifie
         AlertDialog(
             onDismissRequest = { showConsent = false },
             title = { Text("Privacidade da leitura por IA") },
-            text = { Text("Ao testar, a chave e o model ID serão enviados para ${runCatching { com.ogos.apprandomizador.modes.domain.BaseUrlNormalizer.authority(state.baseUrl) }.getOrNull() ?: "o provedor informado"}. Ao aprofundar, também serão enviados a pergunta (se houver) e os nomes, posições e orientações das cartas. A chave é enviada diretamente por HTTPS; a resposta da IA não é salva no aparelho. O provedor pode aplicar sua própria política de retenção. Deseja permitir esses envios?") },
+            text = { Text("Ao testar, a chave e o model ID serão enviados para ${state.baseUrlAuthority ?: "o provedor informado"}. Ao aprofundar, também serão enviados a pergunta (se houver) e os nomes, posições e orientações das cartas. A chave é enviada diretamente por HTTPS; a resposta da IA não é salva no aparelho. O provedor pode aplicar sua própria política de retenção. Deseja permitir esses envios?") },
             confirmButton = { TextButton(onClick = { showConsent = false; viewModel.acceptConsentAndTest() }) { Text("Aceitar e testar") } },
             dismissButton = { TextButton(onClick = { showConsent = false }) { Text("Agora não") } }
         )

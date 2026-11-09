@@ -15,6 +15,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+private const val DEFAULT_BASE_URL = "https://api.openai.com/v1"
+
+/** Autoridade (host:porta) da URL, ou null se inválida. Calculada no ViewModel, nunca na composição. */
+internal fun authorityOrNull(baseUrl: String): String? = runCatching { BaseUrlNormalizer.authority(baseUrl) }.getOrNull()
+
 sealed interface ConnectionState {
     data object Idle : ConnectionState
     data object Testing : ConnectionState
@@ -23,7 +28,9 @@ sealed interface ConnectionState {
 }
 
 data class AiSettingsUiState(
-    val baseUrl: String = "https://api.openai.com/v1",
+    val baseUrl: String = DEFAULT_BASE_URL,
+    /** Autoridade da URL digitada (null se inválida); exibida na confirmação de envio de dados. */
+    val baseUrlAuthority: String? = authorityOrNull(DEFAULT_BASE_URL),
     val model: String = "",
     val apiKeyInput: Secret? = null,
     val hasSavedKey: Boolean = false,
@@ -36,7 +43,7 @@ data class AiSettingsUiState(
     val isSaving: Boolean = false
 ) {
     val hasConsent: Boolean
-        get() = consentedAuthority != null && runCatching { BaseUrlNormalizer.authority(baseUrl) == consentedAuthority }.getOrDefault(false)
+        get() = consentedAuthority != null && baseUrlAuthority == consentedAuthority
 }
 
 class AiSettingsViewModel(
@@ -54,8 +61,10 @@ class AiSettingsViewModel(
                 val config = settings.config
                 val firstLoad = !settingsLoaded
                 settingsLoaded = true
+                val loadedBaseUrl = if (firstLoad) config?.baseUrl ?: _state.value.baseUrl else _state.value.baseUrl
                 _state.value = _state.value.copy(
-                    baseUrl = if (firstLoad) config?.baseUrl ?: _state.value.baseUrl else _state.value.baseUrl,
+                    baseUrl = loadedBaseUrl,
+                    baseUrlAuthority = authorityOrNull(loadedBaseUrl),
                     model = if (firstLoad) config?.model ?: _state.value.model else _state.value.model,
                     enabled = if (firstLoad) config?.enabled ?: true else _state.value.enabled,
                     hasSavedKey = settings.hasApiKey,
@@ -67,7 +76,7 @@ class AiSettingsViewModel(
 
     fun updateBaseUrl(value: String) {
         connectionJob?.cancel()
-        _state.value = _state.value.copy(baseUrl = value, models = emptyList(), connection = ConnectionState.Idle, message = null)
+        _state.value = _state.value.copy(baseUrl = value, baseUrlAuthority = authorityOrNull(value), models = emptyList(), connection = ConnectionState.Idle, message = null)
     }
     fun updateModel(value: String) { connectionJob?.cancel(); _state.value = _state.value.copy(model = value, connection = ConnectionState.Idle) }
     fun updateApiKey(value: String) { connectionJob?.cancel(); _state.value = _state.value.copy(apiKeyInput = value.takeIf(String::isNotEmpty)?.let(::Secret), connection = ConnectionState.Idle) }

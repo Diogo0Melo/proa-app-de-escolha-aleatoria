@@ -12,7 +12,6 @@ import com.ogos.apprandomizador.modes.domain.LlmClient
 import com.ogos.apprandomizador.modes.domain.Reading
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.ogos.apprandomizador.viewmodel.EntropySource
-import com.ogos.apprandomizador.viewmodel.MonotonicClock
 import com.ogos.apprandomizador.modes.ui.ai.MainDispatcherRule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -30,7 +29,6 @@ class TarotPersistenceTest {
         val vm = TarotViewModel(
             entropySource = EntropySource { ByteArray(32) { it.toByte() } },
             deckProvider = FullTarotDeck,
-            clock = MonotonicClock { 1_000L },
             oracleRepository = repository
         )
         vm.onDraw()
@@ -50,7 +48,6 @@ class TarotPersistenceTest {
         val vm = TarotViewModel(
             entropySource = EntropySource { ByteArray(32) { (it + 1).toByte() } },
             deckProvider = FullTarotDeck,
-            clock = MonotonicClock { 1_000L },
             oracleRepository = repository
         )
         vm.onDraw()
@@ -71,7 +68,6 @@ class TarotPersistenceTest {
         val vm = TarotViewModel(
             entropySource = EntropySource { ByteArray(32) { (it + 2).toByte() } },
             deckProvider = FullTarotDeck,
-            clock = MonotonicClock { 1_000L },
             aiReadingService = aiService,
             aiSettingsRepository = settings
         )
@@ -86,6 +82,36 @@ class TarotPersistenceTest {
         assertEquals(TarotPhase.Revealed, vm.uiState.value.phase)
         assertEquals(offlineReading, vm.uiState.value.reading)
         assertNotNull(vm.uiState.value.aiError)
+    }
+
+    @Test fun `disabling AI clears its error and keeps the offline reading`() = runTest(mainDispatcher.dispatcher) {
+        val settings = FakeAiSettingsRepository()
+        val aiService = AiReadingService(object : LlmClient {
+            override suspend fun listModels(baseUrl: String, apiKey: String) = emptyList<String>()
+            override suspend fun ping(baseUrl: String, apiKey: String, model: String) = Unit
+            override suspend fun complete(baseUrl: String, apiKey: String, model: String, prompt: String): String = error("provider unavailable")
+        }, settings)
+        val vm = TarotViewModel(
+            entropySource = EntropySource { ByteArray(32) { (it + 3).toByte() } },
+            deckProvider = FullTarotDeck,
+            aiReadingService = aiService,
+            aiSettingsRepository = settings
+        )
+        advanceUntilIdle()
+        vm.onDraw()
+        vm.onRevealFinished(vm.uiState.value.requestId)
+        advanceUntilIdle()
+        vm.onDeepenWithAi()
+        advanceUntilIdle()
+        assertNotNull(vm.uiState.value.aiError)
+
+        settings.settings.value = AiSettings(AiConfig("https://api.openai.com/v1", "model", enabled = false), true, "api.openai.com")
+        advanceUntilIdle()
+
+        assertFalse(vm.uiState.value.aiEnabled)
+        assertNull(vm.uiState.value.aiError)
+        assertNull(vm.uiState.value.aiReading)
+        assertNotNull(vm.uiState.value.reading)
     }
 
     private class FakeAiSettingsRepository : AiSettingsRepository {

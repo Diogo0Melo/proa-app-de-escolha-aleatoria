@@ -1,5 +1,6 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ogos.apprandomizador.data.repository.IOracleRepository
@@ -16,10 +17,7 @@ import com.ogos.apprandomizador.modes.domain.ReadingSection
 import com.ogos.apprandomizador.modes.domain.Spread
 import com.ogos.apprandomizador.modes.domain.TarotDrawer
 import com.ogos.apprandomizador.viewmodel.EntropySource
-import com.ogos.apprandomizador.viewmodel.MonotonicClock
-import com.ogos.apprandomizador.viewmodel.AndroidMonotonicClock
 import com.ogos.apprandomizador.viewmodel.deriveOracleStream
-import com.ogos.apprandomizador.viewmodel.uniformInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,15 +31,19 @@ sealed interface TarotPhase {
     data object Revealed : TarotPhase
 }
 
+/** Ação de IA disponível na leitura. Derivada do estado: a tela não combina flags soltas. */
+enum class AiAction { None, Deepen, Loading, Retry }
+
+@Immutable
 data class TarotUiState(
     val question: String = "",
     val spread: Spread = Spread.SINGLE,
     val allowReversed: Boolean = true,
     val phase: TarotPhase = TarotPhase.Idle,
     val requestId: Long = 0L,
-    val revealStartElapsedRealtime: Long = 0L,
-    val durationMillis: Long = 900L,
     val drawn: List<DrawnCard> = emptyList(),
+    /** Quantas cartas já foram reveladas e fixadas na tela, em ordem (0 até drawn.size). */
+    val landedCount: Int = 0,
     val reading: Reading? = null,
     val aiEnabled: Boolean = false,
     val aiReading: Reading? = null,
@@ -49,14 +51,28 @@ data class TarotUiState(
     val aiLoading: Boolean = false,
     /** Número da tentativa em curso (1 = primeira). Valores acima de 1 indicam nova tentativa. */
     val aiAttempt: Int = 0,
-    val aiError: String? = null
-)
+    val aiError: String? = null,
+    /** Geração cancelada pelo usuário: não é erro nem sucesso, então pode ser refeita. */
+    val aiCancelled: Boolean = false
+) {
+    /**
+     * Uma leitura de IA com sucesso encerra os botões de IA para esta tiragem.
+     * Só há nova chamada se houve erro ou cancelamento.
+     */
+    val aiAction: AiAction
+        get() = when {
+            !aiEnabled || phase != TarotPhase.Revealed -> AiAction.None
+            aiReading != null -> AiAction.None
+            aiLoading -> AiAction.Loading
+            aiError != null || aiCancelled -> AiAction.Retry
+            else -> AiAction.Deepen
+        }
+}
 
 class TarotViewModel(
     private val entropySource: EntropySource,
     private val deckProvider: DeckProvider,
     private val readingInterpreter: ReadingInterpreter = OfflineReadingInterpreter(),
-    private val clock: MonotonicClock = AndroidMonotonicClock,
     private val oracleRepository: IOracleRepository? = null,
     private val aiReadingService: com.ogos.apprandomizador.modes.domain.AiReadingService? = null,
     aiSettingsRepository: AiSettingsRepository? = null
@@ -75,6 +91,7 @@ class TarotViewModel(
                         settings.consentedAuthority == com.ogos.apprandomizador.modes.domain.BaseUrlNormalizer.authority(config.baseUrl)
                     }.getOrDefault(false)
                     _uiState.value = _uiState.value.copy(aiEnabled = enabled)
+                    if (!enabled) clearAiState()
                 }
             }
         }
@@ -101,20 +118,34 @@ class TarotViewModel(
         val requestId = ++nextRequestId
         val stream = deriveOracleStream(entropySource.nextSeed(), requestId)
         val drawn = TarotDrawer.draw(deckProvider.getDeck(), current.spread, stream, current.allowReversed)
-        val duration = 700L + stream.uniformInt(501)
         _uiState.value = current.copy(
             phase = TarotPhase.Revealing,
             requestId = requestId,
-            revealStartElapsedRealtime = clock.nowMillis(),
-            durationMillis = duration,
             drawn = drawn,
+            landedCount = 0,
             reading = null
         )
     }
 
+    /** Uma carta terminou a animação e foi fixada na tela. A leitura começa quando a última é fixada. */
+    fun onCardLanded(requestId: Long, index: Int) {
+        val current = _uiState.value
+        if (current.phase != TarotPhase.Revealing || current.requestId != requestId) return
+        if (index != current.landedCount) return
+        val landed = current.copy(landedCount = current.landedCount + 1)
+        _uiState.value = landed
+        if (landed.landedCount == landed.drawn.size) beginInterpretation(landed)
+    }
+
+    /** Encerra a sequência de revelação de uma vez: usado com animações desligadas e em testes. */
     fun onRevealFinished(requestId: Long) {
         val current = _uiState.value
         if (current.phase != TarotPhase.Revealing || current.requestId != requestId) return
+        beginInterpretation(current.copy(landedCount = current.drawn.size))
+    }
+
+    private fun beginInterpretation(current: TarotUiState) {
+        val requestId = current.requestId
         _uiState.value = current.copy(phase = TarotPhase.Interpreting)
         viewModelScope.launch {
             try {
@@ -151,12 +182,12 @@ class TarotViewModel(
 
     fun onDeepenWithAi() {
         val current = _uiState.value
-        if (current.phase != TarotPhase.Revealed || !current.aiEnabled || current.aiLoading) return
+        if (current.aiAction != AiAction.Deepen && current.aiAction != AiAction.Retry) return
         val service = aiReadingService ?: return
         aiJob?.cancel()
         val requestId = current.requestId
         aiJob = viewModelScope.launch {
-            _uiState.value = current.copy(aiLoading = true, aiAttempt = 1, aiError = null, aiReading = null, aiModel = null)
+            _uiState.value = current.copy(aiLoading = true, aiAttempt = 1, aiError = null, aiReading = null, aiModel = null, aiCancelled = false)
             val onRetry: (Int) -> Unit = { attempt ->
                 val latest = _uiState.value
                 if (latest.aiLoading && latest.requestId == requestId) _uiState.value = latest.copy(aiAttempt = attempt)
@@ -178,14 +209,21 @@ class TarotViewModel(
         }
     }
 
-    fun onCancelAi() {
+    /** Sem IA ativa, a leitura de IA sai da tela; a leitura offline continua disponível. */
+    private fun clearAiState() {
         aiJob?.cancel()
-        _uiState.value = _uiState.value.copy(aiLoading = false, aiAttempt = 0)
+        _uiState.value = _uiState.value.copy(aiReading = null, aiModel = null, aiLoading = false, aiAttempt = 0, aiError = null, aiCancelled = false)
+    }
+
+    fun onCancelAi() {
+        if (!_uiState.value.aiLoading) return
+        aiJob?.cancel()
+        _uiState.value = _uiState.value.copy(aiLoading = false, aiAttempt = 0, aiCancelled = true)
     }
 
     fun onReset() {
-        if (_uiState.value.phase == TarotPhase.Revealing || _uiState.value.phase == TarotPhase.Interpreting) return
+        if (_uiState.value.phase == TarotPhase.Revealing || _uiState.value.phase == TarotPhase.Interpreting || _uiState.value.aiLoading) return
         aiJob?.cancel()
-        _uiState.value = _uiState.value.copy(question = "", phase = TarotPhase.Idle, drawn = emptyList(), reading = null, aiReading = null, aiModel = null, aiLoading = false, aiAttempt = 0, aiError = null)
+        _uiState.value = _uiState.value.copy(question = "", phase = TarotPhase.Idle, drawn = emptyList(), landedCount = 0, reading = null, aiReading = null, aiModel = null, aiLoading = false, aiAttempt = 0, aiError = null, aiCancelled = false)
     }
 }
