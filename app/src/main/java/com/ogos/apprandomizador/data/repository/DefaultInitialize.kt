@@ -10,27 +10,27 @@ import kotlinx.coroutines.launch
 class DefaultInitialize : IDefaultInitialization {
 
     override suspend fun initializeDatabase(
-        isFirstTime: Boolean,
+        needsSeed: Boolean,
         dataStoreManager: DataStoreManager,
         repository: IRepository
     ) {
-        if (!isFirstTime) return
+        if (!needsSeed) return
         // Idempotency: never re-seed if lists already exist (e.g. a previous run
-        // was killed mid-seeding before the first-access flag was cleared).
+        // was killed mid-seeding before the seeded flag was set).
         if (repository.allItems.first().isNotEmpty()) {
-            dataStoreManager.saveFirstAccess(false)
+            dataStoreManager.markSeeded()
             return
         }
         val defaultItems = createDefaultList()
         // Insert concurrently instead of awaiting each save sequentially.
-        // coroutineScope awaits all children before clearing the first-access
-        // flag, so the seed-then-clear ordering keeps initialization idempotent.
+        // coroutineScope awaits all children before setting the seeded flag,
+        // so the seed-then-mark ordering keeps initialization idempotent.
         coroutineScope {
             defaultItems.forEach { item ->
                 launch { repository.save(item) }
             }
         }
-        dataStoreManager.saveFirstAccess(false)
+        dataStoreManager.markSeeded()
     }
 
     override fun createDefaultList(): List<ItemList> {

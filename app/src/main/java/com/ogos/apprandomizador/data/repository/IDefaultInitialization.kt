@@ -5,7 +5,7 @@ import com.ogos.apprandomizador.data.database.DataStoreManager
 
 interface IDefaultInitialization {
     suspend fun initializeDatabase(
-        isFirstTime: Boolean,
+        needsSeed: Boolean,
         dataStoreManager: DataStoreManager,
         repository: IRepository
     )

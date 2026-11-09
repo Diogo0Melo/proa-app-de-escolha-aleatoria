@@ -19,13 +19,15 @@ class DataStoreManager(private val context: Context) {
         val IS_SOUND_ON = booleanPreferencesKey("is_sound_on")
     }
 
-    suspend fun saveFirstAccess(isFirstTime: Boolean) {
+    /** Marca o conteúdo inicial como semeado. Depois disso a inicialização não roda de novo. */
+    suspend fun markSeeded() {
         dataStore.edit {
-            it[IS_FIRST_TIME] = isFirstTime
+            it[IS_FIRST_TIME] = false
         }
     }
 
-    val isFirstTime: Flow<Boolean> = dataStore.data.map {
+    /** true enquanto o conteúdo inicial não foi semeado. A chave gravada mantém o nome antigo para não re-semear quem já usa o app. */
+    val needsSeed: Flow<Boolean> = dataStore.data.map {
         it[IS_FIRST_TIME] ?: true
     }
 
