@@ -1,0 +1,56 @@
+package com.ogos.apprandomizador.modes.domain
+
+import com.ogos.apprandomizador.model.RaffleItem
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.withTimeout
+
+sealed interface OracleAiResult {
+    data class Success(val reading: OracleReading, val modelId: String) : OracleAiResult
+    data class Failure(val reason: String) : OracleAiResult
+}
+
+/**
+ * Leitura do oráculo com IA. A resposta sorteada entra no prompt como fato já decidido;
+ * a IA não tem como alterá-la nem decidi-la.
+ */
+class OracleAiService(
+    private val client: LlmClient,
+    private val settings: AiSettingsRepository,
+    private val retryDelaysMillis: List<Long> = AiReadingService.DEFAULT_RETRY_DELAYS_MILLIS,
+    private val totalBudgetMillis: Long = AiReadingService.TOTAL_BUDGET_MILLIS
+) {
+    suspend fun deepen(
+        question: String?,
+        answer: RaffleItem,
+        topic: String?,
+        depth: ReadingDepth = ReadingDepth.Short,
+        onRetry: (attempt: Int) -> Unit = {}
+    ): OracleAiResult {
+        return try {
+            withTimeout(totalBudgetMillis) { runAttempt(question, answer, topic, depth, onRetry) }
+        } catch (_: TimeoutCancellationException) {
+            // Vem antes de CancellationException: o timeout também herda dela.
+            OracleAiResult.Failure(AiReadingService.TIMEOUT_MESSAGE)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            OracleAiResult.Failure(ApiErrorMapper.message(error))
+        }
+    }
+
+    private suspend fun runAttempt(
+        question: String?,
+        answer: RaffleItem,
+        topic: String?,
+        depth: ReadingDepth,
+        onRetry: (Int) -> Unit
+    ): OracleAiResult {
+        val configured = settings.settingsSnapshot() ?: return OracleAiResult.Failure(AiReadingService.NOT_CONFIGURED)
+        val key = settings.apiKey() ?: return OracleAiResult.Failure(AiReadingService.MISSING_KEY)
+        val prompt = OraclePromptBuilder.build(question, answer, topic, depth)
+        val raw = completeWithLlmRetry(client, configured, key, prompt, retryDelaysMillis, onRetry)
+        val reading = OracleJsonParser.parse(raw, depth) ?: return OracleAiResult.Failure(AiReadingService.INVALID_RESPONSE)
+        return OracleAiResult.Success(reading, configured.model)
+    }
+}
