@@ -11,23 +11,20 @@ import kotlinx.serialization.json.jsonObject
  */
 object OracleJsonParser {
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
-    private const val MAX_READING_SHORT = 600
-    private const val MAX_READING_EXTENDED = 1_200
+    private const val MAX_READING = 600
     private const val MAX_TITLE = 60
     private const val MAX_ESSENCE = 40
     private const val MAX_AFFIRMATION = 100
 
-    fun parse(raw: String, depth: ReadingDepth): OracleReading? {
+    fun parse(raw: String): OracleReading? {
         val candidate = extractJsonObject(raw) ?: return null
         val root = runCatching { json.parseToJsonElement(candidate).jsonObject }.getOrNull() ?: return null
-        val maxReading = if (depth == ReadingDepth.Extended) MAX_READING_EXTENDED else MAX_READING_SHORT
-        val reading = text(root["reading"], maxReading) ?: return null
+        val reading = text(root["reading"], MAX_READING) ?: return null
         return OracleReading(
             title = text(root["title"], MAX_TITLE),
             essence = text(root["essence"], MAX_ESSENCE),
             reading = reading,
-            affirmation = text(root["affirmation"], MAX_AFFIRMATION),
-            depth = depth
+            affirmation = text(root["affirmation"], MAX_AFFIRMATION)
         )
     }
 

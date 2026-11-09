@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -133,8 +134,12 @@ fun OracleScreen(
     val keyboard = LocalSoftwareKeyboardController.current
 
     // Quando a leitura da IA chega, desce até ela: sem isso ela fica abaixo da dobra.
+    // Espera um frame: o LaunchedEffect roda antes do layout, e maxValue ainda seria o antigo.
     LaunchedEffect(state.aiReading) {
-        if (state.aiReading != null) scrollState.animateScrollTo(scrollState.maxValue)
+        if (state.aiReading != null) {
+            withFrameNanos { }
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
     }
 
     Column(
@@ -207,7 +212,7 @@ fun OracleScreen(
         }
 
         if (revealed) {
-            state.reflection?.let { ReflectionQuote(it) }
+            state.visibleReflection?.let { ReflectionQuote(it) }
             OracleAiSection(state = state, speechAvailable = speechAvailable, speaking = speaking, actions = actions)
             if (state.aiAction != AiAction.Loading) {
                 OutlinedButton(
@@ -251,10 +256,7 @@ private fun OracleAiSection(
     actions: OracleActions
 ) {
     val action = state.aiAction
-    // Antes da curta, o botão aprofunda; depois dela, pede a leitura estendida.
-    val deepenLabel = stringResource(
-        if (state.aiReading == null) R.string.oracle_deepen_with_ai else R.string.oracle_deepen_more
-    )
+    val deepenLabel = stringResource(R.string.oracle_deepen_with_ai)
     if (action == AiAction.Deepen) {
         OutlinedButton(onClick = actions.onDeepenAi, modifier = Modifier.fillMaxWidth()) {
             Text(deepenLabel)

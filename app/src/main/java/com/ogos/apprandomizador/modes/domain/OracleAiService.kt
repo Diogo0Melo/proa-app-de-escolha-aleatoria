@@ -4,6 +4,7 @@ import com.ogos.apprandomizador.model.RaffleItem
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration.Companion.milliseconds
 
 sealed interface OracleAiResult {
     data class Success(val reading: OracleReading, val modelId: String) : OracleAiResult
@@ -24,11 +25,10 @@ class OracleAiService(
         question: String?,
         answer: RaffleItem,
         topic: String?,
-        depth: ReadingDepth = ReadingDepth.Short,
         onRetry: (attempt: Int) -> Unit = {}
     ): OracleAiResult {
         return try {
-            withTimeout(totalBudgetMillis) { runAttempt(question, answer, topic, depth, onRetry) }
+            withTimeout(totalBudgetMillis.milliseconds) { runAttempt(question, answer, topic, onRetry) }
         } catch (_: TimeoutCancellationException) {
             // Vem antes de CancellationException: o timeout também herda dela.
             OracleAiResult.Failure(AiReadingService.TIMEOUT_MESSAGE)
@@ -43,14 +43,13 @@ class OracleAiService(
         question: String?,
         answer: RaffleItem,
         topic: String?,
-        depth: ReadingDepth,
         onRetry: (Int) -> Unit
     ): OracleAiResult {
         val configured = settings.settingsSnapshot() ?: return OracleAiResult.Failure(AiReadingService.NOT_CONFIGURED)
         val key = settings.apiKey() ?: return OracleAiResult.Failure(AiReadingService.MISSING_KEY)
-        val prompt = OraclePromptBuilder.build(question, answer, topic, depth)
+        val prompt = OraclePromptBuilder.build(question, answer, topic)
         val raw = completeWithLlmRetry(client, configured, key, prompt, retryDelaysMillis, onRetry)
-        val reading = OracleJsonParser.parse(raw, depth) ?: return OracleAiResult.Failure(AiReadingService.INVALID_RESPONSE)
+        val reading = OracleJsonParser.parse(raw) ?: return OracleAiResult.Failure(AiReadingService.INVALID_RESPONSE)
         return OracleAiResult.Success(reading, configured.model)
     }
 }

@@ -24,17 +24,10 @@ class OraclePromptBuilderTest {
         assertTrue(OraclePromptBuilder.build(null, RaffleItem("Vai", 1L), null).contains("clássico"))
     }
 
-    @Test fun `leitura curta pede saida concisa e o campo essence`() {
-        val prompt = OraclePromptBuilder.build("?", RaffleItem("SIM", 1L), null, ReadingDepth.Short)
+    @Test fun `a leitura pede um paragrafo curto e o campo essence`() {
+        val prompt = OraclePromptBuilder.build("?", RaffleItem("SIM", 1L), null)
         assertTrue(prompt.contains("\"essence\""))
         assertTrue(prompt.contains("UM parágrafo"))
         assertTrue(prompt.contains("máximo 60 palavras"))
-        assertFalse(prompt.contains("2 a 4 parágrafos"))
-    }
-
-    @Test fun `leitura estendida pede ate 180 palavras`() {
-        val prompt = OraclePromptBuilder.build("?", RaffleItem("SIM", 1L), null, ReadingDepth.Extended)
-        assertTrue(prompt.contains("2 a 3 parágrafos"))
-        assertTrue(prompt.contains("máximo 180 palavras"))
     }
 }

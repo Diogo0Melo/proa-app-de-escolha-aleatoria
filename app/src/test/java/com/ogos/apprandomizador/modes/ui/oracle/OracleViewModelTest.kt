@@ -11,7 +11,6 @@ import com.ogos.apprandomizador.modes.domain.AiSettingsRepository
 import com.ogos.apprandomizador.modes.domain.LlmClient
 import com.ogos.apprandomizador.modes.domain.OracleAiService
 import com.ogos.apprandomizador.modes.domain.OracleSource
-import com.ogos.apprandomizador.modes.domain.ReadingDepth
 import com.ogos.apprandomizador.modes.domain.StoredOutcome
 import com.ogos.apprandomizador.modes.ui.ai.AiAction
 import com.ogos.apprandomizador.modes.ui.ai.MainDispatcherRule
@@ -205,7 +204,7 @@ class OracleViewModelTest {
         assertEquals(OracleSource.CLASSIC, vm.uiState.value.source)
     }
 
-    @Test fun `com IA ativa, a leitura curta sai sozinha e a estendida e opcional, uma unica vez`() = runTest(mainDispatcher.dispatcher) {
+    @Test fun `com IA ativa, a leitura sai sozinha uma unica vez e a reflexao offline sai com ela`() = runTest(mainDispatcher.dispatcher) {
         val settings = FakeSettings()
         val client = CountingClient("""{"title":"Título","essence":"Abertura","reading":"Leitura","affirmation":"Confie"}""")
         val service = OracleAiService(client, settings, retryDelaysMillis = emptyList())
@@ -216,20 +215,23 @@ class OracleViewModelTest {
         vm.onAsk()
         vm.onRevealFinished(vm.uiState.value.requestId)
         advanceUntilIdle()
-        assertEquals(ReadingDepth.Short, vm.uiState.value.aiReading?.depth)
+        assertNotNull(vm.uiState.value.aiReading)
         assertEquals(1, client.calls)
-        // Com a curta pronta, ainda existe a ação de aprofundar.
-        assertEquals(AiAction.Deepen, vm.uiState.value.aiAction)
-
-        vm.onDeepenWithAi()
-        advanceUntilIdle()
-        assertEquals(ReadingDepth.Extended, vm.uiState.value.aiReading?.depth)
-        assertEquals(2, client.calls)
-        // Depois da estendida, nenhuma ação de IA volta para esta tiragem.
+        // A leitura encerra as ações de IA desta tiragem.
         assertEquals(AiAction.None, vm.uiState.value.aiAction)
+        // A afirmação da IA é a frase final: a reflexão offline não compete com ela.
+        assertNull(vm.uiState.value.visibleReflection)
 
         vm.onDeepenWithAi()
         advanceUntilIdle()
-        assertEquals(2, client.calls)
+        assertEquals(1, client.calls)
+    }
+
+    @Test fun `sem IA, a reflexao offline fica visivel`() = runTest(mainDispatcher.dispatcher) {
+        val vm = OracleViewModel(FakeEntropySource())
+        vm.onAsk()
+        vm.onRevealFinished(vm.uiState.value.requestId)
+        advanceUntilIdle()
+        assertNotNull(vm.uiState.value.visibleReflection)
     }
 }

@@ -14,7 +14,6 @@ import com.ogos.apprandomizador.modes.domain.OracleAiService
 import com.ogos.apprandomizador.modes.domain.OracleDrawer
 import com.ogos.apprandomizador.modes.domain.OracleReading
 import com.ogos.apprandomizador.modes.domain.OracleSource
-import com.ogos.apprandomizador.modes.domain.ReadingDepth
 import com.ogos.apprandomizador.modes.domain.StoredOutcome
 import com.ogos.apprandomizador.modes.domain.asOracleSource
 import com.ogos.apprandomizador.modes.domain.isAiReady
@@ -59,14 +58,12 @@ data class OracleUiState(
 
     val canAsk: Boolean get() = phase == OraclePhase.Idle && source.items.isNotEmpty()
 
-    /**
-     * A leitura curta é automática e ainda permite aprofundar; só a estendida encerra as ações de IA.
-     */
+    /** Depois de uma leitura da IA com sucesso, nenhuma ação de IA volta para esta tiragem. */
     val aiAction: AiAction
         get() = aiActionFor(
             enabled = aiEnabled,
             revealed = phase == OraclePhase.Revealed,
-            hasReading = aiReading?.depth == ReadingDepth.Extended,
+            hasReading = aiReading != null,
             loading = aiLoading,
             error = aiError,
             cancelled = aiCancelled
@@ -74,12 +71,18 @@ data class OracleUiState(
 
     /** Frase de reflexão offline, só enquanto a resposta está revelada. */
     val reflection: String? get() = revealedAnswer?.let(DefaultOracleReflections::forAnswer)
+
+    /**
+     * A reflexão offline preenche o espaço enquanto a IA não entregou. Quando a leitura chega,
+     * a afirmação dela vira a frase final, e a reflexão sai para não competir com ela.
+     */
+    val visibleReflection: String? get() = reflection.takeIf { aiReading == null }
 }
 
 /**
  * Oráculo: o sorteio decide a resposta; a IA, quando ativa, só a elabora.
  * Fases: Idle → Revealing (animação) → Recording (grava o uso) → Revealed.
- * Com IA ativa, uma leitura curta sai sozinha; a estendida é opcional e pedida pelo usuário.
+ * Com IA ativa, a leitura sai sozinha uma única vez por tiragem.
  */
 class OracleViewModel(
     private val entropySource: EntropySource,
@@ -210,19 +213,17 @@ class OracleViewModel(
     }
 
     /**
-     * Pede a IA. Sem leitura ainda, pede a curta. Com a curta pronta, o mesmo botão pede a
-     * estendida. Depois da estendida com sucesso, nenhuma ação de IA volta para esta tiragem.
+     * Pede a leitura da IA para a tiragem atual. Só age quando a ação é Deepen ou Retry, ou seja,
+     * sem leitura ainda, depois de erro ou depois de cancelamento. Com sucesso, a ação some.
      */
     fun onDeepenWithAi() {
         val current = _uiState.value
         if (current.aiAction != AiAction.Deepen && current.aiAction != AiAction.Retry) return
         val service = aiService ?: return
         val answer = current.answer ?: return
-        val depth = if (current.aiReading == null) ReadingDepth.Short else ReadingDepth.Extended
         aiJob?.cancel()
         val requestId = current.requestId
         aiJob = viewModelScope.launch {
-            // A leitura curta, se existir, continua visível durante a estendida.
             _uiState.value = _uiState.value.copy(aiLoading = true, aiAttempt = 1, aiError = null, aiCancelled = false)
             val onRetry: (Int) -> Unit = { attempt ->
                 val latest = _uiState.value
@@ -230,7 +231,7 @@ class OracleViewModel(
                     _uiState.value = latest.copy(aiAttempt = attempt)
                 }
             }
-            when (val result = service.deepen(current.question, answer, current.source.topic, depth, onRetry)) {
+            when (val result = service.deepen(current.question, answer, current.source.topic, onRetry)) {
                 is OracleAiResult.Success -> {
                     val latest = _uiState.value
                     if (latest.phase == OraclePhase.Revealed && latest.requestId == requestId) {
