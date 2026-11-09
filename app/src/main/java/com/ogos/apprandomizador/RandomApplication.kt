@@ -9,6 +9,7 @@ import com.ogos.apprandomizador.modes.data.AiSettingsDataStore
 import com.ogos.apprandomizador.modes.data.KeystoreSecretStore
 import com.ogos.apprandomizador.modes.data.OpenAiCompatibleClient
 import com.ogos.apprandomizador.modes.domain.AiReadingService
+import com.ogos.apprandomizador.modes.domain.OracleAiService
 import com.ogos.apprandomizador.modes.data.AiSettingsRepositoryImpl
 import com.ogos.apprandomizador.viewmodel.EntropySource
 import com.ogos.apprandomizador.viewmodel.SecureEntropySource
@@ -29,5 +30,6 @@ class RandomApplication : Application() {
     }
     val llmClient by lazy { OpenAiCompatibleClient() }
     val aiReadingService by lazy { AiReadingService(llmClient, aiSettingsRepository) }
+    val oracleAiService by lazy { OracleAiService(llmClient, aiSettingsRepository) }
     val entropySource: EntropySource by lazy { SecureEntropySource() }
 }

@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val app = application as RandomApplication
             val factory = remember {
-                ViewModelFactory(app.repository, app.dataStoreManager, DefaultInitialize(), app.entropySource, oracleRepository = app.oracleRepository, aiSettingsRepository = app.aiSettingsRepository, aiReadingService = app.aiReadingService, aiClient = app.llmClient)
+                ViewModelFactory(app.repository, app.dataStoreManager, DefaultInitialize(), app.entropySource, oracleRepository = app.oracleRepository, aiSettingsRepository = app.aiSettingsRepository, aiReadingService = app.aiReadingService, aiClient = app.llmClient, oracleAiService = app.oracleAiService)
             }
             val mainViewModel: MainViewModel = viewModel(factory = factory)
             val isReady by mainViewModel.isReady.collectAsStateWithLifecycle()
@@ -135,8 +135,8 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() }
             )
 
-            currentRoute == Routes.MODE_YES_NO -> TopBarState(
-                titleRes = R.string.mode_yes_no,
+            currentRoute == Routes.MODE_ORACLE -> TopBarState(
+                titleRes = R.string.mode_oracle,
                 showBackButton = true,
                 onBackClick = { navController.popBackStack() }
             )

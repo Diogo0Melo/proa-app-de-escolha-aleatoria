@@ -17,8 +17,8 @@ import com.ogos.apprandomizador.modes.ui.hub.ModesHubRoute
 import com.ogos.apprandomizador.modes.ui.hub.ModesHubViewModel
 import com.ogos.apprandomizador.modes.ui.ai.AiSettingsRoute
 import com.ogos.apprandomizador.modes.ui.ai.AiSettingsViewModel
-import com.ogos.apprandomizador.modes.ui.yesno.YesNoRoute
-import com.ogos.apprandomizador.modes.ui.yesno.YesNoViewModel
+import com.ogos.apprandomizador.modes.ui.oracle.OracleRoute
+import com.ogos.apprandomizador.modes.ui.oracle.OracleViewModel
 import com.ogos.apprandomizador.modes.ui.tarot.TarotRoute
 import com.ogos.apprandomizador.modes.ui.tarot.TarotViewModel
 import com.ogos.apprandomizador.ui.navigation.Routes
@@ -47,7 +47,7 @@ fun NavGraphBuilder.modesGraph(
         AiSettingsRoute(viewModel = viewModel, modifier = modifier)
     }
     composable(
-        route = Routes.MODE_YES_NO,
+        route = Routes.MODE_ORACLE,
         enterTransition = {
             slideInHorizontally(initialOffsetX = { it / 4 }) + fadeIn(tween(200))
         },
@@ -61,8 +61,8 @@ fun NavGraphBuilder.modesGraph(
             slideOutHorizontally(targetOffsetX = { -it / 4 }) + fadeOut(tween(150))
         }
     ) {
-        val viewModel: YesNoViewModel = viewModel(factory = factory)
-        YesNoRoute(viewModel = viewModel, modifier = modifier)
+        val viewModel: OracleViewModel = viewModel(factory = factory)
+        OracleRoute(viewModel = viewModel, modifier = modifier)
     }
     composable(
         route = Routes.MODE_TAROT,
