@@ -16,7 +16,13 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -47,7 +53,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ogos.apprandomizador.R
+import com.ogos.apprandomizador.modes.domain.Reading
 import com.ogos.apprandomizador.modes.domain.Spread
+import com.ogos.apprandomizador.ui.sound.rememberSpeechPlayer
+import com.ogos.apprandomizador.ui.sound.toSpeechText
+import com.ogos.apprandomizador.ui.speech.rememberSpeechInput
 import com.ogos.apprandomizador.ui.sound.TickPlayer
 import kotlinx.coroutines.delay
 
@@ -65,6 +75,14 @@ fun TarotRoute(
     }
     DisposableEffect(tickPlayer) {
         onDispose { tickPlayer.release() }
+    }
+    val speechPlayer = rememberSpeechPlayer()
+    val speech by speechPlayer.state.collectAsStateWithLifecycle()
+    val voiceInput = rememberSpeechInput(prompt = stringResource(R.string.voice_prompt)) { spoken ->
+        viewModel.onQuestionChange(listOf(state.question, spoken).filter(String::isNotBlank).joinToString(" "))
+    }
+    LaunchedEffect(state.phase) {
+        if (state.phase != TarotPhase.Revealed) speechPlayer.stop()
     }
 
     LaunchedEffect(state.requestId, state.phase) {
@@ -88,6 +106,12 @@ fun TarotRoute(
         onReset = viewModel::onReset,
         onDeepenAi = viewModel::onDeepenWithAi,
         onCancelAi = viewModel::onCancelAi,
+        voiceInputAvailable = voiceInput.available,
+        onVoiceInput = voiceInput.start,
+        speechAvailable = speech.available,
+        speaking = speech.speaking,
+        onSpeakReading = { reading -> speechPlayer.speak(reading.toSpeechText()) },
+        onStopSpeaking = speechPlayer::stop,
         modifier = modifier
     )
 }
@@ -103,6 +127,12 @@ fun TarotScreen(
     onReset: () -> Unit,
     onDeepenAi: () -> Unit = {},
     onCancelAi: () -> Unit = {},
+    voiceInputAvailable: Boolean = false,
+    onVoiceInput: () -> Unit = {},
+    speechAvailable: Boolean = false,
+    speaking: Boolean = false,
+    onSpeakReading: (Reading) -> Unit = {},
+    onStopSpeaking: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
@@ -112,6 +142,11 @@ fun TarotScreen(
     val remainingRevealMillis = if (state.phase == TarotPhase.Revealing) {
         (state.revealStartElapsedRealtime + state.durationMillis - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
     } else state.durationMillis
+    val voiceIcon: @Composable () -> Unit = {
+        IconButton(onClick = onVoiceInput) {
+            Icon(Icons.Filled.Mic, contentDescription = stringResource(R.string.voice_input))
+        }
+    }
     Column(
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -131,6 +166,7 @@ fun TarotScreen(
                     enabled = controlsEnabled,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    trailingIcon = if (voiceInputAvailable && controlsEnabled) voiceIcon else null,
                     keyboardActions = KeyboardActions(onDone = { keyboard?.hide() })
                 )
                 Text(stringResource(R.string.tarot_spread), style = MaterialTheme.typography.titleMedium)
@@ -220,7 +256,13 @@ fun TarotScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(stringResource(R.string.tarot_reading), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    SpeechHeader(
+                        title = stringResource(R.string.tarot_reading),
+                        showSpeech = speechAvailable && state.aiReading == null,
+                        speaking = speaking,
+                        onSpeak = { onSpeakReading(state.reading) },
+                        onStop = onStopSpeaking
+                    )
                     Text(state.reading.summary, style = MaterialTheme.typography.bodyLarge)
                     state.reading.sections.forEach { section ->
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -237,6 +279,9 @@ fun TarotScreen(
                 }
                 if (state.aiLoading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    if (state.aiAttempt > 1) {
+                        Text(stringResource(R.string.tarot_ai_retrying), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                     OutlinedButton(onClick = onCancelAi, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.cancel)) }
                 }
                 state.aiError?.let { error ->
@@ -246,12 +291,22 @@ fun TarotScreen(
                 state.aiReading?.let { ai ->
                     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(stringResource(R.string.tarot_ai_reading, state.aiModel.orEmpty()), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            SpeechHeader(
+                                title = stringResource(R.string.tarot_ai_reading, state.aiModel.orEmpty()),
+                                showSpeech = speechAvailable,
+                                speaking = speaking,
+                                onSpeak = { onSpeakReading(ai) },
+                                onStop = onStopSpeaking
+                            )
+                            ai.title?.let { Text(it, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
+                            ai.opening?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
                             Text(ai.summary, style = MaterialTheme.typography.bodyLarge)
                             ai.sections.forEach { section ->
                                 Text(section.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                                 Text(section.text, style = MaterialTheme.typography.bodyMedium)
                             }
+                            ai.guidance?.let { LabeledBlock(stringResource(R.string.tarot_guidance), it) }
+                            ai.synthesis?.let { LabeledBlock(stringResource(R.string.tarot_synthesis), it) }
                             Text(stringResource(R.string.tarot_disclaimer), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
@@ -265,6 +320,34 @@ fun TarotScreen(
     }
 }
 
+
+@Composable
+private fun SpeechHeader(
+    title: String,
+    showSpeech: Boolean,
+    speaking: Boolean,
+    onSpeak: () -> Unit,
+    onStop: () -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+        if (showSpeech) {
+            if (speaking) {
+                IconButton(onClick = onStop) { Icon(Icons.Filled.Stop, contentDescription = stringResource(R.string.tarot_stop_reading)) }
+            } else {
+                IconButton(onClick = onSpeak) { Icon(Icons.Filled.VolumeUp, contentDescription = stringResource(R.string.tarot_listen_reading)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LabeledBlock(label: String, text: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(text, style = MaterialTheme.typography.bodyMedium)
+    }
+}
 
 @Preview(showBackground = true, name = "Tarô · configuração")
 @Composable

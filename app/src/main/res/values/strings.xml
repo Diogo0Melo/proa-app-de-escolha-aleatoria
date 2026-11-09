@@ -69,4 +69,11 @@
     <string name="cd_theme">Tema</string>
     <string name="sound_on">Som: ligado</string>
     <string name="sound_off">Som: desligado</string>
+    <string name="voice_input">Ditar pergunta</string>
+    <string name="voice_prompt">Diga sua pergunta</string>
+    <string name="tarot_listen_reading">Ouvir leitura</string>
+    <string name="tarot_stop_reading">Parar leitura</string>
+    <string name="tarot_ai_retrying">Tentando novamente…</string>
+    <string name="tarot_guidance">Orientação</string>
+    <string name="tarot_synthesis">Síntese</string>
 </resources>

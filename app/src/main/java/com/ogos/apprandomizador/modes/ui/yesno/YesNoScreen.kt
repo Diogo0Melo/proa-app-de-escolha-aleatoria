@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -40,6 +44,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ogos.apprandomizador.R
+import com.ogos.apprandomizador.ui.speech.rememberSpeechInput
 import kotlinx.coroutines.delay
 
 @Composable
@@ -50,6 +55,9 @@ fun YesNoRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var question by rememberSaveable { mutableStateOf("") }
     val keyboard = LocalSoftwareKeyboardController.current
+    val voiceInput = rememberSpeechInput(prompt = stringResource(R.string.voice_prompt)) { spoken ->
+        question = listOf(question, spoken).filter(String::isNotBlank).joinToString(" ").take(140)
+    }
 
     LaunchedEffect(state.requestId, state.phase) {
         if (state.phase == YesNoPhase.Revealing) {
@@ -72,6 +80,8 @@ fun YesNoRoute(
             viewModel.onReset()
             question = ""
         },
+        voiceInputAvailable = voiceInput.available,
+        onVoiceInput = voiceInput.start,
         modifier = modifier
     )
 }
@@ -83,8 +93,15 @@ fun YesNoScreen(
     onQuestionChange: (String) -> Unit,
     onAsk: () -> Unit,
     onReset: () -> Unit,
+    voiceInputAvailable: Boolean = false,
+    onVoiceInput: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val voiceIcon: @Composable () -> Unit = {
+        IconButton(onClick = onVoiceInput) {
+            Icon(Icons.Filled.Mic, contentDescription = stringResource(R.string.voice_input))
+        }
+    }
     Column(
         modifier = modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -104,6 +121,7 @@ fun YesNoScreen(
             label = { Text(stringResource(R.string.optional_question)) },
             supportingText = { Text(stringResource(R.string.question_not_saved)) },
             singleLine = true,
+            trailingIcon = if (voiceInputAvailable && state.phase == YesNoPhase.Idle) voiceIcon else null,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
                 if (state.phase != YesNoPhase.Revealed) onAsk()
