@@ -32,3 +32,21 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Codegraph
+.codegraph
+
+# Deepwork progress (kept local)
+.slim/deepwork/
+
+# OpenCode session data
+.opencode/
+
+# Generated AI bundle (via bundle.bat)
+aleastra-bundle.md
+aleastra-project.zip
+bundle.bat
+bundle-project.mjs
+
+# Kotlin compiler sessions
+.kotlin/
