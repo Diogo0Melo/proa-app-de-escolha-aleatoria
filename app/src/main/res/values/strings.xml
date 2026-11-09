@@ -98,6 +98,12 @@
     <string name="mode_oracle">Oráculo</string>
     <string name="mode_oracle_description">Pergunte em voz alta e receba uma resposta sorteada, com leitura opcional da IA.</string>
     <string name="oracle_prompt">Pergunte ao oráculo</string>
+    <string name="oracle_intro">Concentre-se na sua questão antes de consultar.</string>
+    <string name="oracle_suggestions_label">Ou escolha uma pergunta para começar</string>
+    <string name="oracle_suggestion_forward">Devo seguir em frente?</string>
+    <string name="oracle_suggestion_timing">É o momento certo?</string>
+    <string name="oracle_suggestion_trust">Posso confiar?</string>
+    <string name="oracle_synchronizing">Sintonizando sua intenção…</string>
     <string name="oracle_hold_to_speak">Aperte para falar</string>
     <string name="oracle_voice_unavailable">Ditado por voz indisponível neste aparelho.</string>
     <string name="oracle_source_label">Fonte</string>

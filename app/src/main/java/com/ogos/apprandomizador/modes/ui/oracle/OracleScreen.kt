@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -173,6 +175,7 @@ fun OracleScreen(
                 if (state.canAsk) actions.onAsk()
             })
         )
+        if (idle) OracleSuggestionRow(onQuestionChange = actions.onQuestionChange)
         SourceChip(source = state.source, enabled = idle, onClick = { showSources = true })
         if (state.sourceNotice == OracleSourceNotice.RouletteRemoved) {
             Text(
@@ -233,6 +236,23 @@ fun OracleScreen(
             onSelectRoulette = actions.onLinkRoulette,
             onDismiss = { showSources = false }
         )
+    }
+}
+
+@Composable
+private fun OracleSuggestionRow(onQuestionChange: (String) -> Unit) {
+    val suggestions = listOf(
+        stringResource(R.string.oracle_suggestion_forward) to "Devo seguir em frente com essa ideia?",
+        stringResource(R.string.oracle_suggestion_timing) to "Este é o momento certo para agir?",
+        stringResource(R.string.oracle_suggestion_trust) to "Posso confiar nesta decisão?"
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        suggestions.forEach { (_, question) ->
+            SuggestionChip(onClick = { onQuestionChange(question) }, label = { Text(question, maxLines = 1) })
+        }
     }
 }
 
