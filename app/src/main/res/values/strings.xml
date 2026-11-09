@@ -24,6 +24,7 @@
     <string name="tarot_intro_description">Defina sua intenção e tire uma ou três cartas. Sua leitura offline fica disponível imediatamente.</string>
     <string name="tarot_your_cards">Suas cartas</string>
     <string name="tarot_revealing_cards">Revelando suas cartas…</string>
+    <string name="tarot_revealing_card">Revelando %1$s: %2$s%3$s</string>
     <string name="tarot_card_back">Aleastra · Tarô</string>
     <string name="tarot_card_hidden">Carta ainda não revelada</string>
     <string name="tarot_keywords">Palavras-chave</string>
@@ -74,6 +75,24 @@
     <string name="tarot_listen_reading">Ouvir leitura</string>
     <string name="tarot_stop_reading">Parar leitura</string>
     <string name="tarot_ai_retrying">Tentando novamente…</string>
+    <string name="tarot_ai_cancelled">Geração cancelada.</string>
     <string name="tarot_guidance">Orientação</string>
     <string name="tarot_synthesis">Síntese</string>
+    <string name="tarot_title">Tarô</string>
+    <string name="tarot_intent_label">Sua intenção</string>
+    <string name="tarot_intent_placeholder">O que você quer explorar?</string>
+    <string name="tarot_suggestion_decision">Uma decisão</string>
+    <string name="tarot_suggestion_decision_question">Qual escolha honra minha integridade agora?</string>
+    <string name="tarot_suggestion_relationship">Um relacionamento</string>
+    <string name="tarot_suggestion_relationship_question">O que precisa de escuta e clareza nessa relação?</string>
+    <string name="tarot_suggestion_next_step">Meu próximo passo</string>
+    <string name="tarot_suggestion_next_step_question">Qual energia me apoia a dar o próximo passo?</string>
+    <string name="tarot_allow_reversed_hint">Adiciona nuances de sombra à leitura.</string>
+    <string name="tarot_revealing_subtext">Sintonizando arquétipos e sincronicidades</string>
+    <string name="tarot_upright">Em pé</string>
+    <string name="tarot_arcana_major">Arcano Maior</string>
+    <string name="tarot_arcana_minor">Arcano Menor</string>
+    <string name="tarot_detail_position">Posição: %1$s (%2$s)</string>
+    <string name="tarot_meaning_upright">Em pé · Essência</string>
+    <string name="tarot_meaning_reversed">Invertida · Essência</string>
 </resources>
