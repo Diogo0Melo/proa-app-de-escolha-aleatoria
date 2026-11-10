@@ -1,5 +1,7 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
+import com.ogos.apprandomizador.modes.ui.ai.AiAction
+
 import android.animation.ValueAnimator
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode

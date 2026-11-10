@@ -2,15 +2,18 @@ package com.ogos.apprandomizador.modes.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.ogos.apprandomizador.modes.domain.YesNoAnswer
+import com.ogos.apprandomizador.modes.domain.DefaultOracleAnswers
 import com.ogos.apprandomizador.modes.ui.hub.ModeCatalog
 import com.ogos.apprandomizador.modes.ui.hub.ModesHubScreen
-import com.ogos.apprandomizador.modes.ui.yesno.YesNoPhase
-import com.ogos.apprandomizador.modes.ui.yesno.YesNoScreen
-import com.ogos.apprandomizador.modes.ui.yesno.YesNoUiState
+import com.ogos.apprandomizador.modes.ui.oracle.OracleActions
+import com.ogos.apprandomizador.modes.ui.oracle.OraclePhase
+import com.ogos.apprandomizador.modes.ui.oracle.YesNoOracleScreen
+import com.ogos.apprandomizador.modes.ui.oracle.OracleUiState
+import com.ogos.apprandomizador.ui.navigation.Routes
 import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -21,7 +24,7 @@ class ModesAccessibilityTest {
     val compose = createComposeRule()
 
     @Test
-    fun hub_abre_modo_sim_ou_nao() {
+    fun hub_abre_oraculo() {
         var selectedRoute: String? = null
         compose.setContent {
             AppRandomizadorTheme {
@@ -34,22 +37,43 @@ class ModesAccessibilityTest {
         }
 
         compose.onNodeWithTag("mode-yes_no").assertIsDisplayed().performClick()
-        compose.runOnIdle { assertEquals(com.ogos.apprandomizador.ui.navigation.Routes.MODE_YES_NO, selectedRoute) }
+        compose.runOnIdle { assertEquals(Routes.MODE_ORACLE, selectedRoute) }
     }
 
     @Test
-    fun resultado_sim_fica_visivel() {
+    fun sugestao_preenche_a_pergunta_sem_disparar_consulta() {
+        var question = ""
+        var askCalled = false
         compose.setContent {
             AppRandomizadorTheme {
-                YesNoScreen(
-                    state = YesNoUiState(phase = YesNoPhase.Revealed, answer = YesNoAnswer.YES),
-                    question = "",
-                    onQuestionChange = {},
-                    onAsk = {},
-                    onReset = {}
+                YesNoOracleScreen(
+                    state = OracleUiState(),
+                    actions = OracleActions(
+                        onQuestionChange = { question = it },
+                        onAsk = { askCalled = true }
+                    )
                 )
             }
         }
-        compose.onNodeWithText("SIM").assertIsDisplayed()
+
+        compose.onNodeWithText("Devo seguir em frente?").performClick()
+        compose.runOnIdle {
+            assertEquals("Devo seguir em frente com essa ideia?", question)
+            assertEquals(false, askCalled)
+        }
+    }
+
+    @Test
+    fun resposta_revelada_fica_anunciada() {
+        val answer = DefaultOracleAnswers.items.first()
+        compose.setContent {
+            AppRandomizadorTheme {
+                YesNoOracleScreen(
+                    state = OracleUiState(phase = OraclePhase.Revealed, answer = answer),
+                    actions = OracleActions()
+                )
+            }
+        }
+        compose.onNodeWithContentDescription("O oráculo respondeu: ${answer.name}").assertIsDisplayed()
     }
 }

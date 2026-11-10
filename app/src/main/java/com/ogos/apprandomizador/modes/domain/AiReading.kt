@@ -62,25 +62,9 @@ class AiReadingService(
         val configured = settings.settingsSnapshot() ?: return AiReadingResult.Failure(NOT_CONFIGURED)
         val key = settings.apiKey() ?: return AiReadingResult.Failure(MISSING_KEY)
         val prompt = PromptBuilder.build(question, draw)
-        val raw = completeWithRetry(configured, key, prompt, onRetry)
+        val raw = completeWithLlmRetry(client, configured, key, prompt, retryDelaysMillis, onRetry)
         val reading = ReadingJsonParser.parse(raw, draw) ?: return AiReadingResult.Failure(INVALID_RESPONSE)
         return AiReadingResult.Success(reading, configured.model)
-    }
-
-    private suspend fun completeWithRetry(config: AiConfig, key: String, prompt: String, onRetry: (Int) -> Unit): String {
-        var attempt = 1
-        while (attempt <= retryDelaysMillis.size) {
-            try {
-                return client.complete(config.baseUrl, key, config.model, prompt)
-            } catch (error: Exception) {
-                if (error is CancellationException || !isTransient(error)) throw error
-                onRetry(attempt + 1)
-                delay(retryDelaysMillis[attempt - 1])
-                attempt++
-            }
-        }
-        // Última tentativa: qualquer erro segue para o chamador.
-        return client.complete(config.baseUrl, key, config.model, prompt)
     }
 
     companion object {
@@ -105,4 +89,31 @@ internal fun isTransient(error: Exception): Boolean = when (error) {
 // A leitura das configurações é mantida num repositório de fluxo; este helper lê o valor atual sem expor a chave.
 suspend fun AiSettingsRepository.settingsSnapshot(): AiConfig? = settings.first().let { state ->
     state.config?.takeIf { it.enabled && state.consentedAuthority == BaseUrlNormalizer.authority(it.baseUrl) }
+}
+
+/**
+ * Chama o provedor e retenta erros transitórios com o backoff informado.
+ * Compartilhado pela leitura do tarô e pelo oráculo; o último erro sempre segue para o chamador.
+ */
+internal suspend fun completeWithLlmRetry(
+    client: LlmClient,
+    config: AiConfig,
+    key: String,
+    prompt: String,
+    retryDelaysMillis: List<Long>,
+    onRetry: (Int) -> Unit
+): String {
+    var attempt = 1
+    while (attempt <= retryDelaysMillis.size) {
+        try {
+            return client.complete(config.baseUrl, key, config.model, prompt)
+        } catch (error: Exception) {
+            if (error is CancellationException || !isTransient(error)) throw error
+            onRetry(attempt + 1)
+            delay(retryDelaysMillis[attempt - 1])
+            attempt++
+        }
+    }
+    // Última tentativa: qualquer erro segue para o chamador.
+    return client.complete(config.baseUrl, key, config.model, prompt)
 }

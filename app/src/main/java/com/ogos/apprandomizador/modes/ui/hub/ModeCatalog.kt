@@ -19,10 +19,11 @@ data class ModeEntry(
 object ModeCatalog {
     val entries = listOf(
         ModeEntry(
+            // O id continua "yes_no": as estatísticas do hub já salvas usam esse identificador.
             id = "yes_no",
-            route = Routes.MODE_YES_NO,
-            titleRes = R.string.mode_yes_no,
-            descriptionRes = R.string.mode_yes_no_description,
+            route = Routes.MODE_ORACLE,
+            titleRes = R.string.mode_oracle,
+            descriptionRes = R.string.mode_oracle_description,
             icon = Icons.Filled.AutoAwesome
         ),
         ModeEntry(
