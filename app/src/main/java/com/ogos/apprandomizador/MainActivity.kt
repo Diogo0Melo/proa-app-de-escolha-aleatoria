@@ -105,7 +105,18 @@ fun AppNavigation(
     var lastRandomizeNavTime by remember { mutableLongStateOf(0L) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val topBarState = remember(currentRoute, navController) {
+    val randomizeListTopic = if (currentRoute?.startsWith("${Routes.RANDOMIZE_ROUTE}/") == true) {
+        val randomizeEntry = remember(navBackStackEntry) {
+            navController.getBackStackEntry(Routes.RANDOMIZE_FULL)
+        }
+        val randomizeViewModel: RandomizeViewModel =
+            viewModel(viewModelStoreOwner = randomizeEntry, factory = factory)
+        val itemList by randomizeViewModel.currentItemList.collectAsStateWithLifecycle()
+        itemList.topic
+    } else {
+        null
+    }
+    val topBarState = remember(currentRoute, randomizeListTopic, navController) {
         when {
             currentRoute == Routes.HOME_RANDOMIZE || currentRoute == null -> TopBarState(
                 titleRes = R.string.draw_item_from_list,
@@ -148,7 +159,8 @@ fun AppNavigation(
             )
 
             currentRoute.startsWith("${Routes.RANDOMIZE_ROUTE}/") -> TopBarState(
-                titleRes = R.string.blank_text,
+                titleRes = R.string.draw_item_from_list,
+                title = randomizeListTopic,
                 showBackButton = true,
                 onBackClick = { navController.popBackStack() },
                 actions = listOf(

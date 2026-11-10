@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.model.TopBarState
 import com.ogos.apprandomizador.ui.theme.ThemeMode
@@ -37,7 +38,11 @@ fun TopBar(
 
     TopAppBar(
         title = {
-            Text(text = stringResource(state.titleRes))
+            Text(
+                text = state.title?.takeIf { it.isNotBlank() } ?: stringResource(state.titleRes),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         },
         navigationIcon = {
             if (state.showBackButton) {
