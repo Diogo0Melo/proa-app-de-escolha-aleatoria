@@ -124,4 +124,17 @@
     <string name="oracle_deepen_with_ai">Aprofundar com IA</string>
     <string name="oracle_listen_reading">Ouvir leitura</string>
     <string name="oracle_stop_reading">Parar leitura</string>
+
+    <!-- Tela de Dedos -->
+    <string name="fingers_hint_place">Coloque 2 ou mais dedos na tela</string>
+    <string name="fingers_hint_after">Após todos os dedos estarem posicionados, um dedo e um sentido serão sorteados.</string>
+    <string name="fingers_ready">Estão prontos?</string>
+    <string name="fingers_ready_hint">Mantenha %1$d dedos na tela</string>
+    <string name="fingers_selected_title">O sorteado</string>
+    <string name="fingers_direction_label">O sentido sorteado foi:</string>
+    <string name="fingers_direction_cw">Horário</string>
+    <string name="fingers_direction_ccw">Anti-horário</string>
+    <string name="fingers_exit">Sair</string>
+    <string name="fingers_finger_description">Dedo %1$d</string>
+    <string name="close">Fechar</string>
 </resources>
