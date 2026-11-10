@@ -5,12 +5,15 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.ogos.apprandomizador.model.RaffleItem
@@ -69,8 +73,8 @@ private const val TRAVEL_SIZE_FLOOR = 0.4f
 private const val OVERSHOOT_NONE_THRESHOLD = 0.45f
 private const val OVERSHOOT_ONE_THRESHOLD = 0.78f
 
-// Carrossel pseudo-cilíndrico por JANELA DE POSIÇÃO: position é contínua em
-// unidades de item (0f = item 0 centralizado). A janela visível cobre
+// Roleta por JANELA DE POSIÇÃO: position é contínua em unidades de item
+// (0f = item 0 centralizado). A janela visível cobre
 // abs(distância) <= 4.5 (<=10 cartões); o render usa um CONJUNTO FIXO de
 // shells (SHELL_COUNT) ancorado em floor(pos - 4.5), publicado discretamente
 // via snapshotFlow — composição estática durante o giro.
@@ -86,26 +90,17 @@ private const val CENTER_SHELL_OFFSET = 5
 // Pitch vertical = slotHeight * PITCH_MULTIPLIER
 private const val PITCH_MULTIPLIER = 0.92f
 
-// Profundidade de câmera ≈ 900–1200px (400.dp: ~800px @2x, ~1200px @3x)
-private val CAMERA_DISTANCE = 400.dp
-
-// Rampas contínuas (interpolação linear entre chaves) por abs(distância).
-// Inclinação: 0→0°, 1→17°, 2→34°, 3→49°, 4→61°; clamp final em ±70°
-private val TILT_KEYS = floatArrayOf(0f, 1f, 2f, 3f, 4f)
-private val TILT_VALUES = floatArrayOf(0f, 17f, 34f, 49f, 61f)
-private const val TILT_CLAMP_DEGREES = 70f
-
-// Escala: 1.00 → 0.86 → 0.70 → 0.56 → 0.48; além de 4 segura em 0.45
-private val SCALE_KEYS = floatArrayOf(0f, 1f, 2f, 3f, 4f)
-private val SCALE_VALUES = floatArrayOf(1f, 0.86f, 0.70f, 0.56f, 0.48f)
-private const val SCALE_BEYOND_WINDOW = 0.45f
+// Escala suavizada: 1.00 → 0.95 → 0.90; além de 2 mantém 0.88.
+private val SCALE_KEYS = floatArrayOf(0f, 1f, 2f)
+private val SCALE_VALUES = floatArrayOf(1f, 0.95f, 0.90f)
+private const val SCALE_BEYOND_WINDOW = 0.88f
 
 // Escuridão: agora usada como ALPHA de um overlay preto (crossfade) em vez de
 // mistura de cor por frame; matematicamente idêntica em repouso para cores
 // opacas (cor*(1-t) + preto*t).
-// 0→0.00, 1→0.42, 2→0.68, 3→0.86, 4→0.94; além de 4 segura em 0.97
+// 0→0.00, 1→0.40, 2→0.70, 3→0.85, 4→0.92; além de 4 segura em 0.97
 private val DARKNESS_KEYS = floatArrayOf(0f, 1f, 2f, 3f, 4f)
-private val DARKNESS_VALUES = floatArrayOf(0f, 0.42f, 0.68f, 0.86f, 0.94f)
+private val DARKNESS_VALUES = floatArrayOf(0f, 0.40f, 0.70f, 0.85f, 0.92f)
 private const val DARKNESS_BEYOND_WINDOW = 0.97f
 
 private val CardShape = RoundedCornerShape(20.dp)
@@ -128,12 +123,13 @@ private val SETTLE_DURATION_MS =
     ((settleDurationSeconds(SETTLE_SCALE_AMPLITUDE)) * 1000f).roundToInt().coerceAtLeast(1)
 private val SETTLE_DURATION_SECONDS = SETTLE_DURATION_MS / 1000f
 
-// Elevação do cartão central: sombra preta suave (sem glow colorido)
-private val CENTER_SHADOW_ELEVATION = 12.dp
+// Realce do cartão central: glow esmeralda sob a borda.
+private val CENTER_SHADOW_ELEVATION = 18.dp
+private val WINNER_EMERALD = Color(0xFF34D399)
 
-// Cores da sombra hoistadas — nunca alocar por recomposição/frame
-private val CENTER_SHADOW_AMBIENT = Color.Black.copy(alpha = 0.4f)
-private val CENTER_SHADOW_SPOT = Color.Black.copy(alpha = 0.4f)
+// Cores da sombra hoistadas — nunca alocar por recomposição/frame.
+private val CENTER_SHADOW_AMBIENT = WINNER_EMERALD.copy(alpha = 0.38f)
+private val CENTER_SHADOW_SPOT = WINNER_EMERALD.copy(alpha = 0.28f)
 
 // Interpolação linear entre chaves; abaixo da 1ª chave usa o 1º valor,
 // acima da última usa o último.
@@ -241,6 +237,68 @@ internal object RouletteMath {
             palettePair(indexInList)
         }
     }
+
+    /**
+     * Paleta visual exclusiva da roleta. Respostas verdes/vermelhas recebem
+     * tons esmeralda/rubi consistentes; as demais cores mantêm o gradiente
+     * original, sem alterar o contrato consumido por ListCollection e Oracle.
+     */
+    fun curatedGradientFor(item: RaffleItem, indexInList: Int): List<Long> {
+        val hue = hueDegrees(item.color)
+        val saturation = saturation(item.color)
+        return when {
+            item.color != 0L && saturation >= 0.35f && isGreenHue(hue) -> GREEN_GRADIENT
+            item.color != 0L && saturation >= 0.35f && isRedHue(hue) -> RED_GRADIENT
+            else -> {
+                val (top, bottom) = gradientFor(item, indexInList)
+                listOf(top, lerpArgb(top, bottom, 0.5f), bottom)
+            }
+        }
+    }
+
+    private fun isGreenHue(hue: Float): Boolean = hue in 90f..160f
+
+    private fun isRedHue(hue: Float): Boolean = hue >= 345f || hue <= 15f
+
+    private fun saturation(argb: Long): Float {
+        val value = argb and 0xFFFFFFFFL
+        val red = ((value shr 16) and 0xFF).toFloat() / 255f
+        val green = ((value shr 8) and 0xFF).toFloat() / 255f
+        val blue = (value and 0xFF).toFloat() / 255f
+        val maximum = maxOf(red, green, blue)
+        val minimum = minOf(red, green, blue)
+        return if (maximum == 0f) 0f else (maximum - minimum) / maximum
+    }
+
+    private fun hueDegrees(argb: Long): Float {
+        val value = argb and 0xFFFFFFFFL
+        val red = ((value shr 16) and 0xFF).toFloat() / 255f
+        val green = ((value shr 8) and 0xFF).toFloat() / 255f
+        val blue = (value and 0xFF).toFloat() / 255f
+        val maximum = maxOf(red, green, blue)
+        val minimum = minOf(red, green, blue)
+        val delta = maximum - minimum
+        if (delta == 0f) return 0f
+
+        val hue = when (maximum) {
+            red -> 60f * (((green - blue) / delta) % 6f)
+            green -> 60f * (((blue - red) / delta) + 2f)
+            else -> 60f * (((red - green) / delta) + 4f)
+        }
+        return if (hue < 0f) hue + 360f else hue
+    }
+
+    private val GREEN_GRADIENT = listOf(
+        0xFF2E7D32L,
+        0xFF388E3CL,
+        0xFF1B5E20L
+    )
+
+    private val RED_GRADIENT = listOf(
+        0xFF7F1D1DL,
+        0xFFB91C1CL,
+        0xFF450A0AL
+    )
 
     // Brightness ~1.15 sem RenderEffect (minSdk 27)
     fun brighten(argb: Long): Long = lerpArgb(argb, WHITE_ARGB, 0.15f)
@@ -464,24 +522,19 @@ fun RouletteWheel(
             // slotHeight = altura do cartão + gap → pitch uniforme do carrossel
             val slotHeightPx = cardHeightPx + gapPx
             val pitchPx = slotHeightPx * PITCH_MULTIPLIER
-            // Câmera fixa (~900–1200px) substitui a geometria de cilindro verdadeiro;
-            // RouletteMath.radiusPx permanece disponível mas não é usada no render.
-            val cameraDistancePx = with(density) { CAMERA_DISTANCE.toPx() }
+            // RouletteMath.radiusPx permanece disponível por compatibilidade, mas
+            // o render usa uma pilha plana com pitch uniforme.
             // Conversão dp uma única vez por mudança de métricas (não por frame)
             val cardHeightDp = with(density) { cardHeightPx.toDp() }
 
-            // Visuais estáticos: um par (brush, classe de texto) por item da
-            // sequência, calculado só quando a sequência muda.
+            // Visuais estáticos: gradiente e classe de contraste por item da
+            // sequência, calculados só quando a sequência muda.
             val visualsByIndex = remember(items) {
                 items.mapIndexed { index, item ->
-                    val (top, bottom) = RouletteMath.gradientFor(item, index)
+                    val gradient = RouletteMath.curatedGradientFor(item, index)
                     ShellVisuals(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color(top), Color(bottom))
-                        ),
-                        lightBase = RouletteMath.isLightBase(
-                            RouletteMath.baseColorFor(item, index)
-                        )
+                        brush = Brush.verticalGradient(colors = gradient.map { Color(it) }),
+                        lightBase = RouletteMath.isLightBase(gradient[1])
                     )
                 }
             }
@@ -501,7 +554,6 @@ fun RouletteWheel(
                             absoluteSlot = absSlot,
                             zIndexDepth = abs(off - CENTER_SHELL_OFFSET).toFloat(),
                             position = position,
-                            cameraDistance = cameraDistancePx,
                             pitchPx = pitchPx,
                             cardHeightDp = cardHeightDp,
                             visuals = visualsByIndex[itemIndex],
@@ -523,7 +575,6 @@ private fun RouletteShell(
     absoluteSlot: Int,
     zIndexDepth: Float,
     position: Animatable<Float, AnimationVector1D>,
-    cameraDistance: Float,
     pitchPx: Float,
     cardHeightDp: Dp,
     visuals: ShellVisuals,
@@ -536,11 +587,9 @@ private fun RouletteShell(
     // Destaque do centro: derivado da shell discreta (off == CENTER_SHELL_OFFSET),
     // que coincide com roundToInt(position) — muda só em cruzamentos.
     val highlighted = isCenterShell && centerHighlighted
-    // Cor do texto estática por item (sem lerp por frame): o escurecimento por
-    // profundidade vem do overlay preto com alpha animado abaixo.
-    // Realce não inverte mais para branco fixo: a classe claro/escuro da base
-    // manda mesmo em destaque — texto branco sobre amarelo-da-paleta ficava
-    // ilegível justamente na carta que importa.
+    // Contraste estático por item, derivado do stop central do gradiente.
+    // O resultado curado tem luminância baixa e, portanto, recebe texto branco;
+    // paletas claras personalizadas continuam recebendo texto preto.
     val textColor = if (visuals.lightBase) Color.Black else Color.White
 
     // Micro-assentamento do vencedor: dispara SOMENTE ao pousar (justLanded), não
@@ -552,6 +601,17 @@ private fun RouletteShell(
     // relógio e ficariam presas no pico da onda. O relógio nasce em 1 (onda já
     // extinta) para o repouso ser neutro — idêntico ao visual de repouso da onda 1.
     val settle = remember { Animatable(1f) }
+    val pulse = remember { Animatable(1f) }
+    LaunchedEffect(justLanded, highlighted) {
+        if (justLanded && highlighted) {
+            while (true) {
+                pulse.animateTo(1.02f, tween(durationMillis = 1_000))
+                pulse.animateTo(1f, tween(durationMillis = 1_000))
+            }
+        } else {
+            pulse.snapTo(1f)
+        }
+    }
     val settleScaleAmp = if (isCenterShell) SETTLE_SCALE_AMPLITUDE else 0f
     val settleBobAmp = if (isCenterShell) SETTLE_BOB_SLOTS else 0f
     LaunchedEffect(justLanded, isCenterShell) {
@@ -578,28 +638,25 @@ private fun RouletteShell(
                 // Cull por frame: shells fora da janela ±4.5 ficam invisíveis
                 // (alpha 0) — substitui o `continue` que antes era composição.
                 alpha = if (ad <= VISIBLE_WINDOW_HALF) 1f else 0f
-                // Inclinação por distância: cilindro CONVEXO — abaixo do centro
-                // inclina para trás (negativa), acima inclina para frente (positiva)
-                val tilt = ramp(TILT_KEYS, TILT_VALUES, ad)
-                rotationX = (if (d < 0f) tilt else -tilt)
-                    .coerceIn(-TILT_CLAMP_DEGREES, TILT_CLAMP_DEGREES)
+                // Cartões planos: a distância controla apenas deslocamento,
+                // escala e escurecimento; a física continua operando em slots.
                 // Pilha vertical uniforme (window picker); sem soft-cap dentro de ±4.5
                 // Mais o balanço amortecido do assentamento, quando este cartão é o
                 // vencedor recém-pousado.
                 val settleSeconds = settle.value * SETTLE_DURATION_SECONDS
                 translationY = d * pitchPx +
                     settleBob(settleSeconds, settleBobAmp) * pitchPx
-                this.cameraDistance = cameraDistance
                 // Escala contínua por distância; respiração amortecida no centro
+                val pulseScale = if (highlighted && justLanded) pulse.value else 1f
                 val scale =
                     rampBeyond(SCALE_KEYS, SCALE_VALUES, SCALE_BEYOND_WINDOW, ad) *
-                        settleScale(settleSeconds, settleScaleAmp)
+                        settleScale(settleSeconds, settleScaleAmp) * pulseScale
                 scaleX = scale
                 scaleY = scale
             }
             .then(
                 if (highlighted) {
-                    // Centro: sombra preta suave — sem borda, sem glow colorido
+                    // Glow abaixo do cartão; a borda é desenhada acima do fundo.
                     Modifier.shadow(
                         elevation = CENTER_SHADOW_ELEVATION,
                         shape = CardShape,
@@ -613,15 +670,18 @@ private fun RouletteShell(
             .background(
                 brush = visuals.brush,
                 shape = CardShape
-            ),
+            )
+            .then(if (highlighted) Modifier.border(2.dp, WINNER_EMERALD, CardShape) else Modifier),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = item.name,
             color = textColor,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            maxLines = 1,
+            fontWeight = if (highlighted) FontWeight.Black else FontWeight.Bold,
+            fontSize = if (highlighted) 30.sp else 20.sp,
+            letterSpacing = if (highlighted) 0.1.em else 0.em,
+            lineHeight = if (highlighted) 1.05.em else 1.2.em,
+            maxLines = if (highlighted) 2 else 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 12.dp)
@@ -642,5 +702,14 @@ private fun RouletteShell(
                 .clip(CardShape)
                 .background(Color.Black)
         )
+        if (highlighted) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 8.dp)
+                    .size(width = 32.dp, height = 4.dp)
+                    .background(Color.White.copy(alpha = 0.65f), CircleShape)
+            )
+        }
     }
 }

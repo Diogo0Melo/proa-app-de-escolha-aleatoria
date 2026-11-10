@@ -1,14 +1,24 @@
 package com.ogos.apprandomizador.ui.view
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -23,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -254,24 +265,52 @@ fun RandomizeViewContent(
 
         val hasLandedResult = locked != null && locked.sourceItems == items
 
-        RouletteWheel(
-            items = displayItems,
-            spinTarget = spinTarget,
-            centerHighlighted = isSpinning || uses > 0 || hasLandedResult,
-            onSpinFinished = {
-                if (spinTarget != null && displayItems.isNotEmpty()) {
-                    lockedSequence = LockedDisplaySequence(
-                        sourceItems = items,
-                        sequence = displayItems,
-                    )
-                }
-                onSpinFinished()
-            },
-            onSlotCrossed = onSlotCrossed,
+        Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-        )
+        ) {
+            RouletteWheel(
+                items = displayItems,
+                spinTarget = spinTarget,
+                centerHighlighted = isSpinning || uses > 0 || hasLandedResult,
+                onSpinFinished = {
+                    if (spinTarget != null && displayItems.isNotEmpty()) {
+                        lockedSequence = LockedDisplaySequence(
+                            sourceItems = items,
+                            sequence = displayItems,
+                        )
+                    }
+                    onSpinFinished()
+                },
+                onSlotCrossed = onSlotCrossed,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            if (displayItems.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Box(
+                        Modifier
+                            .size(width = 12.dp, height = 2.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                    )
+                    Box(
+                        Modifier
+                            .size(width = 12.dp, height = 2.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                    )
+                }
+            }
+        }
     }
 }
 @Composable
@@ -294,9 +333,11 @@ fun RandomizeViewBottomBar(
             Button(
                 onClick = onPerformRoll,
                 enabled = !isSpinning,
-                shape = RoundedCornerShape(12.dp),
+                shape = CircleShape,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                Spacer(Modifier.size(8.dp))
                 Text(
                     text = stringResource(R.string.roll),
                     fontWeight = FontWeight.Bold
@@ -305,20 +346,30 @@ fun RandomizeViewBottomBar(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
                     onClick = { /* TODO */ },
+                    enabled = !isSpinning,
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(stringResource(R.string.disable))
+                    Icon(Icons.Filled.VisibilityOff, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.size(6.dp))
+                    Text(stringResource(R.string.disable), maxLines = 1)
                 }
 
                 OutlinedButton(
                     onClick = { /* TODO */ },
+                    enabled = !isSpinning,
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(stringResource(R.string.reset))
+                    Icon(Icons.Filled.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.size(6.dp))
+                    Text(stringResource(R.string.reset), maxLines = 1)
                 }
             }
         }
