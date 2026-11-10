@@ -674,22 +674,12 @@ private fun RouletteShell(
             .then(if (highlighted) Modifier.border(2.dp, WINNER_EMERALD, CardShape) else Modifier),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = item.name,
-            color = textColor,
-            fontWeight = if (highlighted) FontWeight.Black else FontWeight.Bold,
-            fontSize = if (highlighted) 30.sp else 20.sp,
-            letterSpacing = if (highlighted) 0.1.em else 0.em,
-            lineHeight = if (highlighted) 1.05.em else 1.2.em,
-            maxLines = if (highlighted) 2 else 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
         // Escurecimento por profundidade como CROSSFADE: overlay preto estático
         // (zero alocação por frame) cujo ALPHA segue a rampa de darkness dentro
         // de graphicsLayer. Para cores opacas, preto sobre cor com alpha t é
         // matematicamente igual ao lerpArgb(cor, preto, t) anterior.
+        // Deve ser desenhado ANTES do texto: o overlay escurece o cartão sem
+        // cobrir as letras e destruir o contraste dos itens vizinhos.
         Box(
             Modifier
                 .matchParentSize()
@@ -701,6 +691,18 @@ private fun RouletteShell(
                 }
                 .clip(CardShape)
                 .background(Color.Black)
+        )
+        Text(
+            text = item.name,
+            color = textColor,
+            fontWeight = if (highlighted) FontWeight.Black else FontWeight.Bold,
+            fontSize = if (highlighted) 30.sp else 20.sp,
+            letterSpacing = if (highlighted) 0.1.em else 0.em,
+            lineHeight = if (highlighted) 1.05.em else 1.2.em,
+            maxLines = if (highlighted) 2 else 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 12.dp)
         )
         if (highlighted) {
             Box(
