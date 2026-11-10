@@ -15,6 +15,18 @@ sealed interface StoredOutcome {
 
     @Serializable @SerialName("tarot")
     data class Tarot(val spread: String, val cards: List<StoredTarotCard>) : StoredOutcome
+
+    /**
+     * Sorteio por dedos. [fingerIndex] é a posição do vencedor na lista de dedos no
+     * momento da revelação (0-based). [direction] é o `name` de FingersDirection.
+     * Nenhuma coordenada é salva: só o necessário para estatística.
+     */
+    @Serializable @SerialName("fingers")
+    data class Fingers(
+        val fingerIndex: Int,
+        val direction: String,
+        val fingerCount: Int
+    ) : StoredOutcome
 }
 
 @Serializable

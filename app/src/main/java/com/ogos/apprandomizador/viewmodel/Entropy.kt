@@ -220,3 +220,9 @@ private const val ORACLE_STREAM_TAG = 0x4F_52_43_4C // "ORCL"
 
 internal fun deriveOracleStream(seed: ByteArray, requestId: Long): EntropyStream =
     EntropyStream(sha256(tagged(seed, ORACLE_STREAM_TAG, requestId)))
+
+/** Tag de domínio da tela de dedos: nenhum byte se repete entre ela e as demais. */
+private const val FINGER_STREAM_TAG = 0x46_49_4E_47 // "FING"
+
+internal fun deriveFingerStream(seed: ByteArray, requestId: Long): EntropyStream =
+    EntropyStream(sha256(tagged(seed, FINGER_STREAM_TAG, requestId)))
