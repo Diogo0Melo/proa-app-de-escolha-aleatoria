@@ -15,13 +15,13 @@
     <string name="mode_yes_no">Sim ou Não</string>
     <string name="mode_yes_no_description">Faça uma pergunta e receba uma resposta aleatória.</string>
     <string name="mode_tarot">Tarô</string>
-    <string name="mode_tarot_description">Tire cartas e explore uma leitura reflexiva offline.</string>
-    <string name="modes_hub_title">Escolha seu oráculo</string>
+    <string name="mode_tarot_description">Sorteie cartas e explore uma leitura reflexiva.</string>
+    <string name="modes_hub_title">Escolha um modo</string>
     <string name="modes_hub_description">Faça uma pergunta, escolha um caminho e receba uma leitura para reflexão.</string>
     <string name="ai_settings">Configurar IA</string>
     <string name="tarot_prompt">Qual tema você deseja explorar?</string>
     <string name="tarot_intro_title">Uma pausa para refletir</string>
-    <string name="tarot_intro_description">Defina sua intenção e tire uma ou três cartas. Sua leitura offline fica disponível imediatamente.</string>
+    <string name="tarot_intro_description">Defina sua intenção e tire uma ou três cartas. Sua leitura fica disponível imediatamente.</string>
     <string name="tarot_your_cards">Suas cartas</string>
     <string name="tarot_revealing_cards">Revelando suas cartas…</string>
     <string name="tarot_revealing_card">Revelando %1$s: %2$s%3$s</string>
@@ -96,7 +96,7 @@
     <string name="tarot_meaning_upright">Em pé · Essência</string>
     <string name="tarot_meaning_reversed">Invertida · Essência</string>
     <string name="mode_oracle">Oráculo</string>
-    <string name="mode_oracle_description">Pergunte em voz alta e receba uma resposta sorteada, com leitura opcional da IA.</string>
+    <string name="mode_oracle_description">Pergunte em voz alta e receba uma resposta sorteada, com leitura da IA.</string>
     <string name="oracle_prompt">Pergunte ao oráculo</string>
     <string name="oracle_intro">Concentre-se na sua questão antes de consultar.</string>
     <string name="oracle_suggestions_label">Ou escolha uma pergunta para começar</string>
@@ -130,7 +130,7 @@
     <string name="fingers_hint_after">Após todos os dedos estarem posicionados, um dedo e um sentido serão sorteados.</string>
     <string name="fingers_ready">Estão prontos?</string>
     <string name="fingers_ready_hint">Mantenha %1$d dedos na tela</string>
-    <string name="fingers_selected_title">O sorteado</string>
+    <string name="fingers_selected_title">Ganhador</string>
     <string name="fingers_direction_label">O sentido sorteado foi:</string>
     <string name="fingers_direction_cw">Horário</string>
     <string name="fingers_direction_ccw">Anti-horário</string>

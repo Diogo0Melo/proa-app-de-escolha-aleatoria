@@ -26,9 +26,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -55,6 +55,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -128,7 +130,7 @@ fun FingersScreen(
             }
     ) {
         if (state.phase == FingersPhase.Idle) {
-            FingersInstructions(modifier = Modifier.align(Alignment.TopCenter))
+            FingersInstructions(modifier = Modifier.align(Alignment.Center))
         }
 
         state.fingers.forEachIndexed { index, finger ->
@@ -159,16 +161,11 @@ private fun FingersInstructions(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 32.dp, start = 24.dp, end = 24.dp),
+            .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(
-            Icons.Filled.AutoAwesome,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(48.dp)
-        )
+        FingerprintBadge(badgeSize = 96.dp, iconSize = 52.dp, borderWidth = 2.dp)
         Text(
             stringResource(R.string.fingers_hint_place),
             style = MaterialTheme.typography.headlineSmall,
@@ -268,6 +265,23 @@ private fun BubbleBody(
 }
 
 @Composable
+private fun FingerprintBadge(badgeSize: Dp, iconSize: Dp, borderWidth: Dp) {
+    Box(
+        modifier = Modifier
+            .size(badgeSize)
+            .border(borderWidth, MaterialTheme.colorScheme.primary, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            Icons.Filled.Fingerprint,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(iconSize)
+        )
+    }
+}
+
+@Composable
 private fun FingersCountdownPopup(countdown: Int, fingerCount: Int) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Surface(
@@ -303,7 +317,6 @@ private fun FingersCountdownPopup(countdown: Int, fingerCount: Int) {
         }
     }
 }
-
 @Composable
 private fun FingersResultPopup(
     winner: FingerState,
@@ -342,22 +355,39 @@ private fun FingersResultPopup(
                 verticalArrangement = Arrangement.spacedBy(18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Icon(
-                        Icons.Filled.AutoAwesome,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        stringResource(R.string.fingers_selected_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.weight(1f))
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
+                // Header: título sempre no centro geométrico da Card.
+                // A Box separa as extremidades (badge + X) do texto: o Text
+                // é o único filho fora da Row, então contentAlignment = Center
+                // o posiciona no meio exato, sem depender da largura dos ícones.
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FingerprintBadge(badgeSize = 40.dp, iconSize = 24.dp, borderWidth = 1.dp)
+                        Spacer(Modifier.weight(1f))
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.close)
+                            )
+                        }
                     }
+                    // Padding horizontal de segurança: se o título crescer
+                    // (outra fonte, texto longo), encolhe com ellipsis em vez
+                    // de vazar por baixo do badge ou do X.
+                    Text(
+                        text = stringResource(R.string.fingers_selected_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 56.dp)
+                    )
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
