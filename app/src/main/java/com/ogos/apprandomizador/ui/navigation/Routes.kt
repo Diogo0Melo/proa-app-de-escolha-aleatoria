@@ -3,6 +3,7 @@ package com.ogos.apprandomizador.ui.navigation
 object Routes {
     const val HOME_RANDOMIZE = "home_randomize"
     const val HOME_SHUFFLE = "home_shuffle"
+    const val HOME_FINGERS = "home_fingers"
     const val HOME_MODES = "home_modes"
     const val MODE_ORACLE = "mode_oracle"
     const val MODE_TAROT = "mode_tarot"

@@ -38,6 +38,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ogos.apprandomizador.data.repository.DefaultInitialize
+import com.ogos.apprandomizador.fingers.ui.FingersRoute
+import com.ogos.apprandomizador.fingers.ui.FingersViewModel
 import com.ogos.apprandomizador.model.TopBarAction
 import com.ogos.apprandomizador.model.TopBarState
 import com.ogos.apprandomizador.ui.navigation.Routes
@@ -53,7 +55,12 @@ import com.ogos.apprandomizador.viewmodel.MainViewModel
 import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 import com.ogos.apprandomizador.viewmodel.ViewModelFactory
 
-private val BOTTOM_BAR_ROUTES = setOf(Routes.HOME_RANDOMIZE, Routes.HOME_SHUFFLE, Routes.HOME_MODES)
+private val BOTTOM_BAR_ROUTES = setOf(
+    Routes.HOME_RANDOMIZE,
+    Routes.HOME_SHUFFLE,
+    Routes.HOME_FINGERS,
+    Routes.HOME_MODES
+)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,6 +145,11 @@ fun AppNavigation(
                 titleRes = R.string.modes,
                 showBackButton = false,
                 actions = listOf(TopBarAction(Icons.Filled.Settings, R.string.ai_settings) { navController.navigate(Routes.MODE_AI_SETTINGS) })
+            )
+
+            currentRoute == Routes.HOME_FINGERS -> TopBarState(
+                titleRes = R.string.fingers,
+                showBackButton = false
             )
 
             currentRoute == Routes.MODE_AI_SETTINGS -> TopBarState(
@@ -245,6 +257,13 @@ fun AppNavigation(
                 val viewModel: RandomizeViewModel =
                     viewModel(factory = factory)
                 HomeShuffleViewRoute(
+                    viewModel = viewModel,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+            composable(Routes.HOME_FINGERS) {
+                val viewModel: FingersViewModel = viewModel(factory = factory)
+                FingersRoute(
                     viewModel = viewModel,
                     modifier = Modifier.padding(paddingValues)
                 )

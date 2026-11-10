@@ -16,6 +16,15 @@ class StoredOutcomeTest {
         assertFalse(encoded.contains("reading"))
     }
 
+    @Test fun `sorteio dos dedos salva so indice, quantidade e sentido`() {
+        val original: StoredOutcome = StoredOutcome.Fingers(fingerIndex = 2, direction = "CLOCKWISE", fingerCount = 4)
+        val encoded = Json.encodeToString(original)
+        assertEquals(original, Json.decodeFromString<StoredOutcome>(encoded))
+        assertTrue(encoded.contains("fingers"))
+        assertFalse(encoded.contains("position"))
+        assertFalse(encoded.contains("color"))
+    }
+
     @Test fun `resposta sim nao usa apenas o identificador da resposta`() {
         val encoded = Json.encodeToString<StoredOutcome>(StoredOutcome.YesNo("YES"))
         assertTrue(encoded.contains("YES"))

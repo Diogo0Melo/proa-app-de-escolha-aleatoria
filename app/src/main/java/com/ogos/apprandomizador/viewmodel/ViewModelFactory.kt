@@ -14,6 +14,7 @@ import com.ogos.apprandomizador.modes.domain.OfflineReadingInterpreter
 import com.ogos.apprandomizador.modes.domain.OracleAiService
 import com.ogos.apprandomizador.modes.domain.ReadingInterpreter
 import com.ogos.apprandomizador.modes.data.FullTarotDeck
+import com.ogos.apprandomizador.fingers.ui.FingersViewModel
 
 class ViewModelFactory(
     private val repository: IRepository,
@@ -34,6 +35,11 @@ class ViewModelFactory(
                 MainViewModel(repository, dataStoreManager, defaultInitialization) as T
             modelClass.isAssignableFrom(RandomizeViewModel::class.java) ->
                 RandomizeViewModel(repository, entropySource) as T
+            modelClass.isAssignableFrom(FingersViewModel::class.java) ->
+                FingersViewModel(
+                    entropySource = entropySource,
+                    oracleRepository = oracleRepository
+                ) as T
             modelClass.isAssignableFrom(ModesHubViewModel::class.java) ->
                 ModesHubViewModel(oracleRepository) as T
             modelClass.isAssignableFrom(OracleViewModel::class.java) ->
