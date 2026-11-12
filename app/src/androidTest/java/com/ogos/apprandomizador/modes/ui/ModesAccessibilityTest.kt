@@ -6,15 +6,15 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.ogos.apprandomizador.core.ui.navigation.Routes
+import com.ogos.apprandomizador.core.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.modes.domain.DefaultOracleAnswers
 import com.ogos.apprandomizador.modes.ui.hub.ModeCatalog
 import com.ogos.apprandomizador.modes.ui.hub.ModesHubScreen
-import com.ogos.apprandomizador.modes.ui.oracle.OracleActions
+import com.ogos.apprandomizador.modes.ui.oracle.YesNoOracleActions
 import com.ogos.apprandomizador.modes.ui.oracle.OraclePhase
-import com.ogos.apprandomizador.modes.ui.oracle.YesNoOracleScreen
 import com.ogos.apprandomizador.modes.ui.oracle.OracleUiState
-import com.ogos.apprandomizador.ui.navigation.Routes
-import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
+import com.ogos.apprandomizador.modes.ui.oracle.YesNoOracleScreen
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -48,7 +48,7 @@ class ModesAccessibilityTest {
             AppRandomizadorTheme {
                 YesNoOracleScreen(
                     state = OracleUiState(),
-                    actions = OracleActions(
+                    actions = YesNoOracleActions(
                         onQuestionChange = { question = it },
                         onAsk = { askCalled = true }
                     )
@@ -70,7 +70,7 @@ class ModesAccessibilityTest {
             AppRandomizadorTheme {
                 YesNoOracleScreen(
                     state = OracleUiState(phase = OraclePhase.Revealed, answer = answer),
-                    actions = OracleActions()
+                    actions = YesNoOracleActions()
                 )
             }
         }

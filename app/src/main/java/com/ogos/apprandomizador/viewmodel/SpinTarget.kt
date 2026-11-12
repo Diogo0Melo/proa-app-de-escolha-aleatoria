@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador.viewmodel
 
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.model.RaffleItem
 
 /**
  * Encenação de um sorteio: cinco números tirados do fluxo criptográfico, ainda

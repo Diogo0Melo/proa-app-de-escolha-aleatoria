@@ -1,11 +1,16 @@
 package com.ogos.apprandomizador.modes.domain
 
+import com.ogos.apprandomizador.core.ai.domain.AiConfig
+import com.ogos.apprandomizador.core.ai.domain.AiSettings
+import com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository
+import com.ogos.apprandomizador.core.ai.domain.LlmClient
+import com.ogos.apprandomizador.core.ai.domain.LlmHttpException
+import javax.net.ssl.SSLException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
-import javax.net.ssl.SSLException
 
 class AiReadingServiceTest {
     private val card = TarotCard("00", 0, "O Louco", CardMeaning(listOf("começo"), "essência"), CardMeaning(listOf("medo"), "essência invertida"))

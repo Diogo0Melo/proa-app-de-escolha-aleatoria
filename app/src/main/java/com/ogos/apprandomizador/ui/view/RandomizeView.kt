@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,16 +44,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.model.RaffleItem
-import com.ogos.apprandomizador.ui.sound.TickPlayer
+import com.ogos.apprandomizador.core.entropy.cryptoShuffled
+import com.ogos.apprandomizador.core.entropy.shuffleStreamFrom
+import com.ogos.apprandomizador.core.entropy.uniformInt
+import com.ogos.apprandomizador.core.model.RaffleItem
+import com.ogos.apprandomizador.core.ui.voice.TickPlayer
 import com.ogos.apprandomizador.ui.view.component.MAX_DISPLAY_SLOTS
 import com.ogos.apprandomizador.ui.view.component.RouletteWheel
 import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
 import com.ogos.apprandomizador.viewmodel.SpinTarget
-import com.ogos.apprandomizador.viewmodel.cryptoShuffled
-import com.ogos.apprandomizador.viewmodel.shuffleStreamFrom
-import com.ogos.apprandomizador.viewmodel.uniformInt
-
 
 private const val MIN_SEQUENCE_SLOTS = 4
 

@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.model.RaffleItem
 import com.ogos.apprandomizador.modes.domain.OracleSource
 import com.ogos.apprandomizador.ui.view.component.RouletteMath
 

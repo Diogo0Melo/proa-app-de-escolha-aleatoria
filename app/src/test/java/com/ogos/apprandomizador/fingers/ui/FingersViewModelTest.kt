@@ -1,12 +1,12 @@
 package com.ogos.apprandomizador.fingers.ui
 
 import androidx.compose.ui.geometry.Offset
-import com.ogos.apprandomizador.data.database.OracleModeStats
-import com.ogos.apprandomizador.data.repository.IOracleRepository
+import com.ogos.apprandomizador.core.database.OracleModeStats
+import com.ogos.apprandomizador.core.entropy.EntropySource
+import com.ogos.apprandomizador.core.outcome.IOracleRepository
+import com.ogos.apprandomizador.core.outcome.StoredOutcome
 import com.ogos.apprandomizador.fingers.domain.FingersPalette
-import com.ogos.apprandomizador.modes.domain.StoredOutcome
 import com.ogos.apprandomizador.modes.ui.ai.MainDispatcherRule
-import com.ogos.apprandomizador.viewmodel.EntropySource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.advanceTimeBy

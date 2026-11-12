@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador.fingers.domain
 
-import com.ogos.apprandomizador.viewmodel.deriveFingerStream
+import com.ogos.apprandomizador.core.entropy.deriveFingerStream
 import java.security.MessageDigest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows

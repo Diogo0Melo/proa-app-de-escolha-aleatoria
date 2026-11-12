@@ -2,13 +2,13 @@ package com.ogos.apprandomizador.modes.ui.ai
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ogos.apprandomizador.modes.domain.AiConfig
-import com.ogos.apprandomizador.modes.domain.AiSettingsRepository
-import com.ogos.apprandomizador.modes.domain.ApiErrorMapper
-import com.ogos.apprandomizador.modes.domain.BaseUrlNormalizer
-import com.ogos.apprandomizador.modes.domain.LlmClient
-import com.ogos.apprandomizador.modes.domain.LlmHttpException
-import com.ogos.apprandomizador.modes.domain.Secret
+import com.ogos.apprandomizador.core.ai.domain.AiConfig
+import com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository
+import com.ogos.apprandomizador.core.ai.domain.ApiErrorMapper
+import com.ogos.apprandomizador.core.ai.domain.BaseUrlNormalizer
+import com.ogos.apprandomizador.core.ai.domain.LlmClient
+import com.ogos.apprandomizador.core.ai.domain.LlmHttpException
+import com.ogos.apprandomizador.core.ai.domain.Secret
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

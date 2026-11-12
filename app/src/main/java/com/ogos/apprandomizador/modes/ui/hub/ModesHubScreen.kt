@@ -22,16 +22,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.data.database.OracleModeStats
-import com.ogos.apprandomizador.ui.format.TimeAgoFormatter
-import com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme
+import com.ogos.apprandomizador.core.database.OracleModeStats
+import com.ogos.apprandomizador.core.ui.format.TimeAgoFormatter
+import com.ogos.apprandomizador.core.ui.theme.AppRandomizadorTheme
 
 @Composable
 fun ModesHubRoute(

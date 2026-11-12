@@ -1,16 +1,16 @@
 package com.ogos.apprandomizador.modes.ui.yesno
 
+import com.ogos.apprandomizador.core.entropy.EntropySource
+import com.ogos.apprandomizador.core.entropy.MonotonicClock
 import com.ogos.apprandomizador.modes.ui.ai.MainDispatcherRule
-import com.ogos.apprandomizador.viewmodel.EntropySource
-import com.ogos.apprandomizador.viewmodel.MonotonicClock
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class YesNoViewModelTest {

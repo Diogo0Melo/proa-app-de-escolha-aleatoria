@@ -1,21 +1,21 @@
 package com.ogos.apprandomizador.modes.ui.yesno
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ogos.apprandomizador.core.entropy.AndroidMonotonicClock
+import com.ogos.apprandomizador.core.entropy.EntropySource
+import com.ogos.apprandomizador.core.entropy.MonotonicClock
+import com.ogos.apprandomizador.core.entropy.deriveOracleStream
+import com.ogos.apprandomizador.core.entropy.nextIntInRange
+import com.ogos.apprandomizador.core.outcome.IOracleRepository
+import com.ogos.apprandomizador.core.outcome.StoredOutcome
 import com.ogos.apprandomizador.modes.domain.YesNoAnswer
 import com.ogos.apprandomizador.modes.domain.YesNoOracle
-import com.ogos.apprandomizador.data.repository.IOracleRepository
-import com.ogos.apprandomizador.modes.domain.StoredOutcome
-import com.ogos.apprandomizador.viewmodel.EntropySource
-import com.ogos.apprandomizador.viewmodel.MonotonicClock
-import com.ogos.apprandomizador.viewmodel.AndroidMonotonicClock
-import com.ogos.apprandomizador.viewmodel.deriveOracleStream
-import com.ogos.apprandomizador.viewmodel.nextIntInRange
 import kotlinx.coroutines.CancellationException
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 sealed interface YesNoPhase {
     data object Idle : YesNoPhase

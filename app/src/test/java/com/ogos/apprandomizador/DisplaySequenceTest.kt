@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador
 
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.model.RaffleItem
 import com.ogos.apprandomizador.ui.view.buildDisplaySequence
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

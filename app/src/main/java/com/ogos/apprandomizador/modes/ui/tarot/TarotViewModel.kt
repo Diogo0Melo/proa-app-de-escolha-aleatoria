@@ -1,16 +1,18 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
 import androidx.compose.runtime.Immutable
-import com.ogos.apprandomizador.modes.domain.isAiReady
-import com.ogos.apprandomizador.modes.ui.ai.AiAction
-import com.ogos.apprandomizador.modes.ui.ai.aiActionFor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ogos.apprandomizador.data.repository.IOracleRepository
+import com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository
+import com.ogos.apprandomizador.core.ai.domain.isAiReady
+import com.ogos.apprandomizador.core.entropy.EntropySource
+import com.ogos.apprandomizador.core.entropy.deriveOracleStream
+import com.ogos.apprandomizador.core.outcome.IOracleRepository
+import com.ogos.apprandomizador.core.outcome.StoredOutcome
+import com.ogos.apprandomizador.core.outcome.StoredTarotCard
+import com.ogos.apprandomizador.core.ui.ai.AiAction
+import com.ogos.apprandomizador.core.ui.ai.aiActionFor
 import com.ogos.apprandomizador.modes.domain.AiReadingResult
-import com.ogos.apprandomizador.modes.domain.AiSettingsRepository
-import com.ogos.apprandomizador.modes.domain.StoredOutcome
-import com.ogos.apprandomizador.modes.domain.StoredTarotCard
 import com.ogos.apprandomizador.modes.domain.DeckProvider
 import com.ogos.apprandomizador.modes.domain.DrawnCard
 import com.ogos.apprandomizador.modes.domain.OfflineReadingInterpreter
@@ -19,8 +21,6 @@ import com.ogos.apprandomizador.modes.domain.ReadingInterpreter
 import com.ogos.apprandomizador.modes.domain.ReadingSection
 import com.ogos.apprandomizador.modes.domain.Spread
 import com.ogos.apprandomizador.modes.domain.TarotDrawer
-import com.ogos.apprandomizador.viewmodel.EntropySource
-import com.ogos.apprandomizador.viewmodel.deriveOracleStream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

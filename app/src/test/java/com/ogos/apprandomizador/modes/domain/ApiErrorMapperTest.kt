@@ -1,9 +1,12 @@
 package com.ogos.apprandomizador.modes.domain
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import com.ogos.apprandomizador.core.ai.domain.ApiErrorMapper
+import com.ogos.apprandomizador.core.ai.domain.LlmHttpException
+import com.ogos.apprandomizador.core.ai.domain.LlmResponseFormatException
 import java.io.IOException
 import javax.net.ssl.SSLException
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
 class ApiErrorMapperTest {
     @Test fun `mapeia status de autenticacao limite e endpoint`() {

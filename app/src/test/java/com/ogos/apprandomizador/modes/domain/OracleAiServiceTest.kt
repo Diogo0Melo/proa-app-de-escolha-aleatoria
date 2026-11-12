@@ -1,6 +1,11 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.ai.domain.AiConfig
+import com.ogos.apprandomizador.core.ai.domain.AiSettings
+import com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository
+import com.ogos.apprandomizador.core.ai.domain.LlmClient
+import com.ogos.apprandomizador.core.ai.domain.LlmHttpException
+import com.ogos.apprandomizador.core.model.RaffleItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

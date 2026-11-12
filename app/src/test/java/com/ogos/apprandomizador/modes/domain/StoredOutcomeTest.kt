@@ -1,5 +1,7 @@
 package com.ogos.apprandomizador.modes.domain
 
+import com.ogos.apprandomizador.core.outcome.StoredOutcome
+import com.ogos.apprandomizador.core.outcome.StoredTarotCard
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

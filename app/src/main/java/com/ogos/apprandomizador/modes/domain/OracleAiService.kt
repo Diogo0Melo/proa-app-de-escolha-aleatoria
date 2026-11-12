@@ -1,10 +1,15 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository
+import com.ogos.apprandomizador.core.ai.domain.ApiErrorMapper
+import com.ogos.apprandomizador.core.ai.domain.LlmClient
+import com.ogos.apprandomizador.core.ai.domain.completeWithLlmRetry
+import com.ogos.apprandomizador.core.ai.domain.settingsSnapshot
+import com.ogos.apprandomizador.core.model.RaffleItem
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
-import kotlin.time.Duration.Companion.milliseconds
 
 sealed interface OracleAiResult {
     data class Success(val reading: OracleReading, val modelId: String) : OracleAiResult

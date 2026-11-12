@@ -1,8 +1,8 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.viewmodel.EntropyStream
-import com.ogos.apprandomizador.viewmodel.cryptoShuffled
-import com.ogos.apprandomizador.viewmodel.uniformInt
+import com.ogos.apprandomizador.core.entropy.EntropyStream
+import com.ogos.apprandomizador.core.entropy.cryptoShuffled
+import com.ogos.apprandomizador.core.entropy.uniformInt
 
 object TarotDrawer {
     internal fun draw(deck: List<TarotCard>, spread: Spread, stream: EntropyStream, allowReversed: Boolean): List<DrawnCard> {

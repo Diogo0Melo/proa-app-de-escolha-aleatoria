@@ -1,7 +1,7 @@
 package com.ogos.apprandomizador.modes.domain
 
+import com.ogos.apprandomizador.core.entropy.deriveOracleStream
 import com.ogos.apprandomizador.modes.data.FullTarotDeck
-import com.ogos.apprandomizador.viewmodel.deriveOracleStream
 import java.security.MessageDigest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals

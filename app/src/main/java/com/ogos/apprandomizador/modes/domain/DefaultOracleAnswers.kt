@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.model.RaffleItem
 
 /**
  * As seis respostas do Sim ou Não clássico. Ficam fora do banco de propósito: uma roleta do

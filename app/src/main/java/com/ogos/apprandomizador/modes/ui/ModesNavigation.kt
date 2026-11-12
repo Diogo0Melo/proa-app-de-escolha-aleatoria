@@ -1,27 +1,27 @@
 package com.ogos.apprandomizador.modes.ui
 
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.core.tween
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.ogos.apprandomizador.modes.ui.hub.ModesHubRoute
-import com.ogos.apprandomizador.modes.ui.hub.ModesHubViewModel
+import com.ogos.apprandomizador.core.ui.navigation.Routes
 import com.ogos.apprandomizador.modes.ui.ai.AiSettingsRoute
 import com.ogos.apprandomizador.modes.ui.ai.AiSettingsViewModel
-import com.ogos.apprandomizador.modes.ui.oracle.YesNoOracleRoute
+import com.ogos.apprandomizador.modes.ui.hub.ModesHubRoute
+import com.ogos.apprandomizador.modes.ui.hub.ModesHubViewModel
 import com.ogos.apprandomizador.modes.ui.oracle.OracleViewModel
+import com.ogos.apprandomizador.modes.ui.oracle.YesNoOracleRoute
 import com.ogos.apprandomizador.modes.ui.tarot.TarotRoute
 import com.ogos.apprandomizador.modes.ui.tarot.TarotViewModel
-import com.ogos.apprandomizador.ui.navigation.Routes
 
 fun NavGraphBuilder.modesGraph(
     navController: NavController,

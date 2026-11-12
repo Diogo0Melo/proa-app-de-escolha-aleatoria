@@ -1,12 +1,12 @@
 package com.ogos.apprandomizador
 
 import com.ogos.apprandomizador.ui.view.component.RouletteMath
+import kotlin.math.abs
+import kotlin.math.tan
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.math.abs
-import kotlin.math.tan
 
 class RouletteMathTest {
 

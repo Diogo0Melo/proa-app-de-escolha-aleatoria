@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.model.RaffleItem
 
 /**
  * Frase de reflexão para cada resposta do oráculo clássico. Aparece quando a IA está desligada

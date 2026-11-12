@@ -1,27 +1,17 @@
 package com.ogos.apprandomizador.modes.domain
 
+import com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository
+import com.ogos.apprandomizador.core.ai.domain.ApiErrorMapper
+import com.ogos.apprandomizador.core.ai.domain.LlmClient
+import com.ogos.apprandomizador.core.ai.domain.completeWithLlmRetry
+import com.ogos.apprandomizador.core.ai.domain.settingsSnapshot
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
-import java.io.IOException
-import javax.net.ssl.SSLException
 
 sealed interface AiReadingResult {
     data class Success(val reading: Reading, val modelId: String) : AiReadingResult
     data class Failure(val reason: String) : AiReadingResult
-}
-
-class LlmHttpException(val statusCode: Int, message: String) : IOException("HTTP $statusCode: $message")
-
-/** Resposta recebida do provedor, porém fora do formato esperado. Não é retentada. */
-class LlmResponseFormatException(message: String) : IOException(message)
-
-interface LlmClient {
-    suspend fun listModels(baseUrl: String, apiKey: String): List<String>
-    suspend fun ping(baseUrl: String, apiKey: String, model: String)
-    suspend fun complete(baseUrl: String, apiKey: String, model: String, prompt: String): String
 }
 
 /**
@@ -33,7 +23,7 @@ interface LlmClient {
  */
 class AiReadingService(
     private val client: LlmClient,
-    private val settings: AiSettingsRepository,
+    private val settings: com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository,
     private val retryDelaysMillis: List<Long> = DEFAULT_RETRY_DELAYS_MILLIS,
     private val totalBudgetMillis: Long = TOTAL_BUDGET_MILLIS
 ) {
@@ -75,45 +65,4 @@ class AiReadingService(
         const val MISSING_KEY = "A chave da API não está disponível. Confira as configurações."
         const val INVALID_RESPONSE = "A resposta da IA não pôde ser validada. A leitura offline continua disponível."
     }
-}
-
-/** Classifica se um erro pode ser resolvido por nova tentativa. */
-internal fun isTransient(error: Exception): Boolean = when (error) {
-    is LlmHttpException -> error.statusCode == 408 || error.statusCode == 429 || error.statusCode in 500..599
-    is LlmResponseFormatException -> false
-    is SSLException -> false
-    is IOException -> true
-    else -> false
-}
-
-// A leitura das configurações é mantida num repositório de fluxo; este helper lê o valor atual sem expor a chave.
-suspend fun AiSettingsRepository.settingsSnapshot(): AiConfig? = settings.first().let { state ->
-    state.config?.takeIf { it.enabled && state.consentedAuthority == BaseUrlNormalizer.authority(it.baseUrl) }
-}
-
-/**
- * Chama o provedor e retenta erros transitórios com o backoff informado.
- * Compartilhado pela leitura do tarô e pelo oráculo; o último erro sempre segue para o chamador.
- */
-internal suspend fun completeWithLlmRetry(
-    client: LlmClient,
-    config: AiConfig,
-    key: String,
-    prompt: String,
-    retryDelaysMillis: List<Long>,
-    onRetry: (Int) -> Unit
-): String {
-    var attempt = 1
-    while (attempt <= retryDelaysMillis.size) {
-        try {
-            return client.complete(config.baseUrl, key, config.model, prompt)
-        } catch (error: Exception) {
-            if (error is CancellationException || !isTransient(error)) throw error
-            onRetry(attempt + 1)
-            delay(retryDelaysMillis[attempt - 1])
-            attempt++
-        }
-    }
-    // Última tentativa: qualquer erro segue para o chamador.
-    return client.complete(config.baseUrl, key, config.model, prompt)
 }

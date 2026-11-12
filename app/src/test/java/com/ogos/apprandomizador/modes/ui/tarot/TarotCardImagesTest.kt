@@ -1,9 +1,9 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
 import com.ogos.apprandomizador.modes.data.FullTarotDeck
+import java.io.File
 import org.junit.Assert.*
 import org.junit.Test
-import java.io.File
 
 class TarotCardImagesTest {
     private val assetsRoot = File("src/main/assets")

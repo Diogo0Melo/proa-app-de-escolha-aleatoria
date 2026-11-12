@@ -1,7 +1,7 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
+import com.ogos.apprandomizador.core.ui.ai.AiAction
 import com.ogos.apprandomizador.modes.domain.Reading
-import com.ogos.apprandomizador.modes.ui.ai.AiAction
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

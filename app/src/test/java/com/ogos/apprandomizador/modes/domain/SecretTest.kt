@@ -1,5 +1,6 @@
 package com.ogos.apprandomizador.modes.domain
 
+import com.ogos.apprandomizador.core.ai.domain.Secret
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

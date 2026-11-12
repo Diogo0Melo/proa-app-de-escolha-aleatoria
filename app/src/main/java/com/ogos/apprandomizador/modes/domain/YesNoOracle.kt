@@ -1,7 +1,7 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.viewmodel.EntropyStream
-import com.ogos.apprandomizador.viewmodel.uniformInt
+import com.ogos.apprandomizador.core.entropy.EntropyStream
+import com.ogos.apprandomizador.core.entropy.uniformInt
 
 enum class YesNoAnswer { YES, NO }
 

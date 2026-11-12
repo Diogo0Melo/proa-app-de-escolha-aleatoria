@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.model.RaffleItem
 
 /**
  * Prompt da leitura da IA. A resposta já foi sorteada pelo domínio e o modelo só a elabora.

@@ -1,11 +1,12 @@
 package com.ogos.apprandomizador.modes.data
 
-import com.ogos.apprandomizador.modes.domain.LlmHttpException
+import com.ogos.apprandomizador.core.ai.data.OpenAiCompatibleClient
+import com.ogos.apprandomizador.core.ai.domain.LlmHttpException
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.runBlocking
-import java.util.concurrent.TimeUnit
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After

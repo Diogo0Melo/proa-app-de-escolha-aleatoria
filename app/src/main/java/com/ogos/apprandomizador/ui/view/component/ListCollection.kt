@@ -36,8 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.ui.format.TimeAgoFormatter
+import com.ogos.apprandomizador.core.model.ItemList
+import com.ogos.apprandomizador.core.ui.format.TimeAgoFormatter
 
 private const val MaxVisibleChips = 7
 

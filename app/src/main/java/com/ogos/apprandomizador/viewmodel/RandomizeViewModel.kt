@@ -2,16 +2,17 @@ package com.ogos.apprandomizador.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ogos.apprandomizador.data.repository.IRepository
-import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.data.IRepository
+import com.ogos.apprandomizador.core.entropy.EntropySource
+import com.ogos.apprandomizador.core.model.ItemList
+import com.ogos.apprandomizador.core.model.RaffleItem
+import java.security.SecureRandom
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.security.SecureRandom
 
 class RandomizeViewModel(
     private val repository: IRepository,

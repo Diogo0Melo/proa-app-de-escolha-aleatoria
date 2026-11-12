@@ -43,18 +43,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.ogos.apprandomizador.model.RaffleItem
-import com.ogos.apprandomizador.ui.theme.LocalRouletteBackground
+import com.ogos.apprandomizador.core.model.RaffleItem
+import com.ogos.apprandomizador.core.ui.theme.LocalRouletteBackground
 import com.ogos.apprandomizador.viewmodel.SpinCosmetics
 import com.ogos.apprandomizador.viewmodel.SpinTarget
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.tan
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 internal const val MAX_DISPLAY_SLOTS = 24
 internal const val WHEEL_FULL_TURNS = 2

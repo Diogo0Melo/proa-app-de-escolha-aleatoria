@@ -1,7 +1,7 @@
 package com.ogos.apprandomizador.fingers.domain
 
-import com.ogos.apprandomizador.viewmodel.EntropyStream
-import com.ogos.apprandomizador.viewmodel.uniformInt
+import com.ogos.apprandomizador.core.entropy.EntropyStream
+import com.ogos.apprandomizador.core.entropy.uniformInt
 
 data class FingersPick(val winnerIndex: Int, val direction: FingersDirection)
 

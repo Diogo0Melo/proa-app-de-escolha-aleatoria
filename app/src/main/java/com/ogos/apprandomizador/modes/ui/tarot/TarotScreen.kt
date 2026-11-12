@@ -1,7 +1,5 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
-import com.ogos.apprandomizador.modes.ui.ai.AiAction
-
 import android.animation.ValueAnimator
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -11,6 +9,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -73,12 +71,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ogos.apprandomizador.R
+import com.ogos.apprandomizador.core.ui.ai.AiAction
+import com.ogos.apprandomizador.core.ui.voice.TickPlayer
+import com.ogos.apprandomizador.core.ui.voice.rememberSpeechInput
+import com.ogos.apprandomizador.core.ui.voice.rememberSpeechPlayer
+import com.ogos.apprandomizador.core.ui.voice.toSpeechText
 import com.ogos.apprandomizador.modes.domain.Reading
 import com.ogos.apprandomizador.modes.domain.Spread
-import com.ogos.apprandomizador.ui.sound.TickPlayer
-import com.ogos.apprandomizador.ui.sound.rememberSpeechPlayer
-import com.ogos.apprandomizador.ui.sound.toSpeechText
-import com.ogos.apprandomizador.ui.speech.rememberSpeechInput
 
 @Composable
 fun TarotRoute(
@@ -677,7 +676,7 @@ private fun LabeledBlock(label: String, text: String) {
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "Tarô · configuração")
 @Composable
 private fun TarotScreenPreview() {
-    com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme {
+    com.ogos.apprandomizador.core.ui.theme.AppRandomizadorTheme {
         TarotScreen(state = TarotUiState(), onFlip = {}, onQuestionChange = {}, onSpreadChange = {}, onAllowReversedChange = {}, onDraw = {}, onReset = {})
     }
 }

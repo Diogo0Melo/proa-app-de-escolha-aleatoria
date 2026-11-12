@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.viewmodel.deriveOracleStream
+import com.ogos.apprandomizador.core.entropy.deriveOracleStream
 import java.security.MessageDigest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

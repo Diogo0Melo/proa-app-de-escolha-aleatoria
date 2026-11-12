@@ -1,8 +1,8 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
+import com.ogos.apprandomizador.core.entropy.EntropySource
 import com.ogos.apprandomizador.modes.data.FullTarotDeck
 import com.ogos.apprandomizador.modes.domain.Spread
-import com.ogos.apprandomizador.viewmodel.EntropySource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

@@ -1,7 +1,7 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.model.ItemList
+import com.ogos.apprandomizador.core.model.RaffleItem
 
 /** O que alimenta o sorteio: o oráculo clássico (topic nulo) ou uma roleta do usuário. */
 data class OracleSource(val topic: String?, val items: List<RaffleItem>) {

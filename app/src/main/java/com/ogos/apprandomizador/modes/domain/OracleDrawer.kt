@@ -1,8 +1,8 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.model.RaffleItem
-import com.ogos.apprandomizador.viewmodel.EntropyStream
-import com.ogos.apprandomizador.viewmodel.uniformInt
+import com.ogos.apprandomizador.core.entropy.EntropyStream
+import com.ogos.apprandomizador.core.entropy.uniformInt
+import com.ogos.apprandomizador.core.model.RaffleItem
 
 /**
  * Sorteio da resposta. Cada item tem probabilidade uniforme e o resultado depende só do fluxo

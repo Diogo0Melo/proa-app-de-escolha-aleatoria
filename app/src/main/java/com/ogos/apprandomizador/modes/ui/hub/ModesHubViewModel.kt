@@ -2,8 +2,8 @@ package com.ogos.apprandomizador.modes.ui.hub
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ogos.apprandomizador.data.database.OracleModeStats
-import com.ogos.apprandomizador.data.repository.IOracleRepository
+import com.ogos.apprandomizador.core.database.OracleModeStats
+import com.ogos.apprandomizador.core.outcome.IOracleRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map

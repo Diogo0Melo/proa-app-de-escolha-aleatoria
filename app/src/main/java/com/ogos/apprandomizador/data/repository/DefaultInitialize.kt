@@ -1,8 +1,10 @@
 package com.ogos.apprandomizador.data.repository
 
-import com.ogos.apprandomizador.data.database.DataStoreManager
-import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.data.IDefaultInitialization
+import com.ogos.apprandomizador.core.data.IRepository
+import com.ogos.apprandomizador.core.datastore.DataStoreManager
+import com.ogos.apprandomizador.core.model.ItemList
+import com.ogos.apprandomizador.core.model.RaffleItem
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

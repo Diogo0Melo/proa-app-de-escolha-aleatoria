@@ -1,13 +1,14 @@
 package com.ogos.apprandomizador.data.repository
 
 import androidx.room.withTransaction
-import com.ogos.apprandomizador.data.database.AppDatabase
-import com.ogos.apprandomizador.data.database.DrawHistoryDao
-import com.ogos.apprandomizador.data.database.ItemDao
-import com.ogos.apprandomizador.model.DrawHistoryEntry
-import com.ogos.apprandomizador.model.ItemList
-import kotlinx.coroutines.flow.Flow
+import com.ogos.apprandomizador.core.data.IRepository
+import com.ogos.apprandomizador.core.database.AppDatabase
+import com.ogos.apprandomizador.core.database.dao.DrawHistoryDao
+import com.ogos.apprandomizador.core.database.dao.ItemDao
+import com.ogos.apprandomizador.core.model.DrawHistoryEntry
+import com.ogos.apprandomizador.core.model.ItemList
 import java.time.Instant
+import kotlinx.coroutines.flow.Flow
 
 class ItemListRepository(
     private val database: AppDatabase,

@@ -1,5 +1,6 @@
 package com.ogos.apprandomizador.modes.ui.yesno
 
+import android.os.SystemClock
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,13 +17,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,19 +33,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import android.os.SystemClock
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.ui.speech.rememberSpeechInput
+import com.ogos.apprandomizador.core.ui.voice.rememberSpeechInput
 import kotlinx.coroutines.delay
 
 @Composable
@@ -182,7 +182,7 @@ fun YesNoScreen(
 @Preview(showBackground = true, name = "Sim ou Não")
 @Composable
 private fun YesNoScreenPreview() {
-    com.ogos.apprandomizador.ui.theme.AppRandomizadorTheme {
+    com.ogos.apprandomizador.core.ui.theme.AppRandomizadorTheme {
         YesNoScreen(
             state = YesNoUiState(),
             question = "",

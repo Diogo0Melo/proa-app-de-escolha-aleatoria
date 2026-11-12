@@ -1,6 +1,8 @@
 package com.ogos.apprandomizador.viewmodel
 
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.entropy.deriveSpinStream
+import com.ogos.apprandomizador.core.entropy.pickWinnerIndex
+import com.ogos.apprandomizador.core.model.RaffleItem
 
 /**
  * Planeja um giro sem efeitos colaterais. A ordem de consumo do fluxo é parte

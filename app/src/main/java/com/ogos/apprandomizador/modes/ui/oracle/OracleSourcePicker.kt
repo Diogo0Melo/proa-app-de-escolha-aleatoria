@@ -19,7 +19,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.model.ItemList
+import com.ogos.apprandomizador.core.model.ItemList
 
 /** Escolha da fonte: o Sim ou Não clássico ou uma roleta do usuário. */
 @OptIn(ExperimentalMaterial3Api::class)

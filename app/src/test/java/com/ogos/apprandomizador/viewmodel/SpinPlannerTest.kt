@@ -1,6 +1,8 @@
 package com.ogos.apprandomizador.viewmodel
 
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.entropy.deriveSpinStream
+import com.ogos.apprandomizador.core.entropy.pickWinnerIndex
+import com.ogos.apprandomizador.core.model.RaffleItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

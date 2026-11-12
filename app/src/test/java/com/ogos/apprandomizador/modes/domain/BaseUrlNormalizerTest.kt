@@ -1,5 +1,6 @@
 package com.ogos.apprandomizador.modes.domain
 
+import com.ogos.apprandomizador.core.ai.domain.BaseUrlNormalizer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test

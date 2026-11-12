@@ -26,20 +26,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import com.ogos.apprandomizador.R
 import coil.compose.AsyncImage
+import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.modes.domain.DrawnCard
-import com.ogos.apprandomizador.modes.domain.Suit
 import com.ogos.apprandomizador.modes.domain.SpreadPosition
+import com.ogos.apprandomizador.modes.domain.Suit
 import kotlinx.coroutines.delay
 
 @Composable

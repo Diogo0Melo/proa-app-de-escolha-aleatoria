@@ -1,9 +1,9 @@
 package com.ogos.apprandomizador.modes.ui.tarot
 
+import com.ogos.apprandomizador.core.entropy.EntropySource
 import com.ogos.apprandomizador.modes.data.FullTarotDeck
 import com.ogos.apprandomizador.modes.domain.Spread
 import com.ogos.apprandomizador.modes.ui.ai.MainDispatcherRule
-import com.ogos.apprandomizador.viewmodel.EntropySource
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*

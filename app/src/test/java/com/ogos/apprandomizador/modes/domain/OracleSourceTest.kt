@@ -1,7 +1,7 @@
 package com.ogos.apprandomizador.modes.domain
 
-import com.ogos.apprandomizador.model.ItemList
-import com.ogos.apprandomizador.model.RaffleItem
+import com.ogos.apprandomizador.core.model.ItemList
+import com.ogos.apprandomizador.core.model.RaffleItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

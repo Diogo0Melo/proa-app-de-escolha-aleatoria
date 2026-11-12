@@ -6,7 +6,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.ui.navigation.Routes
+import com.ogos.apprandomizador.core.ui.navigation.Routes
 
 data class ModeEntry(
     val id: String,
