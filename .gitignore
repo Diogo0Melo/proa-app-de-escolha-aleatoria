@@ -50,3 +50,7 @@ bundle-project.mjs
 
 # Kotlin compiler sessions
 .kotlin/
+
+# Project artifacts (zips) and stray tool index
+*.zip
+index/

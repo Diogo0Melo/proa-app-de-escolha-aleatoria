@@ -1,0 +1,39 @@
+package com.ogos.apprandomizador.features.tarot.ui
+
+import com.ogos.apprandomizador.core.entropy.EntropySource
+import com.ogos.apprandomizador.features.tarot.data.FullTarotDeck
+import com.ogos.apprandomizador.features.tarot.domain.Spread
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class TarotViewModelTest {
+    private class FakeEntropySource : EntropySource {
+        private var seed = 0
+        override fun nextSeed(): ByteArray = ByteArray(32) { (it + seed++).toByte() }
+    }
+
+    @Test fun `draw enters revealing with selected spread and no duplicate cards`() {
+        val vm = TarotViewModel(FakeEntropySource(), FullTarotDeck)
+        vm.onQuestionChange("Qual caminho explorar?")
+        vm.onSpreadChange(Spread.PAST_PRESENT_FUTURE)
+        vm.onDraw()
+        val first = vm.uiState.value
+        assertEquals(TarotPhase.Revealing, first.phase)
+        assertEquals(3, first.drawn.size)
+        assertEquals(3, first.drawn.map { it.card.id }.distinct().size)
+        assertEquals("Qual caminho explorar?", first.question)
+        vm.onDraw()
+        assertEquals(first.requestId, vm.uiState.value.requestId)
+    }
+
+    @Test fun `reset cannot interrupt a reveal already decided by the oracle`() {
+        val vm = TarotViewModel(FakeEntropySource(), FullTarotDeck)
+        vm.onDraw()
+        val request = vm.uiState.value.requestId
+        vm.onReset()
+        assertEquals(TarotPhase.Revealing, vm.uiState.value.phase)
+        assertEquals(request, vm.uiState.value.requestId)
+        assertTrue(vm.uiState.value.drawn.isNotEmpty())
+    }
+}

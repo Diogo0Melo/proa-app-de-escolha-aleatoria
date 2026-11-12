@@ -1,0 +1,63 @@
+package com.ogos.apprandomizador.core.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ogos.apprandomizador.core.data.IDefaultInitialization
+import com.ogos.apprandomizador.core.data.IRepository
+import com.ogos.apprandomizador.core.datastore.DataStoreManager
+import com.ogos.apprandomizador.core.ui.theme.ThemeMode
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+class MainViewModel(
+    private val repository: IRepository,
+    private val dataStoreManager: DataStoreManager,
+    defaultInitilization: IDefaultInitialization
+) : ViewModel() {
+    private val _isReady = MutableStateFlow(false)
+    val isReady = _isReady.asStateFlow()
+
+    val themeMode: StateFlow<ThemeMode?> = dataStoreManager.themeMode
+        .map<String, ThemeMode?> { ThemeMode.fromKey(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
+
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch {
+            dataStoreManager.saveThemeMode(mode.key)
+        }
+    }
+
+    val soundEnabled: StateFlow<Boolean> = dataStoreManager.isSoundOn
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = true
+        )
+
+    fun setSoundEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveSoundOn(enabled)
+        }
+    }
+
+    init {
+        // Seeding runs in the background; isReady flips immediately so the first
+        // screen renders as soon as the theme resolves. Room flows stream the
+        // seeded lists into the UI as each insert lands.
+        viewModelScope.launch {
+            val needsSeed = dataStoreManager.needsSeed.first()
+            defaultInitilization.initializeDatabase(needsSeed, dataStoreManager, repository)
+        }
+        _isReady.value = true
+    }
+}

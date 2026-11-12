@@ -1,0 +1,39 @@
+package com.ogos.apprandomizador.features.tarot.data
+
+import com.ogos.apprandomizador.features.tarot.domain.CardMeaning
+import com.ogos.apprandomizador.features.tarot.domain.DeckProvider
+import com.ogos.apprandomizador.features.tarot.domain.TarotCard
+
+/** Conteúdo autoral em PT-BR; o baralho inicial contém os 22 Arcanos Maiores. */
+object MajorArcanaDeck : DeckProvider {
+    private data class Entry(val name: String, val up: String, val down: String, val upText: String, val downText: String)
+    private val entries = listOf(
+        Entry("O Louco", "começo, liberdade, confiança", "imprudência, dispersão, medo", "Um ciclo se abre e convida à curiosidade. Avance com leveza, mantendo atenção ao caminho.", "A vontade de começar pode estar atropelando o planejamento. Recupere o centro antes de dar o próximo passo."),
+        Entry("O Mago", "iniciativa, habilidade, foco", "bloqueio, manipulação, potencial disperso", "Você dispõe de recursos para transformar intenção em ação. Escolha uma prioridade e use bem suas ferramentas.", "Há energia disponível, mas ela pode estar dispersa ou sendo usada sem clareza. Reavalie intenção e método."),
+        Entry("A Sacerdotisa", "intuição, silêncio, percepção", "segredo, ruído interno, desconexão", "Observe antes de reagir. Uma resposta pode surgir quando você cria espaço para escutar sua própria percepção.", "Informações incompletas ou inquietação podem confundir sua leitura. Evite concluir antes de compreender."),
+        Entry("A Imperatriz", "criação, cuidado, abundância", "excesso, dependência, estagnação", "Algo pode florescer com cuidado consistente. Nutra o que importa sem apressar seus resultados.", "Cuidar de tudo pode estar deixando você sem espaço. Reequilibre generosidade, limites e autocuidado."),
+        Entry("O Imperador", "estrutura, limite, responsabilidade", "rigidez, controle, autoritarismo", "Organização e limites claros ajudam a sustentar seus planos. Assuma a responsabilidade sem perder flexibilidade.", "A necessidade de controlar pode endurecer uma situação. Experimente trocar rigidez por acordos claros."),
+        Entry("O Hierofante", "aprendizado, tradição, orientação", "dogma, questionamento, inconformismo", "Conhecimento compartilhado e bons exemplos podem orientar sua escolha. Aprenda com referências sem abrir mão do discernimento.", "Uma regra antiga talvez já não sirva. Questione hábitos e procure uma orientação que respeite seu contexto."),
+        Entry("Os Enamorados", "escolha, vínculo, alinhamento", "conflito, indecisão, desalinhamento", "Uma escolha ganha força quando combina valores e atitudes. Converse com honestidade sobre o que realmente importa.", "Expectativas conflitantes podem dificultar a decisão. Nomeie suas prioridades antes de buscar aprovação externa."),
+        Entry("O Carro", "direção, movimento, disciplina", "pressa, dispersão, falta de direção", "Defina um destino e avance com disciplina. O progresso depende de conduzir forças diferentes na mesma direção.", "O movimento pode ter perdido o rumo. Diminua a velocidade e recupere uma direção que faça sentido."),
+        Entry("A Justiça", "equilíbrio, clareza, consequência", "parcialidade, desequilíbrio, evasão", "Analise fatos e consequências com honestidade. Uma decisão equilibrada considera responsabilidades e limites.", "Pode haver um ponto de vista sendo ignorado. Reúna informações e reconheça sua parte na situação."),
+        Entry("O Eremita", "introspecção, prudência, busca", "isolamento, hesitação, afastamento", "Um intervalo consciente pode revelar o que o excesso de estímulos esconde. Procure clareza sem se desconectar de todos.", "A busca por respostas pode virar isolamento ou adiamento. Compartilhe suas dúvidas com alguém confiável."),
+        Entry("A Roda da Fortuna", "mudança, ciclo, oportunidade", "resistência, instabilidade, repetição", "O cenário está em movimento. Reconheça o que mudou e adapte suas ações ao novo momento.", "Resistir ao inevitável pode prolongar o desgaste. Identifique o que está ao seu alcance e ajuste a rota."),
+        Entry("A Força", "coragem, gentileza, autocontrole", "reatividade, insegurança, desgaste", "Coragem também é agir com calma. Sua firmeza pode aparecer na forma como acolhe emoções sem ser conduzido por elas.", "O cansaço pode reduzir sua paciência. Recupere energia e escolha respostas menos reativas."),
+        Entry("O Enforcado", "pausa, perspectiva, entrega", "resistência, atraso, sacrifício inútil", "Uma pausa pode mudar o ângulo da questão. Nem todo avanço exige movimento imediato.", "Insistir no mesmo caminho pode custar mais do que oferece. Reavalie o que vale manter e o que pode ser solto."),
+        Entry("A Morte", "encerramento, transformação, renovação", "apego, transição difícil, estagnação", "Um encerramento abre espaço para outra etapa. Reconheça o que terminou e permita que a mudança aconteça.", "O apego ao conhecido pode dificultar a transição. Dê nome ao que precisa mudar, respeitando seu próprio ritmo."),
+        Entry("A Temperança", "moderação, integração, paciência", "excesso, impaciência, desequilíbrio", "Ajustes graduais podem aproximar partes que pareciam incompatíveis. Procure uma medida sustentável.", "Os extremos podem estar consumindo energia. Reduza excessos e reconstrua o equilíbrio passo a passo."),
+        Entry("O Diabo", "apego, desejo, padrões", "libertação, consciência, autonomia", "Observe vínculos e hábitos que influenciam suas escolhas. Reconhecer um padrão é o primeiro passo para decidir sobre ele.", "Você pode estar percebendo uma amarra com mais clareza. Transforme consciência em um limite concreto."),
+        Entry("A Torre", "ruptura, revelação, mudança", "resistência, tensão, reconstrução", "Uma estrutura frágil pode precisar ser revista. Encare os fatos e preserve o que continua verdadeiro.", "Evitar uma conversa ou mudança necessária pode aumentar a tensão. Procure uma forma segura de lidar com o que já pede atenção."),
+        Entry("A Estrela", "esperança, inspiração, serenidade", "desânimo, dúvida, vulnerabilidade", "Há espaço para recuperar confiança e imaginar possibilidades. Pequenos gestos coerentes ajudam a renovar o ânimo.", "A esperança pode estar encoberta pelo cansaço. Recomece com metas pequenas e apoio realista."),
+        Entry("A Lua", "imaginação, sensibilidade, incerteza", "clareza gradual, receio, confusão", "Nem tudo está visível ainda. Diferencie fatos, receios e suposições antes de escolher um caminho.", "Uma dúvida começa a ganhar contornos. Verifique informações e não transforme uma impressão em certeza."),
+        Entry("O Sol", "vitalidade, clareza, realização", "excesso, expectativa, alegria contida", "A clareza favorece encontros e iniciativas. Reconheça suas conquistas e compartilhe o que funciona.", "Talvez a expectativa de que tudo seja perfeito esteja diminuindo sua satisfação. Valorize avanços possíveis."),
+        Entry("O Julgamento", "despertar, revisão, chamado", "autocrítica, adiamento, resistência", "Uma revisão honesta pode ajudar a responder ao que a vida está pedindo agora. Aprenda com o passado sem ficar preso a ele.", "A autocrítica ou o medo de mudar podem adiar uma decisão. Trate sua história com responsabilidade e compaixão."),
+        Entry("O Mundo", "conclusão, integração, expansão", "pendência, incompletude, fechamento", "Um ciclo pode estar amadurecendo. Reconheça o percurso, integre o aprendizado e prepare o próximo horizonte.", "Algo ainda pede fechamento ou reconhecimento. Identifique a etapa que falta para concluir com tranquilidade.")
+    )
+    private val cards = entries.mapIndexed { index, entry ->
+        TarotCard(index.toString().padStart(2, '0'), index, entry.name,
+            CardMeaning(entry.up.split(", "), entry.upText), CardMeaning(entry.down.split(", "), entry.downText))
+    }
+    override fun getDeck(): List<TarotCard> = cards
+}
