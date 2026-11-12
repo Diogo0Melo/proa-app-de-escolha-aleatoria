@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.ui.view.component
+package com.ogos.apprandomizador.features.randomize.ui.component
 
 import kotlin.math.cos
 import kotlin.math.exp

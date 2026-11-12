@@ -47,14 +47,14 @@ import com.ogos.apprandomizador.core.ui.navigation.AppNavigation
 import com.ogos.apprandomizador.core.ui.navigation.Routes
 import com.ogos.apprandomizador.core.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.core.ui.theme.ThemeMode
-import com.ogos.apprandomizador.data.repository.DefaultInitialize
+import com.ogos.apprandomizador.features.randomize.data.DefaultInitialize
 import com.ogos.apprandomizador.fingers.ui.FingersRoute
 import com.ogos.apprandomizador.fingers.ui.FingersViewModel
 import com.ogos.apprandomizador.modes.ui.modesGraph
-import com.ogos.apprandomizador.ui.view.HomeRandomizeViewRoute
-import com.ogos.apprandomizador.ui.view.HomeShuffleViewRoute
-import com.ogos.apprandomizador.ui.view.RandomizeViewRoute
-import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
+import com.ogos.apprandomizador.features.randomize.ui.HomeRandomizeViewRoute
+import com.ogos.apprandomizador.features.randomize.ui.HomeShuffleViewRoute
+import com.ogos.apprandomizador.features.randomize.ui.RandomizeViewRoute
+import com.ogos.apprandomizador.features.randomize.ui.RandomizeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

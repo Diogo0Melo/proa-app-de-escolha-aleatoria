@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.core.model.RaffleItem
 import com.ogos.apprandomizador.modes.domain.OracleSource
-import com.ogos.apprandomizador.ui.view.component.RouletteMath
+import com.ogos.apprandomizador.features.randomize.ui.component.RouletteMath
 
 /** Botão grande de ditado por voz, ação principal da tela. */
 @Composable

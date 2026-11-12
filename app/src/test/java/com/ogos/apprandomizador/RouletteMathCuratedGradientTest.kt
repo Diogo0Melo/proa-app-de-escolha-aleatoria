@@ -2,7 +2,7 @@ package com.ogos.apprandomizador
 
 import com.ogos.apprandomizador.core.model.RaffleItem
 import com.ogos.apprandomizador.modes.domain.DefaultOracleAnswers
-import com.ogos.apprandomizador.ui.view.component.RouletteMath
+import com.ogos.apprandomizador.features.randomize.ui.component.RouletteMath
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue

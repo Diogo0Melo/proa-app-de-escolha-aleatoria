@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.data.repository
+package com.ogos.apprandomizador.features.randomize.data
 
 import androidx.room.withTransaction
 import com.ogos.apprandomizador.core.data.IRepository

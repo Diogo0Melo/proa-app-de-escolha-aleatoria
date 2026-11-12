@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador.core.entropy
 
-import com.ogos.apprandomizador.viewmodel.SpinTarget
+import com.ogos.apprandomizador.features.randomize.domain.SpinTarget
 import java.security.MessageDigest
 
 /**

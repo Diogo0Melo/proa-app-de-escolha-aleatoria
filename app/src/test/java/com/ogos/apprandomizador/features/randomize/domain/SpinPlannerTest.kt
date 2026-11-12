@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.viewmodel
+package com.ogos.apprandomizador.features.randomize.domain
 
 import com.ogos.apprandomizador.core.entropy.deriveSpinStream
 import com.ogos.apprandomizador.core.entropy.pickWinnerIndex

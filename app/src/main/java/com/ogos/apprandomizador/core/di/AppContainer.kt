@@ -10,7 +10,7 @@ import com.ogos.apprandomizador.core.datastore.DataStoreManager
 import com.ogos.apprandomizador.core.entropy.EntropySource
 import com.ogos.apprandomizador.core.entropy.SecureEntropySource
 import com.ogos.apprandomizador.core.outcome.OracleRepository
-import com.ogos.apprandomizador.data.repository.ItemListRepository
+import com.ogos.apprandomizador.features.randomize.data.ItemListRepository
 import com.ogos.apprandomizador.modes.domain.AiReadingService
 import com.ogos.apprandomizador.modes.domain.OracleAiService
 

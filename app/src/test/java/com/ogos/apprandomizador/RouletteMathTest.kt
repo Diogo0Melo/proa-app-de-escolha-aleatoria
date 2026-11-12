@@ -1,6 +1,6 @@
 package com.ogos.apprandomizador
 
-import com.ogos.apprandomizador.ui.view.component.RouletteMath
+import com.ogos.apprandomizador.features.randomize.ui.component.RouletteMath
 import kotlin.math.abs
 import kotlin.math.tan
 import org.junit.Assert.assertEquals

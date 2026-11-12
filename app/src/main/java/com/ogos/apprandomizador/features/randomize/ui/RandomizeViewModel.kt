@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.viewmodel
+package com.ogos.apprandomizador.features.randomize.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,8 @@ import com.ogos.apprandomizador.core.data.IRepository
 import com.ogos.apprandomizador.core.entropy.EntropySource
 import com.ogos.apprandomizador.core.model.ItemList
 import com.ogos.apprandomizador.core.model.RaffleItem
+import com.ogos.apprandomizador.features.randomize.domain.SpinTarget
+import com.ogos.apprandomizador.features.randomize.domain.planSpin
 import java.security.SecureRandom
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow

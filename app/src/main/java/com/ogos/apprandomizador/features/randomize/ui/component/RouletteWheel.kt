@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.ui.view.component
+package com.ogos.apprandomizador.features.randomize.ui.component
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -45,8 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.ogos.apprandomizador.core.model.RaffleItem
 import com.ogos.apprandomizador.core.ui.theme.LocalRouletteBackground
-import com.ogos.apprandomizador.viewmodel.SpinCosmetics
-import com.ogos.apprandomizador.viewmodel.SpinTarget
+import com.ogos.apprandomizador.features.randomize.domain.SpinCosmetics
+import com.ogos.apprandomizador.features.randomize.domain.SpinTarget
+import com.ogos.apprandomizador.modes.ui.tarot.CardShape
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.max

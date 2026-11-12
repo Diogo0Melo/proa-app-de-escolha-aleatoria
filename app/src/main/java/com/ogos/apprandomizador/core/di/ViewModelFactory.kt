@@ -21,7 +21,7 @@ import com.ogos.apprandomizador.modes.ui.ai.AiSettingsViewModel
 import com.ogos.apprandomizador.modes.ui.hub.ModesHubViewModel
 import com.ogos.apprandomizador.modes.ui.oracle.OracleViewModel
 import com.ogos.apprandomizador.modes.ui.tarot.TarotViewModel
-import com.ogos.apprandomizador.viewmodel.RandomizeViewModel
+import com.ogos.apprandomizador.features.randomize.ui.RandomizeViewModel
 
 class ViewModelFactory(
     private val repository: IRepository,
