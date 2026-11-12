@@ -18,10 +18,10 @@ import com.ogos.apprandomizador.modes.ui.ai.AiSettingsRoute
 import com.ogos.apprandomizador.modes.ui.ai.AiSettingsViewModel
 import com.ogos.apprandomizador.modes.ui.hub.ModesHubRoute
 import com.ogos.apprandomizador.modes.ui.hub.ModesHubViewModel
-import com.ogos.apprandomizador.modes.ui.oracle.OracleViewModel
-import com.ogos.apprandomizador.modes.ui.oracle.YesNoOracleRoute
-import com.ogos.apprandomizador.modes.ui.tarot.TarotRoute
-import com.ogos.apprandomizador.modes.ui.tarot.TarotViewModel
+import com.ogos.apprandomizador.features.oracle.ui.OracleViewModel
+import com.ogos.apprandomizador.features.oracle.ui.YesNoOracleRoute
+import com.ogos.apprandomizador.features.tarot.ui.TarotRoute
+import com.ogos.apprandomizador.features.tarot.ui.TarotViewModel
 
 fun NavGraphBuilder.modesGraph(
     navController: NavController,

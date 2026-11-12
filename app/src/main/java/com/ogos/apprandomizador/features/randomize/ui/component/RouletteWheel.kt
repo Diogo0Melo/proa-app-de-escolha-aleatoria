@@ -47,7 +47,7 @@ import com.ogos.apprandomizador.core.model.RaffleItem
 import com.ogos.apprandomizador.core.ui.theme.LocalRouletteBackground
 import com.ogos.apprandomizador.features.randomize.domain.SpinCosmetics
 import com.ogos.apprandomizador.features.randomize.domain.SpinTarget
-import com.ogos.apprandomizador.modes.ui.tarot.CardShape
+import com.ogos.apprandomizador.features.tarot.ui.CardShape
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.max

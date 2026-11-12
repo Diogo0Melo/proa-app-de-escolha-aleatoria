@@ -1,8 +1,5 @@
 package com.ogos.apprandomizador.core.ui.voice
 
-import com.ogos.apprandomizador.modes.domain.OracleReading
-import com.ogos.apprandomizador.modes.domain.Reading
-
 /** Limite seguro por chamada do TextToSpeech (o limite do Android é 4000 caracteres). */
 const val MAX_SPEECH_CHUNK = 3_000
 
@@ -22,17 +19,3 @@ fun splitForSpeech(text: String, maxLength: Int = MAX_SPEECH_CHUNK): List<String
     if (rest.isNotEmpty()) chunks += rest
     return chunks.filter(String::isNotEmpty)
 }
-
-/** Texto narrado para uma leitura, na mesma ordem em que a tela a exibe. */
-fun Reading.toSpeechText(): String = buildList {
-    title?.let { add(it) }
-    opening?.let { add(it) }
-    add(summary)
-    sections.forEach { add("${it.title}. ${it.text}") }
-    guidance?.let { add(it) }
-    synthesis?.let { add(it) }
-}.joinToString(" ")
-
-/** Texto narrado para a leitura da IA do oráculo, na ordem em que aparece na tela. */
-fun OracleReading.toSpeechText(): String =
-    listOfNotNull(title, essence?.let { "$it." }, reading, affirmation).joinToString(" ")

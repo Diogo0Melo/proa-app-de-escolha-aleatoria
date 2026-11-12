@@ -1,6 +1,5 @@
 package com.ogos.apprandomizador.core.entropy
 
-import com.ogos.apprandomizador.features.randomize.domain.SpinTarget
 import java.security.MessageDigest
 
 /**
@@ -161,7 +160,7 @@ internal fun deriveShuffleStream(seed: ByteArray, requestId: Long): EntropyStrea
 
 /**
  * Reconstrói o fluxo de embaralhamento a partir apenas da semente de 64 bits que
- * viaja no [SpinTarget]. Oito bytes de origem criptográfica abastecem a cadeia de
+ * viaja no alvo do giro. Oito bytes de origem criptográfica abastecem a cadeia de
  * hashes, então o fluxo se estende indefinidamente sem carregar o digest inteiro
  * até a View.
  */

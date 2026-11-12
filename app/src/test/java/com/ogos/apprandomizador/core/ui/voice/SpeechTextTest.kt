@@ -1,10 +1,7 @@
 package com.ogos.apprandomizador.core.ui.voice
 
-import com.ogos.apprandomizador.modes.domain.CardMeaning
-import com.ogos.apprandomizador.modes.domain.Reading
-import com.ogos.apprandomizador.modes.domain.ReadingSection
-import com.ogos.apprandomizador.modes.domain.SpreadPosition
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SpeechTextTest {
@@ -26,25 +23,5 @@ class SpeechTextTest {
     @Test fun `palavra sem espaco e cortada no limite sem travar`() {
         val chunks = splitForSpeech("a".repeat(25), maxLength = 10)
         assertEquals(listOf(10, 10, 5), chunks.map { it.length })
-    }
-
-    @Test fun `leitura e narrada na ordem da tela`() {
-        val reading = Reading(
-            summary = "Resumo",
-            sections = listOf(ReadingSection(SpreadPosition.SINGLE, "O Louco", "Texto da carta")),
-            title = "Um caminho",
-            opening = "Abertura",
-            guidance = "Orientação",
-            synthesis = "Síntese"
-        )
-        assertEquals(
-            "Um caminho Abertura Resumo O Louco. Texto da carta Orientação Síntese",
-            reading.toSpeechText()
-        )
-    }
-
-    @Test fun `leitura offline sem campos extras narra resumo e secoes`() {
-        val reading = Reading("Resumo", listOf(ReadingSection(SpreadPosition.SINGLE, "Sua carta", "Texto")))
-        assertEquals("Resumo Sua carta. Texto", reading.toSpeechText())
     }
 }

@@ -11,16 +11,16 @@ import com.ogos.apprandomizador.core.entropy.EntropySource
 import com.ogos.apprandomizador.core.outcome.IOracleRepository
 import com.ogos.apprandomizador.core.ui.MainViewModel
 import com.ogos.apprandomizador.fingers.ui.FingersViewModel
-import com.ogos.apprandomizador.modes.data.FullTarotDeck
-import com.ogos.apprandomizador.modes.domain.AiReadingService
-import com.ogos.apprandomizador.modes.domain.DeckProvider
-import com.ogos.apprandomizador.modes.domain.OfflineReadingInterpreter
-import com.ogos.apprandomizador.modes.domain.OracleAiService
-import com.ogos.apprandomizador.modes.domain.ReadingInterpreter
+import com.ogos.apprandomizador.features.tarot.data.FullTarotDeck
+import com.ogos.apprandomizador.features.tarot.domain.AiReadingService
+import com.ogos.apprandomizador.features.tarot.domain.DeckProvider
+import com.ogos.apprandomizador.features.tarot.domain.OfflineReadingInterpreter
+import com.ogos.apprandomizador.features.oracle.domain.OracleAiService
+import com.ogos.apprandomizador.features.tarot.domain.ReadingInterpreter
 import com.ogos.apprandomizador.modes.ui.ai.AiSettingsViewModel
 import com.ogos.apprandomizador.modes.ui.hub.ModesHubViewModel
-import com.ogos.apprandomizador.modes.ui.oracle.OracleViewModel
-import com.ogos.apprandomizador.modes.ui.tarot.TarotViewModel
+import com.ogos.apprandomizador.features.oracle.ui.OracleViewModel
+import com.ogos.apprandomizador.features.tarot.ui.TarotViewModel
 import com.ogos.apprandomizador.features.randomize.ui.RandomizeViewModel
 
 class ViewModelFactory(
@@ -32,7 +32,7 @@ class ViewModelFactory(
     private val readingInterpreter: ReadingInterpreter = OfflineReadingInterpreter(),
     private val oracleRepository: IOracleRepository,
     private val aiSettingsRepository: com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository,
-    private val aiReadingService: com.ogos.apprandomizador.modes.domain.AiReadingService,
+    private val aiReadingService: com.ogos.apprandomizador.features.tarot.domain.AiReadingService,
     private val aiClient: com.ogos.apprandomizador.core.ai.domain.LlmClient,
     private val oracleAiService: OracleAiService
 ) : ViewModelProvider.Factory {
