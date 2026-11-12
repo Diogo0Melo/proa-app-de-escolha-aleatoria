@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador
+package com.ogos.apprandomizador.features.randomize.ui
 
 import com.ogos.apprandomizador.features.randomize.ui.component.RouletteMath
 import kotlin.math.abs
