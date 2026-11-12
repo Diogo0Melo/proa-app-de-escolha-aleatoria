@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.fingers.domain
+package com.ogos.apprandomizador.features.fingers.domain
 
 import com.ogos.apprandomizador.core.entropy.deriveFingerStream
 import java.security.MessageDigest

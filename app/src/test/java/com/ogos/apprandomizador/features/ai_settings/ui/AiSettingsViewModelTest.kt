@@ -1,10 +1,12 @@
-package com.ogos.apprandomizador.modes.ui.ai
+package com.ogos.apprandomizador.features.ai_settings.ui
 
 import com.ogos.apprandomizador.core.ai.domain.AiConfig
 import com.ogos.apprandomizador.core.ai.domain.AiSettings
 import com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository
 import com.ogos.apprandomizador.core.ai.domain.LlmClient
 import com.ogos.apprandomizador.core.ai.domain.LlmHttpException
+import com.ogos.apprandomizador.core.ai.domain.Secret
+import com.ogos.apprandomizador.core.testing.MainDispatcherRule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle

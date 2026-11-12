@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.modes.ui.ai
+package com.ogos.apprandomizador.core.testing
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

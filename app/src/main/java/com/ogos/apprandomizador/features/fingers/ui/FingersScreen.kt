@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.fingers.ui
+package com.ogos.apprandomizador.features.fingers.ui
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -61,7 +61,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.fingers.domain.FingersDirection
+import com.ogos.apprandomizador.features.fingers.domain.FingersDirection
 import kotlin.math.roundToInt
 
 /** Diâmetro da bolinha: folgado para sobrar cor em volta da ponta do dedo. */

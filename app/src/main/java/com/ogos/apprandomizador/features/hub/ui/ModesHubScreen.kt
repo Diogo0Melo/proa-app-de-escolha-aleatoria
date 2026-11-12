@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.modes.ui.hub
+package com.ogos.apprandomizador.features.hub.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

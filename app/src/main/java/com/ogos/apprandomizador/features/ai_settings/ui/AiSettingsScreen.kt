@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.modes.ui.ai
+package com.ogos.apprandomizador.features.ai_settings.ui
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement

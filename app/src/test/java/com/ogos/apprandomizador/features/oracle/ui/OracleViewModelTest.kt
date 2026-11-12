@@ -14,7 +14,7 @@ import com.ogos.apprandomizador.core.outcome.StoredOutcome
 import com.ogos.apprandomizador.core.ui.ai.AiAction
 import com.ogos.apprandomizador.features.oracle.domain.OracleAiService
 import com.ogos.apprandomizador.features.oracle.domain.OracleSource
-import com.ogos.apprandomizador.modes.ui.ai.MainDispatcherRule
+import com.ogos.apprandomizador.core.testing.MainDispatcherRule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow

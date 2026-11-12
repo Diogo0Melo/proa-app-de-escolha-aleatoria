@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.fingers.domain
+package com.ogos.apprandomizador.features.fingers.domain
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals

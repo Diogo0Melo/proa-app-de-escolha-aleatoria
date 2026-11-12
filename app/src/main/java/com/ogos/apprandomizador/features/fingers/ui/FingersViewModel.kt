@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.fingers.ui
+package com.ogos.apprandomizador.features.fingers.ui
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.geometry.Offset
@@ -8,10 +8,10 @@ import com.ogos.apprandomizador.core.entropy.EntropySource
 import com.ogos.apprandomizador.core.entropy.deriveFingerStream
 import com.ogos.apprandomizador.core.outcome.IOracleRepository
 import com.ogos.apprandomizador.core.outcome.StoredOutcome
-import com.ogos.apprandomizador.fingers.domain.FingersDirection
-import com.ogos.apprandomizador.fingers.domain.FingersPalette
-import com.ogos.apprandomizador.fingers.domain.FingersPick
-import com.ogos.apprandomizador.fingers.domain.FingersPicker
+import com.ogos.apprandomizador.features.fingers.domain.FingersDirection
+import com.ogos.apprandomizador.features.fingers.domain.FingersPalette
+import com.ogos.apprandomizador.features.fingers.domain.FingersPick
+import com.ogos.apprandomizador.features.fingers.domain.FingersPicker
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlinx.coroutines.CancellationException

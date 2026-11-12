@@ -11,7 +11,7 @@ import com.ogos.apprandomizador.core.outcome.StoredOutcome
 import com.ogos.apprandomizador.features.tarot.data.FullTarotDeck
 import com.ogos.apprandomizador.features.tarot.domain.AiReadingService
 import com.ogos.apprandomizador.features.tarot.domain.Reading
-import com.ogos.apprandomizador.modes.ui.ai.MainDispatcherRule
+import com.ogos.apprandomizador.core.testing.MainDispatcherRule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow

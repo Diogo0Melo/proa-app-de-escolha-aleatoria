@@ -10,15 +10,15 @@ import com.ogos.apprandomizador.core.datastore.DataStoreManager
 import com.ogos.apprandomizador.core.entropy.EntropySource
 import com.ogos.apprandomizador.core.outcome.IOracleRepository
 import com.ogos.apprandomizador.core.ui.MainViewModel
-import com.ogos.apprandomizador.fingers.ui.FingersViewModel
+import com.ogos.apprandomizador.features.fingers.ui.FingersViewModel
 import com.ogos.apprandomizador.features.tarot.data.FullTarotDeck
 import com.ogos.apprandomizador.features.tarot.domain.AiReadingService
 import com.ogos.apprandomizador.features.tarot.domain.DeckProvider
 import com.ogos.apprandomizador.features.tarot.domain.OfflineReadingInterpreter
 import com.ogos.apprandomizador.features.oracle.domain.OracleAiService
 import com.ogos.apprandomizador.features.tarot.domain.ReadingInterpreter
-import com.ogos.apprandomizador.modes.ui.ai.AiSettingsViewModel
-import com.ogos.apprandomizador.modes.ui.hub.ModesHubViewModel
+import com.ogos.apprandomizador.features.ai_settings.ui.AiSettingsViewModel
+import com.ogos.apprandomizador.features.hub.ui.ModesHubViewModel
 import com.ogos.apprandomizador.features.oracle.ui.OracleViewModel
 import com.ogos.apprandomizador.features.tarot.ui.TarotViewModel
 import com.ogos.apprandomizador.features.randomize.ui.RandomizeViewModel
@@ -59,8 +59,8 @@ class ViewModelFactory(
                 ) as T
             modelClass.isAssignableFrom(TarotViewModel::class.java) ->
                 TarotViewModel(entropySource, deckProvider, readingInterpreter, oracleRepository = oracleRepository, aiReadingService = aiReadingService, aiSettingsRepository = aiSettingsRepository) as T
-            modelClass.isAssignableFrom(com.ogos.apprandomizador.modes.ui.ai.AiSettingsViewModel::class.java) ->
-                com.ogos.apprandomizador.modes.ui.ai.AiSettingsViewModel(aiSettingsRepository, aiClient) as T
+            modelClass.isAssignableFrom(com.ogos.apprandomizador.features.ai_settings.ui.AiSettingsViewModel::class.java) ->
+                com.ogos.apprandomizador.features.ai_settings.ui.AiSettingsViewModel(aiSettingsRepository, aiClient) as T
             else -> throw IllegalArgumentException("Unknown ViewModel class")
         }
     }

@@ -9,8 +9,8 @@ import androidx.compose.ui.test.performClick
 import com.ogos.apprandomizador.core.ui.navigation.Routes
 import com.ogos.apprandomizador.core.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.features.oracle.domain.DefaultOracleAnswers
-import com.ogos.apprandomizador.modes.ui.hub.ModeCatalog
-import com.ogos.apprandomizador.modes.ui.hub.ModesHubScreen
+import com.ogos.apprandomizador.features.hub.ui.ModeCatalog
+import com.ogos.apprandomizador.features.hub.ui.ModesHubScreen
 import com.ogos.apprandomizador.features.oracle.ui.YesNoOracleActions
 import com.ogos.apprandomizador.features.oracle.ui.OraclePhase
 import com.ogos.apprandomizador.features.oracle.ui.OracleUiState

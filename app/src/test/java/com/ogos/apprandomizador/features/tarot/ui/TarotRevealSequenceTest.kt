@@ -3,7 +3,7 @@ package com.ogos.apprandomizador.features.tarot.ui
 import com.ogos.apprandomizador.core.entropy.EntropySource
 import com.ogos.apprandomizador.features.tarot.data.FullTarotDeck
 import com.ogos.apprandomizador.features.tarot.domain.Spread
-import com.ogos.apprandomizador.modes.ui.ai.MainDispatcherRule
+import com.ogos.apprandomizador.core.testing.MainDispatcherRule
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*

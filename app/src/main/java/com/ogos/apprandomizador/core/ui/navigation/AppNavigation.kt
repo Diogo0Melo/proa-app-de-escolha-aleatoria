@@ -1,17 +1,12 @@
 package com.ogos.apprandomizador.core.ui.navigation
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import android.os.SystemClock
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -19,14 +14,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,23 +31,25 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ogos.apprandomizador.R
-import com.ogos.apprandomizador.core.di.ViewModelFactory
-import com.ogos.apprandomizador.core.ui.MainViewModel
 import com.ogos.apprandomizador.core.ui.component.BottomBar
 import com.ogos.apprandomizador.core.ui.component.TopBar
 import com.ogos.apprandomizador.core.ui.component.TopBarAction
 import com.ogos.apprandomizador.core.ui.component.TopBarState
-import com.ogos.apprandomizador.core.ui.navigation.Routes
-import com.ogos.apprandomizador.core.ui.theme.AppRandomizadorTheme
 import com.ogos.apprandomizador.core.ui.theme.ThemeMode
-import com.ogos.apprandomizador.features.randomize.data.DefaultInitialize
-import com.ogos.apprandomizador.fingers.ui.FingersRoute
-import com.ogos.apprandomizador.fingers.ui.FingersViewModel
-import com.ogos.apprandomizador.modes.ui.modesGraph
+import com.ogos.apprandomizador.features.ai_settings.ui.AiSettingsRoute
+import com.ogos.apprandomizador.features.ai_settings.ui.AiSettingsViewModel
+import com.ogos.apprandomizador.features.fingers.ui.FingersRoute
+import com.ogos.apprandomizador.features.fingers.ui.FingersViewModel
+import com.ogos.apprandomizador.features.hub.ui.ModesHubRoute
+import com.ogos.apprandomizador.features.hub.ui.ModesHubViewModel
+import com.ogos.apprandomizador.features.oracle.ui.OracleViewModel
+import com.ogos.apprandomizador.features.oracle.ui.YesNoOracleRoute
 import com.ogos.apprandomizador.features.randomize.ui.HomeRandomizeViewRoute
 import com.ogos.apprandomizador.features.randomize.ui.HomeShuffleViewRoute
 import com.ogos.apprandomizador.features.randomize.ui.RandomizeViewRoute
 import com.ogos.apprandomizador.features.randomize.ui.RandomizeViewModel
+import com.ogos.apprandomizador.features.tarot.ui.TarotRoute
+import com.ogos.apprandomizador.features.tarot.ui.TarotViewModel
 
 private val BOTTOM_BAR_ROUTES = setOf(
     Routes.HOME_RANDOMIZE,
@@ -232,12 +227,69 @@ fun AppNavigation(
                     modifier = Modifier.padding(paddingValues)
                 )
             }
-            modesGraph(
-                navController = navController,
-                factory = factory,
-                soundEnabled = soundEnabled,
-                modifier = Modifier.padding(paddingValues)
-            )
+            composable(Routes.HOME_MODES) {
+                val viewModel: ModesHubViewModel = viewModel(factory = factory)
+                val stats by viewModel.stats.collectAsStateWithLifecycle()
+                ModesHubRoute(
+                    stats = stats,
+                    onModeSelected = { route -> navController.navigate(route) },
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+            composable(
+                route = Routes.MODE_AI_SETTINGS,
+                enterTransition = { fadeIn(tween(200)) },
+                exitTransition = { fadeOut(tween(150)) }
+            ) {
+                val viewModel: AiSettingsViewModel = viewModel(factory = factory)
+                AiSettingsRoute(
+                    viewModel = viewModel,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+            composable(
+                route = Routes.MODE_ORACLE,
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { it / 4 }) + fadeIn(tween(200))
+                },
+                exitTransition = {
+                    slideOutHorizontally(targetOffsetX = { it / 4 }) + fadeOut(tween(150))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn(tween(200))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { -it / 4 }) + fadeOut(tween(150))
+                }
+            ) {
+                val viewModel: OracleViewModel = viewModel(factory = factory)
+                YesNoOracleRoute(
+                    viewModel = viewModel,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+            composable(
+                route = Routes.MODE_TAROT,
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { it / 4 }) + fadeIn(tween(200))
+                },
+                exitTransition = {
+                    slideOutHorizontally(targetOffsetX = { it / 4 }) + fadeOut(tween(150))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn(tween(200))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { -it / 4 }) + fadeOut(tween(150))
+                }
+            ) {
+                val viewModel: TarotViewModel = viewModel(factory = factory)
+                TarotRoute(
+                    viewModel = viewModel,
+                    soundEnabled = soundEnabled,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
         }
     }
 }

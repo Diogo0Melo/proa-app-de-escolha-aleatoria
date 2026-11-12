@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.fingers.domain
+package com.ogos.apprandomizador.features.fingers.domain
 
 /**
  * Paleta dos dedos, em ARGB. Cores saturadas o bastante para contrastar com

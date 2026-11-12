@@ -1,4 +1,4 @@
-package com.ogos.apprandomizador.modes.ui.hub
+package com.ogos.apprandomizador.features.hub.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons

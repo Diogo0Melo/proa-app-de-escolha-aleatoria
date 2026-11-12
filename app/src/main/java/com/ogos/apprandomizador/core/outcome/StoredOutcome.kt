@@ -1,6 +1,5 @@
 package com.ogos.apprandomizador.core.outcome
 
-import com.ogos.apprandomizador.fingers.domain.FingersDirection
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
