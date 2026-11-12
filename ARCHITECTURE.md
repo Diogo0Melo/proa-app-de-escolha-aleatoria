@@ -1,7 +1,7 @@
 # Arquitetura — Aleastra
 
 > Documento normativo. Se o código divergir daqui, um dos dois está errado: decida qual e conserte.
-> Para um resumo operacional voltado a assistentes de IA, veja [`AI_CONTEXT.md`](AI_CONTEXT.md).
+> Para um resumo operacional voltado a assistentes de IA, veja [`AGENTS.md`](AGENTS.md).
 
 ## Princípio fundamental
 
@@ -92,13 +92,19 @@ Estes valores são contrato com dados já gravados no aparelho do usuário. Reno
 - `DataStoreManager` — nomes de arquivo e chaves de preferência.
 - `KEY_ALIAS` do Keystore.
 
-## Dívida conhecida
+## Isolamento entre features
 
-Registrada para não parecer intencional. Corrigir exige extrair o código comum para `core/`.
+Não existe import de uma feature para outra. O que era compartilhado foi extraído para o `core`:
 
-- `features/oracle` importa `features/tarot/domain/AiReadingService` (contrato de leitura com IA reaproveitado).
-- `features/oracle` importa `features/randomize/ui/component/RouletteMath` (gradiente/contraste de cor).
-- `features/randomize` importa `features/tarot/ui/CardShape` (forma de carta usada nos slots).
+| Antes | Agora |
+|---|---|
+| `oracle` → `tarot.domain.AiReadingService` (só constantes) | `core/ai/domain/AiServicePolicy.kt` |
+| `oracle` → `randomize.ui.component.RouletteMath` (cor) | `core/ui/format/ColorUtils.kt` |
+| `randomize` → `tarot.ui.CardShape` | import morto: a roleta declara seu próprio `CardShape` |
+
+Contratos de repositório, entropia e IA já viviam em `core/data`, `core/entropy` e `core/ai/domain`.
+O teste `ColorUtilsCuratedGradientTest` cobre a matemática de cor; `DefaultOracleAnswersTest`
+garante que as respostas reais do oráculo continuam caindo em esmeralda/rubi.
 
 ## Testes
 

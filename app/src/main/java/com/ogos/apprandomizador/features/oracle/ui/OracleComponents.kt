@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.core.model.RaffleItem
-import com.ogos.apprandomizador.features.randomize.ui.component.RouletteMath
+import com.ogos.apprandomizador.core.ui.format.ColorUtils
 
 /**
  * Resposta em destaque. Enquanto a animação roda, mostra um marcador pulsante; depois da
@@ -42,8 +42,8 @@ fun BigAnswerCard(answer: RaffleItem?, colorIndex: Int, modifier: Modifier = Mod
         return
     }
     val shape = MaterialTheme.shapes.extraLarge
-    val (start, end) = RouletteMath.gradientFor(answer, colorIndex)
-    val textColor = if (RouletteMath.isLightBase(answer.color)) Color(0xFF1B1B1B) else Color.White
+    val (start, end) = ColorUtils.gradientFor(answer, colorIndex)
+    val textColor = if (ColorUtils.isLightBase(answer.color)) Color(0xFF1B1B1B) else Color.White
     val announcement = stringResource(R.string.oracle_answer_announcement, answer.name)
     Box(
         modifier = modifier

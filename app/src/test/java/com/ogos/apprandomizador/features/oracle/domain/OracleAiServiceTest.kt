@@ -1,12 +1,12 @@
 package com.ogos.apprandomizador.features.oracle.domain
 
+import com.ogos.apprandomizador.core.ai.domain.AiServicePolicy
 import com.ogos.apprandomizador.core.ai.domain.AiConfig
 import com.ogos.apprandomizador.core.ai.domain.AiSettings
 import com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository
 import com.ogos.apprandomizador.core.ai.domain.LlmClient
 import com.ogos.apprandomizador.core.ai.domain.LlmHttpException
 import com.ogos.apprandomizador.core.model.RaffleItem
-import com.ogos.apprandomizador.features.tarot.domain.AiReadingService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -70,7 +70,7 @@ class OracleAiServiceTest {
         val client = ScriptedClient(listOf<() -> String>({ validJson }))
         val service = OracleAiService(client, FakeSettings(enabled = false), retryDelaysMillis = emptyList())
         val failure = service.deepen(null, answer, null) as OracleAiResult.Failure
-        assertEquals(AiReadingService.NOT_CONFIGURED, failure.reason)
+        assertEquals(AiServicePolicy.NOT_CONFIGURED, failure.reason)
         assertEquals(0, client.calls)
     }
 
@@ -78,6 +78,6 @@ class OracleAiServiceTest {
         val client = ScriptedClient(listOf<() -> String>({ "texto sem json" }))
         val service = OracleAiService(client, FakeSettings(), retryDelaysMillis = emptyList())
         val failure = service.deepen(null, answer, null) as OracleAiResult.Failure
-        assertEquals(AiReadingService.INVALID_RESPONSE, failure.reason)
+        assertEquals(AiServicePolicy.INVALID_RESPONSE, failure.reason)
     }
 }

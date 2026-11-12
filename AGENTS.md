@@ -1,4 +1,6 @@
-# Contexto para assistentes de IA (leia antes de codar)
+# AGENTS.md — instruções para agentes de IA
+
+Você é um agente de IA trabalhando neste repositório. Antes de gerar código, leia e siga estas regras sem exceção.
 
 Projeto Android nativo: Kotlin, Jetpack Compose, MVVM, SOLID, Room e DataStore.
 A arquitetura é **Core (infraestrutura)** + **Features (modos de jogo)**, com dependência apontando para dentro.

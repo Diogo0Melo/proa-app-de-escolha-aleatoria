@@ -1,5 +1,7 @@
 package com.ogos.apprandomizador.features.tarot.domain
 
+import com.ogos.apprandomizador.core.ai.domain.AiServicePolicy
+import com.ogos.apprandomizador.features.tarot.domain.AiReadingService
 import com.ogos.apprandomizador.core.ai.domain.AiConfig
 import com.ogos.apprandomizador.core.ai.domain.AiSettings
 import com.ogos.apprandomizador.core.ai.domain.AiSettingsRepository
@@ -48,7 +50,7 @@ class AiReadingServiceTest {
     @Test fun `formato invalido nao e retentado e nao vira leitura`() = runTest {
         val client = ScriptedClient("texto livre sem json")
         val result = service(client).deepen(null, draw) as AiReadingResult.Failure
-        assertEquals(AiReadingService.INVALID_RESPONSE, result.reason)
+        assertEquals(AiServicePolicy.INVALID_RESPONSE, result.reason)
         assertEquals(1, client.calls)
     }
 
@@ -61,7 +63,7 @@ class AiReadingServiceTest {
     @Test fun `sem configuracao nao chama o provedor`() = runTest {
         val client = ScriptedClient(validJson)
         val result = service(client, configured = false).deepen(null, draw) as AiReadingResult.Failure
-        assertEquals(AiReadingService.NOT_CONFIGURED, result.reason)
+        assertEquals(AiServicePolicy.NOT_CONFIGURED, result.reason)
         assertEquals(0, client.calls)
     }
 
@@ -74,7 +76,7 @@ class AiReadingServiceTest {
         }
         val service = AiReadingService(slow, FakeSettings(), retryDelaysMillis = emptyList(), totalBudgetMillis = 100L)
         val result = service.deepen(null, draw) as AiReadingResult.Failure
-        assertEquals(AiReadingService.TIMEOUT_MESSAGE, result.reason)
+        assertEquals(AiServicePolicy.TIMEOUT_MESSAGE, result.reason)
     }
 
     private fun service(client: LlmClient, configured: Boolean = true) =

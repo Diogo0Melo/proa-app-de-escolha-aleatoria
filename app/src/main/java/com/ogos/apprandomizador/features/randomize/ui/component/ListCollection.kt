@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ogos.apprandomizador.R
 import com.ogos.apprandomizador.core.model.ItemList
+import com.ogos.apprandomizador.core.ui.format.ColorUtils
 import com.ogos.apprandomizador.core.ui.format.TimeAgoFormatter
 
 private const val MaxVisibleChips = 7
@@ -85,8 +86,8 @@ fun ListCollection(
                             ) { currentIndex ->
                                 val circularIndex = currentIndex % item.items.size
                                 val currentSubItem = item.items[circularIndex]
-                                val baseColor = RouletteMath.baseColorFor(currentSubItem, circularIndex)
-                                val contentColor = if (RouletteMath.isLightBase(baseColor)) Color.Black else Color.White
+                                val baseColor = ColorUtils.baseColorFor(currentSubItem, circularIndex)
+                                val contentColor = if (ColorUtils.isLightBase(baseColor)) Color.Black else Color.White
                                 Box(
                                     modifier = Modifier.width(108.dp),
                                     contentAlignment = Alignment.Center

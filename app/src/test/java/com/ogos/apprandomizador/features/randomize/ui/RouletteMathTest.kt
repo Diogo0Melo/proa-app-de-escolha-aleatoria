@@ -4,7 +4,6 @@ import com.ogos.apprandomizador.features.randomize.ui.component.RouletteMath
 import kotlin.math.abs
 import kotlin.math.tan
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -107,59 +106,5 @@ class RouletteMathTest {
         assertEquals(-90f, RouletteMath.normalizeDegrees(-90f), 1e-4f)
         assertEquals(180f, RouletteMath.normalizeDegrees(180f), 1e-4f)
         assertEquals(180f, RouletteMath.normalizeDegrees(-180f), 1e-4f)
-    }
-
-    // --- luminance / text color ------------------------------------------------
-
-    @Test
-    fun luminanceThresholdPicksBlackTextOnLightBases() {
-        assertTrue(RouletteMath.isLightBase(0xFFFFFFFF))
-        assertTrue(RouletteMath.isLightBase(0xFFD6E024))
-        assertTrue(RouletteMath.isLightBase(0xFF4CAF50))
-        assertTrue(RouletteMath.isLightBase(0xFFA8E01F))
-        assertTrue(RouletteMath.isLightBase(0xFF8FA3B0))
-    }
-
-    @Test
-    fun luminanceThresholdPicksWhiteTextOnDarkBases() {
-        assertFalse(RouletteMath.isLightBase(0xFF000000))
-        assertFalse(RouletteMath.isLightBase(0xFF9D4EDD))
-        assertFalse(RouletteMath.isLightBase(0xFFE5484D))
-    }
-
-    @Test
-    fun tealIsLightBase() {
-        assertTrue(RouletteMath.isLightBase(0xFF2BD4C8))
-    }
-
-    @Test
-    fun luminanceMatchesRec709() {
-        assertEquals(0.2126f, RouletteMath.luminance(0xFFFF0000), 1e-3f)
-        assertEquals(0.7152f, RouletteMath.luminance(0xFF00FF00), 1e-3f)
-        assertEquals(0.0722f, RouletteMath.luminance(0xFF0000FF), 1e-3f)
-    }
-
-    // --- color helpers ----------------------------------------------------------
-
-    @Test
-    fun lerpArgbInterpolatesChannels() {
-        assertEquals(0xFF000000L, RouletteMath.lerpArgb(0xFF000000L, 0xFFFFFFFFL, 0f))
-        assertEquals(0xFFFFFFFFL, RouletteMath.lerpArgb(0xFF000000L, 0xFFFFFFFFL, 1f))
-        val mid = RouletteMath.lerpArgb(0xFF000000L, 0xFEFEFEFEL, 0.5f)
-        assertEquals(0xFF7F7F7FL, mid)
-    }
-
-    @Test
-    fun brightenLightensTowardWhite() {
-        val b = RouletteMath.brighten(0xFF808080L)
-        assertTrue(RouletteMath.luminance(b) > RouletteMath.luminance(0xFF808080L))
-        assertEquals(0xFFL, (b shr 24) and 0xFFL)
-    }
-
-    @Test
-    fun paletteCyclesByIndex() {
-        val first = RouletteMath.palettePair(0)
-        assertEquals(first, RouletteMath.palettePair(RouletteMath.paletteSize()))
-        assertEquals(first, RouletteMath.palettePair(2 * RouletteMath.paletteSize()))
     }
 }
